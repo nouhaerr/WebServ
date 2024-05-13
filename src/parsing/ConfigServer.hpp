@@ -62,7 +62,11 @@ class	ConfigServer {
 		int socket;
 };
 
-bool			isValidIPAddress(const std::string& ip);
-size_t			parseMaxBodySize(char &unit, std::string& bodySize, size_t sizeEnd);
+bool						isValidIPAddress(const std::string& ip);
+size_t						parseMaxBodySize(char &unit, std::string& bodySize, size_t sizeEnd);
+std::vector<std::string>	splitVal(std::string& str);
+size_t						isNum(std::string str);
+bool						isUrl(const std::string& str);
+std::vector<std::string>	splitArgs(std::string val);
 
 #endif

@@ -1,10 +1,16 @@
 #include "ConfigLocation.hpp"
 
 ConfigLocation::ConfigLocation() :
-_locationName(""),
-_root(""),
-_maxBodySize(0),
-_autoindex("")
+	_locationName(""),
+	_root(""),
+	_index(std::vector<std::string>()),
+	_methods(std::vector<std::string>()),
+	_maxBodySize(10000),
+	_autoindex(false),
+	_upload(""),
+	_errorPage(std::map<int , std::string>()),
+	_redirection(""),
+	_redirectCode(0)
 {}
 
 ConfigLocation::ConfigLocation(const ConfigLocation &src) {
@@ -19,6 +25,10 @@ ConfigLocation& ConfigLocation::operator=(const ConfigLocation &src) {
 		this->_methods = src._methods;
 		this->_maxBodySize = src._maxBodySize;
 		this->_autoindex = src._autoindex;
+		this->_upload = src._upload;
+		this->_errorPage = src._errorPage;
+		this->_redirection = src._redirection;
+		this->_redirectCode = src._redirectCode;
 	}
 	return *this;
 }
@@ -47,23 +57,8 @@ std::string& ConfigLocation::getRoot() {
 
 void	ConfigLocation::setIndex(std::string& index) {
 	if (index.empty())
-		throw ConfigLocationException("Error: Wrong root!");
-	std::string tmp;
-	size_t pos = 0;
-
-	while (pos < index.size()) {
-		// Extract the word
-		while (pos < index.size() && index[pos] != ' ' && index[pos] != '\t') {
-			tmp += index[pos];
-			pos++;
-		}
-		// Push the word into the result vector
-		if (!tmp.empty()) {
-			this->_index.push_back(tmp);
-			tmp.clear();
-		}
-		pos++;
-	}
+		throw ConfigLocationException("Error: Empty index!");
+	this->_index = splitVal(index);
 }
 
 std::vector<std::string>&	ConfigLocation::getIndex() {
@@ -72,23 +67,8 @@ std::vector<std::string>&	ConfigLocation::getIndex() {
 
 void	ConfigLocation::setMethods(std::string& methods) {
 	if (methods.empty())
-		throw ConfigLocationException("Error: Wrong root!");
-	std::string tmp;
-	size_t pos = 0;
-
-	while (pos < methods.size()) {
-		// Extract the word
-		while (pos < methods.size() && methods[pos] != ' ' && methods[pos] != '\t') {
-			tmp += methods[pos];
-			pos++;
-		}
-		// Push the word into the result vector
-		if (!tmp.empty()) {
-			this->_methods.push_back(tmp);
-			tmp.clear();
-		}
-		pos++;
-	}
+		throw ConfigLocationException("Error: Empty methods!");
+	this->_methods = splitVal(methods);
 }
 
 std::vector<std::string>& ConfigLocation::getMethods() {
@@ -97,7 +77,7 @@ std::vector<std::string>& ConfigLocation::getMethods() {
 
 void	ConfigLocation::setBodySize(std::string& bodySize) {
 	if (bodySize.empty())
-		throw ConfigLocationException("Empty max_body_size");
+		throw ConfigLocationException("Error: Empty max_body_size!");
 	std::size_t sizeEnd = bodySize.size() - 1;
     char unit = std::tolower(bodySize[sizeEnd]);
 
@@ -117,10 +97,71 @@ size_t&	ConfigLocation::getMaxBodySize() {
 void	ConfigLocation::setAutoIndex(std::string& autoindex) {	
 	if (autoindex != "ON" && autoindex != "OFF")
 		throw ConfigLocationException("Error: Wrong Autoindex!");
-	this->_autoindex = autoindex;
+	if (autoindex == "ON")
+		this->_autoindex = true;
+	else
+		this->_autoindex = false;
 }
 
-std::string&	ConfigLocation::getAutoIndex() {
+bool&	ConfigLocation::getAutoIndex() {
 	return this->_autoindex;
 }
+
+void	ConfigLocation::setUpload(std::string& upload) {	
+	if (upload.empty() || upload.find_first_of(" \t") != std::string::npos)
+		throw ConfigLocationException("Error: Wrong Upload!");
+	this->_upload = upload;
+}
+
+std::string&	ConfigLocation::getUpload() {
+	return this->_upload;
+}
+
+void	ConfigLocation::setErrorPage(std::string& errorPage) {	
+	if (errorPage.empty())
+		throw ConfigLocationException("Error: Empty errorPage!");
+	std::vector<std::string> val;
+	std::map<int , std::string>	errors;
+
+	val = splitVal(errorPage);
+	if (val.size() % 2 != 0)
+		throw ConfigLocationException("Error: Invalid error_page!");
+	for (size_t pos = 0; pos < val.size(); pos++) {
+		size_t	code = isNum(val[pos++]);
+		std::string	path = val[pos];
+		errors[code] = path;
+	}
+	this->_errorPage = errors;
+}
+
+std::map<int, std::string>&	ConfigLocation::getErrorPage() {
+	return this->_errorPage;
+}
+
+void	ConfigLocation::setRedirection(std::string& redirection) {
+	if (redirection.empty())
+		throw ConfigLocationException("Error: Empty redirection!");
+	std::vector<std::string> args = splitArgs(redirection);
+
+	if (args.size() > 2)
+		throw ConfigLocationException("Error: Invalid redirection args!");
+	if (args.size() == 1 && isUrl(args[0]))
+		this->_redirection = args[0];
+	else if (args.size() == 2) {
+		this->_redirectCode = isNum(args[0]);
+		this->_redirection = args[1];
+	}
+	else
+		throw ConfigLocationException("Error: Invalid redirection URL!");
+}
+
+std::string&	ConfigLocation::getRedirection() {
+	return (this->_redirection);
+}
+
+int&	ConfigLocation::getRedirectCode() {
+	return (this->_redirectCode);
+}
+
+
 

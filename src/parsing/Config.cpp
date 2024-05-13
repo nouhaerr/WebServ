@@ -23,12 +23,17 @@ ConfigServer Config::parseServerConfig(std::vector<t_tokens>::iterator& it) {
 	++it;
 	ConfigServer	server;
     // Parse server configuration settings
-    while (it != this->_tokens.end() && it->_type != "server") {
+    while (it != this->_tokens.end() && it->_type != "}") {
 		// if (it->_type == "}")
 		// 	continue;
-		if (it->_type == "location")
+		std::cout << it->_type << "\n";
+		if (it->_type == "location") {
 			server.setLocation(this->_tokens ,it);
-		 if (it->_type == "listen")
+			it++;
+			std::cout << "after location block:" <<it->_type << "\n";
+			continue;
+		}
+		else if (it->_type == "listen")
 		{
 			server.setListen(it->_value);
 		}
@@ -36,18 +41,19 @@ ConfigServer Config::parseServerConfig(std::vector<t_tokens>::iterator& it) {
 			server.setServerName(it->_value);
 		else if (it->_type == "client_max_body_size")
 			server.setBodySize(it->_value);
-		else if (it->_type.empty())
+		// else if (it->_type == "autoindex")
+			// server.setAutoIndex(it->_value);
+		else if (it->_type.empty()) {
+			it++;
 			continue;
-		// else
-		// 	break;
-		// if (it->_type == "location")
-		// 	server.set_location(it);
+		}
+		else
+			break;
 
         // Move to the next token
-        it++;
+		it++;
     }
-	it--;
-	// std::cout << it->_type << "\n";
+	std::cout << "end of server\n";
 	if (it->_type != "}")
 		throw ParseServerException("Error: expected '}' in the end of server/location directive.");
     incrementServerCount();
@@ -61,9 +67,10 @@ void	Config::parse()
 		std::vector<t_tokens>::iterator it = _tokens.begin();
 		if (it->_type != "server")
 			throw ParseServerException("Error: Unexpected token.");
-		while (it != this->_tokens.end() && it->_type == "server")
+		while (it != this->_tokens.end())
 		{
-			this->_servers.push_back(parseServerConfig(it));
+			if (it->_type == "server")
+				this->_servers.push_back(parseServerConfig(it));
 			it++;
 		}
 		std::cout << "Host: " << _servers[0].getHost() << ", Port: " << _servers[0].getPort() 
@@ -76,6 +83,4 @@ void	Config::parse()
 		std::cout << e.what() << std::endl;
 		exit(1);
 	}
-		// checkServer();
-
 }

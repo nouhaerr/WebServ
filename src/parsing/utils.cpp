@@ -34,6 +34,68 @@ bool isValidIPAddress(const std::string& ip) {
 	return true;
 }
 
+std::vector<std::string>	splitVal(std::string& str) {
+	std::vector<std::string>	vals;
+	size_t						pos = 0;
+	std::string	tmp;
+	// Extract the word
+	while (pos < str.size()) {
+		while (pos < str.size() && str[pos] != ' ' && str[pos] != '\t') {
+			tmp += str[pos];
+			pos++;
+		}
+		// Push the word into the result vector
+		if (!tmp.empty()) {
+			vals.push_back(tmp);
+			tmp.clear();
+		}
+		pos++;
+	}
+	return vals;
+}
+
+size_t isNum(std::string str) {
+    size_t number = 0;
+    for (size_t i = 0; i < str.length(); i++) {
+        if (isdigit(str[i]))
+            number = number * 10 + (str[i] - '0');
+        else
+            throw std::runtime_error("Error: Invalid code");
+    }
+    if (number > INT_MAX)
+        throw std::runtime_error("Eroor: Invalid code (Big Number)!");
+    return number;
+}
+
+bool	isUrl(const std::string& str) {
+	return (str.substr(0, 7) == "http://") || (str.substr(0, 8) == "https://");
+}
+
+std::vector<std::string>	splitArgs(std::string val) {
+	std::vector<std::string> result;
+	std::string word;
+	bool inQuotes = false;
+
+    for (size_t i = 0; i < val.length(); ++i) {
+        if (val[i] == '"') // Toggle the inQuotes flag
+			inQuotes = !inQuotes;
+        else if ((val[i] == ' ' || val[i] == '\t') && !inQuotes) {
+            // If it's a space or tab and not within quotes, push the current word if not empty
+            if (!word.empty()) {
+                result.push_back(word);
+                word.clear();
+            }
+        } else {
+            // Otherwise, append the character to the current word
+            word += val[i];
+        }
+    }
+    if (!word.empty())
+        result.push_back(word);
+
+    return result;
+}
+
 size_t	parseMaxBodySize(char &unit, std::string& bodySize, size_t sizeEnd) {
 	size_t size;
 	if (std::isdigit(unit)) {
@@ -67,7 +129,8 @@ ConfigLocation	ConfigServer::parseLocation(std::vector<t_tokens> &tok, std::vect
 	bool	root = false, index= false, errPage = false;
 	bool	meth = false, ret = false, upload = false;
 	bool	autind = false, bdSize = false;
-	int rt = 0, ind = 0, met = 0, bd = 0, aut = 0;
+	int rt = 0, ind = 0, met = 0, bd = 0, aut = 0, up = 0;
+	int	err = 0, red = 0;
 
 	loc.setLocationName(it->_value);
 	it++;
@@ -92,22 +155,46 @@ ConfigLocation	ConfigServer::parseLocation(std::vector<t_tokens> &tok, std::vect
 			loc.setAutoIndex(it->_value);
 			aut++;
 		}
-		// if (it->_type == "}")
-		// 	continue;
-		
-		// else if (it->_type.empty())
-		// 	continue;
-		// else
-		// 	break;
-		// if (it->_type == "location")
-		// 	server.set_location(it);
+		else if (it->_type == "upload") {
+			loc.setUpload(it->_value);
+			up++;
+		}
+		else if (it->_type == "error_page") {
+			loc.setErrorPage(it->_value);
+			err++;
+		}
+		else if (it->_type == "return") {
+			loc.setRedirection(it->_value);
+			red++;
+		}
+		else if (it->_type.empty()){
+			it++;
+			continue;
+		}
+		else
+		{
 
-        // Move to the next token
-        it++;
+			break; //error invalid type
+		}
+		std::cout << "loccc: " << it->_type << "\n";
+		it++;
     }
-	it--;
-	// std::cout << it->_type << "\n";
+	if (rt != 1 || ind != 1)
+		throw ConfigServerException("Error: Must have one root/index parametre.");
+	else if (met != 1)
+		throw ConfigServerException("Error: Must set one allowed_methods parametre.");
+	else if (bd > 1)
+		throw ConfigServerException("Error: Must have one body_size parametre.");
+	else if (aut != 1)
+		throw ConfigServerException("Error: Must set one autoindex parametre.");
+	else if (up > 1)
+		throw ConfigServerException("Error: Must have one uplod parametre.");
+	else if (err > 1)
+		throw ConfigServerException("Error: Must set one error_page parametre.");
+	else if (red > 1)
+		throw ConfigServerException("Error: Must have one return parametre.");
+
 	if (it->_type != "}")
-		throw ConfigServerException("Error: expected '}' in the end of server/location directive.");
+		throw ConfigServerException("Error: expected '}' in the end of location directive.");
 	return (loc);
 }

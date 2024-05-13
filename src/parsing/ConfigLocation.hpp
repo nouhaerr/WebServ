@@ -30,14 +30,22 @@ class ConfigLocation {
 		void	setMethods(std::string& methods);
 		void	setBodySize(std::string& bodySize);
 		void	setAutoIndex(std::string& autoindex);
-		
+		void	setUpload(std::string& upload);
+		void	setErrorPage(std::string& errorPage);
+		void	setRedirection(std::string& redirection);
+
 		// Getters
-		std::string& getLocationName();
-		std::string& getRoot();
+		std::string& 				getLocationName();
+		std::string& 				getRoot();
 		std::vector<std::string>&	getIndex();
 		std::vector<std::string>&	getMethods();
 		size_t&						getMaxBodySize();
-		std::string&				getAutoIndex();
+		bool&						getAutoIndex();
+		std::string&				getUpload();
+		std::map<int, std::string>&	getErrorPage();
+		int&						getRedirectCode();
+		std::string&				getRedirection();
+
 
 		class	ConfigLocationException: public std::exception{
 			std::string message;
@@ -56,7 +64,11 @@ class ConfigLocation {
 		std::vector<std::string>	_index;
 		std::vector<std::string>	_methods;
 		size_t						_maxBodySize;
-		std::string					_autoindex;
+		bool						_autoindex;
+		std::string					_upload;
+		std::map<int, std::string>	_errorPage;
+		std::string					_redirection;
+		int							_redirectCode;
 };
 
 #endif

@@ -17,6 +17,7 @@ typedef struct s_tokens {
 	std::string _value;
 } t_tokens;
 
+#include "ParseFile.hpp"
 #include "ConfigServer.hpp"
 
 class ConfigServer;
@@ -54,6 +55,5 @@ class Config {
         std::vector<ConfigServer>  _servers;
        
 };
-
 
 #endif
