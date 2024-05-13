@@ -15,9 +15,9 @@
 #include "Config.hpp"
 #include "ConfigLocation.hpp"
 
+class Config;
 class ConfigLocation;
-
-class   ConfigServer {
+class	ConfigServer {
 	public:
 		ConfigServer();
 		~ConfigServer();

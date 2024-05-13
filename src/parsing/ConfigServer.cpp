@@ -62,7 +62,7 @@ const size_t &ConfigServer::getPort() const
 }
 
 void	ConfigServer::setServerName(std::string& serverName) {
-	if (serverName.empty() || serverName.find(" ") != std::string::npos)
+	if (serverName.empty() || serverName.find_first_of(" \t") != std::string::npos)
 		throw ConfigServerException("Error: Wrong ServerName");
 	this->_serverName = serverName;
 }

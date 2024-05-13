@@ -5,6 +5,7 @@ FLAGS = -Wall -Wextra -Werror #-std=c++98 #-fsanitize=address -g3
 SRC =	src/main.cpp \
 		src/parsing/Config.cpp src/parsing/ParseFile.cpp\
 		src/parsing/ConfigServer.cpp src/parsing/utils.cpp\
+		src/parsing/ConfigLocation.cpp \
 
 OBJS = $(SRC:.cpp=.o)
 

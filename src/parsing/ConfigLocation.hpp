@@ -11,7 +11,11 @@
 #include <exception>
 #include <cstdlib>
 #include <sstream>
+#include "Config.hpp"
+#include "ConfigServer.hpp"
 
+class Config;
+class ConfigServer;
 class ConfigLocation {
 	public:
 		ConfigLocation();
@@ -21,9 +25,19 @@ class ConfigLocation {
 
 		// Setters
 		void	setLocationName(std::string& locationName);
-
+		void	setRoot(std::string& root);
+		void	setIndex(std::string& index);
+		void	setMethods(std::string& methods);
+		void	setBodySize(std::string& bodySize);
+		void	setAutoIndex(std::string& autoindex);
+		
 		// Getters
 		std::string& getLocationName();
+		std::string& getRoot();
+		std::vector<std::string>&	getIndex();
+		std::vector<std::string>&	getMethods();
+		size_t&						getMaxBodySize();
+		std::string&				getAutoIndex();
 
 		class	ConfigLocationException: public std::exception{
 			std::string message;
@@ -37,10 +51,12 @@ class ConfigLocation {
 		};
 
 	private:
-		std::string	_locationName;
-		std::string	_root;
-		std::string	_index;
-		std::string	_methods;
+		std::string					_locationName;
+		std::string					_root;
+		std::vector<std::string>	_index;
+		std::vector<std::string>	_methods;
+		size_t						_maxBodySize;
+		std::string					_autoindex;
 };
 
 #endif

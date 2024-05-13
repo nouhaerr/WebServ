@@ -28,7 +28,7 @@ ConfigServer Config::parseServerConfig(std::vector<t_tokens>::iterator& it) {
 		// 	continue;
 		if (it->_type == "location")
 			server.setLocation(this->_tokens ,it);
-		else if (it->_type == "listen")
+		 if (it->_type == "listen")
 		{
 			server.setListen(it->_value);
 		}

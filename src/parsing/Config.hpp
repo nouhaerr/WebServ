@@ -10,17 +10,18 @@
 #include <limits.h>
 #include <map>
 #include <stdexcept>
-#include "ConfigServer.hpp"
+
 
 typedef struct s_tokens {
 	std::string	_type;
 	std::string _value;
 } t_tokens;
 
-class ConfigServer;
-// class Location;
-class ParseFile;
+#include "ConfigServer.hpp"
 
+class ConfigServer;
+class Location;
+class ParseFile;
 class Config {
     public:
 		Config();
@@ -33,13 +34,7 @@ class Config {
 		void incrementServerCount() { serverCount++; }
 		int getServerCount() const { return serverCount; }
 		ConfigServer	parseServerConfig(std::vector<t_tokens>::iterator& it);
-		// void	checkServer();
-		// bool	look(const std::string &type);
-		// t_tokens match(const std::string &type);
-		// ConfigServer	parseServer();
-		// ConfigServer	parseServerBody();
-		// std::string		parseStringRules(std::string key);
-		// size_t			parseNumRules(std::string key);
+
 		class	ParseServerException: public std::exception{
 			std::string message;
 			public:
@@ -56,7 +51,6 @@ class Config {
 		const char* _fileName;
 		typedef std::vector<t_tokens>	tokenVector;
 		tokenVector	_tokens;
-		
         std::vector<ConfigServer>  _servers;
        
 };

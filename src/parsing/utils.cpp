@@ -1,12 +1,3 @@
-#include <iostream>
-#include <string>
-#include <fstream>
-#include <vector>
-#include <iterator>
-#include <algorithm>
-#include <map>
-#include <exception>
-#include <sstream>
 
 #include "ConfigServer.hpp"
 
@@ -76,13 +67,30 @@ ConfigLocation	ConfigServer::parseLocation(std::vector<t_tokens> &tok, std::vect
 	bool	root = false, index= false, errPage = false;
 	bool	meth = false, ret = false, upload = false;
 	bool	autind = false, bdSize = false;
-	int rt = 0;
+	int rt = 0, ind = 0, met = 0, bd = 0, aut = 0;
+
 	loc.setLocationName(it->_value);
 	it++;
 	while (it != tok.end() && it->_type != "}") {
-		if (!root) {
-			if (it->_type == "root" )
-				loc.setRoot(it->_value);
+		if (it->_type == "root") {
+			loc.setRoot(it->_value);
+			rt++;
+		}
+		else if (it->_type == "index") {
+			loc.setIndex(it->_value);
+			ind++;
+		}
+		else if (it->_type == "allowed_methods") {
+			loc.setMethods(it->_value);
+			met++;
+		}
+		else if (it->_type == "client_max_body_size") {
+			loc.setBodySize(it->_value);
+			bd++;
+		}
+		else if (it->_type == "autoindex") {
+			loc.setAutoIndex(it->_value);
+			aut++;
 		}
 		// if (it->_type == "}")
 		// 	continue;
