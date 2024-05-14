@@ -27,16 +27,23 @@ class	ConfigServer {
 		ConfigLocation	parseLocation(std::vector<t_tokens> &tok, std::vector<t_tokens>::iterator& it);
 		
 		//Getters
-		const std::string &getHost() const;
-		const size_t &getPort() const;
-		const std::string &getServerName() const;
-		const size_t &getMaxBodySize() const;
+		const std::string			&getHost() const;
+		const size_t				&getPort() const;
+		const std::string			&getServerName() const;
+		const size_t				&getMaxBodySize() const;
+		std::vector<ConfigLocation>	&getLocation();
+		bool						&getAutoIndex();
+		std::string					&getRoot();
+		std::map<int, std::string>	&getErrorPage();
 
 		// Setters
 		void	setListen(std::string& listen);
 		void	setServerName(std::string& serverName);
 		void	setBodySize(std::string& bodySize);
 		void	setLocation(std::vector<t_tokens> &tok, std::vector<t_tokens>::iterator& it);
+		void	setAutoIndex(std::string& autoindex);
+		void	setRoot(std::string& root);
+		void	setErrorPage(std::string& errorPage);
 
 		class	ConfigServerException: public std::exception{
 			std::string message;
@@ -50,16 +57,15 @@ class	ConfigServer {
 		};
 
     private:
-        std::string		_host;
-        size_t			_port;
-        std::string		_serverName;
-        size_t			_maxBodySize;
+        std::string					_host;
+        size_t						_port;
+        std::string					_serverName;
+        size_t						_maxBodySize;
 		std::vector<ConfigLocation> _location;
-		std::string		_root;
-		std::vector<std::pair<std::vector<std::string>, std::string> > _errorPage;
-		std::string		_autoindex;
-		std::vector<std::string> _index;
-		int socket;
+		bool						_autoindex;
+		std::string					_root;
+		std::vector<std::string>	_index;
+		std::map<int, std::string>	_errorPage;
 };
 
 bool						isValidIPAddress(const std::string& ip);

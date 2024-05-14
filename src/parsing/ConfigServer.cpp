@@ -92,3 +92,50 @@ void	ConfigServer::setLocation(std::vector<t_tokens> &tok, std::vector<t_tokens>
 	this->_location.push_back(parseLocation(tok, it));
 }
 
+std::vector<ConfigLocation> &ConfigServer::getLocation() {
+	return (this->_location);
+}
+
+void	ConfigServer::setAutoIndex(std::string& autoindex) {	
+	if (autoindex != "ON" && autoindex != "OFF")
+		throw ConfigServerException("Error: Wrong Autoindex!");
+	if (autoindex == "ON")
+		this->_autoindex = true;
+	else
+		this->_autoindex = false;
+}
+
+bool	&ConfigServer::getAutoIndex() {
+	return this->_autoindex;
+}
+
+void	ConfigServer::setRoot(std::string& root) {
+	if (root.empty() || root.find_first_of(" \t") != std::string::npos)
+		throw ConfigServerException("Error: Wrong root!");
+	this->_root = root;
+}
+
+std::string	&ConfigServer::getRoot() {
+	return this->_root;
+}
+
+void	ConfigServer::setErrorPage(std::string& errorPage) {	
+	if (errorPage.empty())
+		throw ConfigServerException("Error: Empty errorPage!");
+	std::vector<std::string> val;
+	std::map<int , std::string>	errors;
+
+	val = splitVal(errorPage);
+	if (val.size() % 2 != 0)
+		throw ConfigServerException("Error: Invalid error_page!");
+	for (size_t pos = 0; pos < val.size(); pos++) {
+		size_t	code = isNum(val[pos++]);
+		std::string	path = val[pos];
+		errors[code] = path;
+	}
+	this->_errorPage = errors;
+}
+
+std::map<int, std::string>	&ConfigServer::getErrorPage() {
+	return this->_errorPage;
+}

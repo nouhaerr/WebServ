@@ -42,18 +42,20 @@ ConfigServer Config::parseServerConfig(std::vector<t_tokens>::iterator& it) {
 			server.setServerName(it->_value);
 		else if (it->_type == "client_max_body_size")
 			server.setBodySize(it->_value);
-		// else if (it->_type == "autoindex")
-			// server.setAutoIndex(it->_value);
+		else if (it->_type == "autoindex")
+			server.setAutoIndex(it->_value);
+		else if (it->_type == "root")
+			server.setRoot(it->_value);
+		else if (it->_type == "error_page")
+			server.setErrorPage(it->_value);
 		else if (it->_type.empty()) {
 			it++;
 			continue;
 		}
 		else
 			break;
-
-        // Move to the next token
 		it++;
-    }
+	}
 	std::cout << "end of server\n";
 	if (it->_type != "}")
 		throw ParseServerException("Error: expected '}' in the end of server directive.");
