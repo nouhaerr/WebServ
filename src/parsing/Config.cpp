@@ -91,9 +91,9 @@ void	Config::parse()
 		std::cout << "Host: " << _servers[0].getHost() << ", Port: " << _servers[0].getPort() 
 		<< ", ServerName: " << _servers[0].getServerName()
 		<< ", BodySize: " << _servers[0].getMaxBodySize() << std::endl;
-		for (std::vector<t_tokens>::iterator it =_tokens.begin(); it != this->_tokens.end(); ++it) {
-			std::cout << "type: " << it->_type << ", Value: " << it->_value << std::endl;
-        }
+		// for (std::vector<t_tokens>::iterator it =_tokens.begin(); it != this->_tokens.end(); ++it) {
+		// 	std::cout << "type: " << it->_type << ", Value: " << it->_value << std::endl;
+        // }
 	} catch(const std::exception &e) {
 		std::cout << e.what() << std::endl;
 		exit(1);
