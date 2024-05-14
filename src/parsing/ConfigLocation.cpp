@@ -85,8 +85,8 @@ void	ConfigLocation::setBodySize(std::string& bodySize) {
         if (!std::isdigit(bodySize[i]))
             throw  ConfigLocationException("Invalid max_body_size.");
     }
-    if (unit != 'm' && unit != 'g' && unit != 't' && unit != 'k' && !std::isdigit(unit))
-        throw ConfigLocationException("Invalid max_body_size.");
+    if (unit != 'm' && unit != 'g' && unit != 't' && unit != 'k' && !std::isdigit(unit)) {
+        throw ConfigLocationException("Invalid max_body_size.");}
 	this->_maxBodySize = parseMaxBodySize(unit, bodySize, sizeEnd);
 }
 

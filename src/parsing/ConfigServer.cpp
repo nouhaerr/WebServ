@@ -1,10 +1,10 @@
 #include "ConfigServer.hpp"
 
 ConfigServer::ConfigServer() : 
-_host(""),
-_port(0),
+_host("127.0.0.1"),
+_port(8000),
 _serverName(""),
-_maxBodySize(0)
+_maxBodySize(100000)
 {}
 
 ConfigServer::ConfigServer(const ConfigServer &src) {
@@ -51,13 +51,11 @@ void	ConfigServer::setListen(std::string& listen) {
 	count++;
 }
 
-const std::string &ConfigServer::getHost() const
-{
+const std::string &ConfigServer::getHost() const {
 	return (this->_host);
 }
 
-const size_t &ConfigServer::getPort() const
-{
+const size_t &ConfigServer::getPort() const {
 	return (this->_port);
 }
 
@@ -81,8 +79,8 @@ void	ConfigServer::setBodySize(std::string& bodySize) {
         if (!std::isdigit(bodySize[i]))
             throw  ConfigServerException("Invalid max_body_size.");
     }
-    if (unit != 'm' && unit != 'g' && unit != 't' && unit != 'k' && !std::isdigit(unit))
-        throw  ConfigServerException("Invalid max_body_size.");
+    if (unit != 'm' && unit != 'g' && unit != 't' && unit != 'k' && !std::isdigit(unit)) {
+        throw  ConfigServerException("Invalid max_body_size."); }
 	this->_maxBodySize = parseMaxBodySize(unit, bodySize, sizeEnd);
 }
 

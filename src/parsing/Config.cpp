@@ -3,7 +3,10 @@
 
 Config::Config() {}
 
-Config::Config(const char *fileName) : serverCount(0), index(0), _fileName(fileName){}
+Config::Config(const char *fileName) :
+	_serverCount(0),
+	_fileName(fileName)
+{}
 
 Config::Config(const Config &other) {
 	*this = other;
@@ -19,13 +22,11 @@ Config&	Config::operator=(const Config &other) {
 Config::~Config() {}
 
 ConfigServer Config::parseServerConfig(std::vector<t_tokens>::iterator& it) {
-    // Increment server count
+
 	++it;
 	ConfigServer	server;
     // Parse server configuration settings
-    while (it != this->_tokens.end() && it->_type != "}") {
-		// if (it->_type == "}")
-		// 	continue;
+	while (it != this->_tokens.end() && it->_type != "}") {
 		std::cout << it->_type << "\n";
 		if (it->_type == "location") {
 			server.setLocation(this->_tokens ,it);
@@ -55,8 +56,7 @@ ConfigServer Config::parseServerConfig(std::vector<t_tokens>::iterator& it) {
     }
 	std::cout << "end of server\n";
 	if (it->_type != "}")
-		throw ParseServerException("Error: expected '}' in the end of server/location directive.");
-    incrementServerCount();
+		throw ParseServerException("Error: expected '}' in the end of server directive.");
 	return (server);
 }
 
@@ -72,6 +72,19 @@ void	Config::parse()
 			if (it->_type == "server")
 				this->_servers.push_back(parseServerConfig(it));
 			it++;
+		}
+		this->_serverCount = this->_servers.size();
+		if (this->_serverCount == 0)
+			throw ParseServerException("Error: Must have at least one server.");
+		while (this->_serverCount > 1) {
+			for (size_t i = 0; i < this->_serverCount - 1; i++) {
+				for (size_t j = i + 1; j < this->_serverCount; j++) {
+					if (this->_servers[i].getPort() == this->_servers[j].getPort()
+						&& this->_servers[i].getServerName() == this->_servers[j].getServerName())
+						throw ParseServerException("Error: Same Server.");
+				}
+			}
+			break;
 		}
 		std::cout << "Host: " << _servers[0].getHost() << ", Port: " << _servers[0].getPort() 
 		<< ", ServerName: " << _servers[0].getServerName()

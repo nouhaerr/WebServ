@@ -126,9 +126,6 @@ size_t	parseMaxBodySize(char &unit, std::string& bodySize, size_t sizeEnd) {
 
 ConfigLocation	ConfigServer::parseLocation(std::vector<t_tokens> &tok, std::vector<t_tokens>::iterator& it) {
 	ConfigLocation	loc;
-	bool	root = false, index= false, errPage = false;
-	bool	meth = false, ret = false, upload = false;
-	bool	autind = false, bdSize = false;
 	int rt = 0, ind = 0, met = 0, bd = 0, aut = 0, up = 0;
 	int	err = 0, red = 0;
 
@@ -172,10 +169,7 @@ ConfigLocation	ConfigServer::parseLocation(std::vector<t_tokens> &tok, std::vect
 			continue;
 		}
 		else
-		{
-
 			break; //error invalid type
-		}
 		std::cout << "loccc: " << it->_type << "\n";
 		it++;
     }

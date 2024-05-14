@@ -1,8 +1,11 @@
 #include "ParseFile.hpp"
 
 ParseFile::ParseFile() {}
-ParseFile::ParseFile(ParseFile const &src) {}
+ParseFile::ParseFile(ParseFile const &src) {
+	*this = src;
+}
 ParseFile&	ParseFile::operator=(ParseFile const &src) {
+	(void)src;
 	return *this;
 }
 

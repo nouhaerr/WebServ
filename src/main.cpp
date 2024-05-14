@@ -6,8 +6,10 @@ int	main(int ac, char **av)
 	const char* conFile;
 	if (ac == 2)
         conFile = av[1];
-    else
+    else{
+
         conFile = DEFAULT_CONFIG;
+	}
 
 	try {
 		Config config(conFile);
