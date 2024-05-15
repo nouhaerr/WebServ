@@ -40,6 +40,8 @@ class HttpRequest {
 		// ConfigServer	_confServ;
 		// int				_port;
 
+		void		_parseMethod();
+		void		_parseURI();
 		void		_getChunkedBody(size_t &bodypos);
 		bool		_isSupportedMethod();
 		std::string	_generateTempFileName();
