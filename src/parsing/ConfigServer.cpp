@@ -4,7 +4,11 @@ ConfigServer::ConfigServer() :
 _host("127.0.0.1"),
 _port(8000),
 _serverName(""),
-_maxBodySize(100000)
+_maxBodySize(100000),
+_autoindex(false),
+_root(""),
+_index(std::vector<std::string>()),
+_errorPage(std::map<int , std::string>())
 {}
 
 ConfigServer::ConfigServer(const ConfigServer &src) {
@@ -19,6 +23,10 @@ ConfigServer&	ConfigServer::operator=(const ConfigServer &src) {
 		this->_serverName = src._serverName;
 		this->_maxBodySize = src._maxBodySize;
 		this->_location = src._location;
+		this->_autoindex = src._autoindex;
+		this->_root = src._root;
+		this->_index = src._index;
+		this->_errorPage = src._errorPage;
 	}
 	return *this;
 }
@@ -117,6 +125,16 @@ void	ConfigServer::setRoot(std::string& root) {
 
 std::string	&ConfigServer::getRoot() {
 	return this->_root;
+}
+
+void	ConfigServer::setIndex(std::string &index) {
+	if (index.empty())
+		throw ConfigServerException("Error: Empty index!");
+	this->_index = splitVal(index);
+}
+
+std::vector<std::string>	&ConfigServer::getIndex() {
+	return this->_index;
 }
 
 void	ConfigServer::setErrorPage(std::string& errorPage) {	
