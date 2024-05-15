@@ -1,17 +1,17 @@
 #include "HttpRequest.hpp"
 
-HttpRequest::HttpRequest() : isChunked(false), errorCode(0) {}
+HttpRequest::HttpRequest() : isChunked(false), _errorCode(0) {}
 
 HttpRequest::~HttpRequest() {}
 
 void HttpRequest::parseHttpRequest(const std::string& req) 
 {
-    this->request = req;
-    std::istringstream requestStream(this->request);
+    this->_request = req;
+    std::istringstream requestStream(this->_request);
     std::string line;
     std::getline(requestStream, line);
     std::istringstream lineStream(line);
-    lineStream >> this->method >> this->uri >> this->httpVersion;
+    lineStream >> this->_method >> this->_uri >> this->_httpVersion;
 
     while (std::getline(requestStream, line) && line != "\r" && !line.empty()) 
     {
@@ -20,40 +20,40 @@ void HttpRequest::parseHttpRequest(const std::string& req)
         {
             std::string headerName = line.substr(0, colonPos);
             std::string headerValue = line.substr(colonPos + 2);
-            headerFields[headerName] = headerValue;
+            _headerFields[headerName] = headerValue;
         }
     }
 
-    if (headerFields.find("Content-Length") != headerFields.end()) 
+    if (_headerFields.find("Content-Length") != _headerFields.end()) 
     {
-        int contentLength = std::stoi(headerFields["Content-Length"]);
+        int contentLength = std::stoi(_headerFields["Content-Length"]);
         if (contentLength > 0) 
         {
             std::vector<char> buffer(contentLength);
             requestStream.read(&buffer[0], contentLength);
-            body.assign(buffer.begin(), buffer.end());
+            _body.assign(buffer.begin(), buffer.end());
         }
     }
 }
 
 void HttpRequest::printRequestDetails() const 
 {
-    std::cout << "Method: " << method << std::endl;
-    std::cout << "URI: " << uri << std::endl;
-    std::cout << "HTTP Version: " << httpVersion << std::endl;
+    std::cout << "Method: " << _method << std::endl;
+    std::cout << "URI: " << _uri << std::endl;
+    std::cout << "HTTP Version: " << _httpVersion << std::endl;
     printHeaders();
-    std::cout << "Body: " << body << std::endl;
+    std::cout << "Body: " << _body << std::endl;
 }
 
 std::string HttpRequest::getBody() const 
 {
-    return body;
+    return _body;
 }
 
 std::string HttpRequest::getHeader(const std::string& headerName) const 
 {
-    std::map<std::string, std::string>::const_iterator it = headerFields.find(headerName);
-    if (it != headerFields.end()) 
+    std::map<std::string, std::string>::const_iterator it = _headerFields.find(headerName);
+    if (it != _headerFields.end()) 
         return it->second;
     else 
         return "";  // Retourne une chaîne vide si l'en-tête n'est pas trouvé
@@ -62,7 +62,7 @@ std::string HttpRequest::getHeader(const std::string& headerName) const
 
 void HttpRequest::printHeaders() const 
 {
-    for (std::map<std::string, std::string>::const_iterator it = headerFields.begin(); it != headerFields.end(); ++it) 
+    for (std::map<std::string, std::string>::const_iterator it = _headerFields.begin(); it != _headerFields.end(); ++it) 
         std::cout << it->first << ": " << it->second << std::endl;
 }
 
@@ -72,19 +72,19 @@ void HttpRequest::parseBody(size_t &bodypos)
     if (is_body(contentLength)) 
     {
         if (this->isChunked) 
-            getChunkedBody(bodypos); 
+            _getChunkedBody(bodypos);
         else 
         {
-            std::string bodyContent(this->request.begin() + bodypos, this->request.end());
-            this->body = bodyContent;
+            std::string bodyContent(this->_request.begin() + bodypos, this->_request.end());
+            this->_body = bodyContent;
         }
     }
 }
 
 bool HttpRequest::is_body(int& contentLength) 
 {
-    std::map<std::string, std::string>::const_iterator it = headerFields.find("Content-Length");
-    if (it != headerFields.end()) 
+    std::map<std::string, std::string>::const_iterator it = _headerFields.find("Content-Length");
+    if (it != _headerFields.end()) 
     {
         contentLength = std::stoi(it->second);
         return true;
@@ -92,7 +92,7 @@ bool HttpRequest::is_body(int& contentLength)
     return false;
 }
 
-void HttpRequest::getChunkedBody(size_t &bodypos) 
+void HttpRequest::_getChunkedBody(size_t &bodypos) 
 {
     (void)bodypos;
     // Implementation for chunked transfer encoding
@@ -121,7 +121,7 @@ void HttpRequest::createFile(const std::string& name, const std::string& reqBody
     else 
     {
         std::cerr << "Failed to create file." << std::endl;
-        errorCode = 500; // Internal Server Error
+        _errorCode = 500; // Internal Server Error
     }
 }
 
@@ -143,15 +143,15 @@ int HttpRequest::hexToInt(const std::string& str)
 
 std::string HttpRequest::getMethod() const 
 {
-    return this->method;
+    return this->_method;
 }
 
 std::string HttpRequest::getUri() const 
 {
-    return this->uri;
+    return this->_uri;
 }
 
 std::string HttpRequest::getHttpVersion() const 
 {
-    return this->httpVersion;
+    return this->_httpVersion;
 }
