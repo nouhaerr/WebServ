@@ -27,6 +27,7 @@ class	ConfigServer {
 		std::vector<ConfigLocation>	&getLocation();
 		bool						&getAutoIndex();
 		std::string					&getRoot();
+		std::vector<std::string>	&getIndex();
 		std::map<int, std::string>	&getErrorPage();
 
 		// Setters
@@ -36,6 +37,7 @@ class	ConfigServer {
 		void	setLocation(std::vector<t_tokens> &tok, std::vector<t_tokens>::iterator& it);
 		void	setAutoIndex(std::string& autoindex);
 		void	setRoot(std::string& root);
+		void	setIndex(std::string &index);
 		void	setErrorPage(std::string& errorPage);
 
 		class	ConfigServerException: public std::exception{
