@@ -37,8 +37,6 @@
 # include <sys/time.h>
 
 // Default
-# define RECV_SIZE 65536
-# define CGI_BUFSIZE 65536
 # define DEFAULT_CONFIG "config/default.conf"
 
 // Colors

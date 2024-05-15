@@ -1,14 +1,7 @@
 #ifndef ParseFILE_HPP
 # define ParseFILE_HPP
 
-#include <iostream>
-#include <string>
-#include <fstream>
-#include <sstream>
-#include <vector>
-#include <iterator>
-#include <algorithm>
-#include <map>
+#include "../Macros.hpp"
 #include <stdexcept>
 
 #include "Config.hpp"

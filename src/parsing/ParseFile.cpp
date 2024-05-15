@@ -35,7 +35,12 @@ std::vector<t_tokens>	ParseFile::readFile(const char *fileName)
 		std::size_t start = line.find_first_not_of(" \t");
 		if (start != std::string::npos)
 			line = line.erase(0, start);
-		// std::cout << line << "\n";
+		if (line[0] == '#') {
+			// std::cout << line << "\n";
+			continue ;
+		}
+		else if (line.find_first_of('#') != std::string::npos)
+			throw ParseFile::ParseFileException("Error: Unexpected token.");
         if (!line.empty()) {
 			tok = ParseFile::setToken(line);
             tokenVect.push_back(tok);

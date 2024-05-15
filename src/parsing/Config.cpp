@@ -24,30 +24,42 @@ Config::~Config() {}
 ConfigServer Config::parseServerConfig(std::vector<t_tokens>::iterator& it) {
 
 	++it;
+	int lis = 0, serv = 0, rt = 0, bd = 0;
+	int	loc = 0, aut = 0, err = 0;
 	ConfigServer	server;
     // Parse server configuration settings
 	while (it != this->_tokens.end() && it->_type != "}") {
-		std::cout << it->_type << "\n";
 		if (it->_type == "location") {
 			server.setLocation(this->_tokens ,it);
+			loc++;
 			it++;
-			std::cout << "after location block:" <<it->_type << "\n";
+			// std::cout << "after location block:" <<it->_type << "\n";
 			continue;
 		}
-		else if (it->_type == "listen")
-		{
+		else if (it->_type == "listen") {
 			server.setListen(it->_value);
+			lis++;
 		}
-		else if (it->_type == "server_name")
+		else if (it->_type == "server_name") {
 			server.setServerName(it->_value);
-		else if (it->_type == "client_max_body_size")
+			serv++;
+		}
+		else if (it->_type == "client_max_body_size") {
 			server.setBodySize(it->_value);
-		else if (it->_type == "autoindex")
+			bd++;
+		}
+		else if (it->_type == "autoindex") {
 			server.setAutoIndex(it->_value);
-		else if (it->_type == "root")
+			aut++;
+		}
+		else if (it->_type == "root") {
 			server.setRoot(it->_value);
-		else if (it->_type == "error_page")
+			rt++;
+		}
+		else if (it->_type == "error_page") {
 			server.setErrorPage(it->_value);
+			err++;
+		}
 		else if (it->_type.empty()) {
 			it++;
 			continue;
@@ -56,6 +68,20 @@ ConfigServer Config::parseServerConfig(std::vector<t_tokens>::iterator& it) {
 			break;
 		it++;
 	}
+	if (lis != 1)
+		throw ParseServerException("Error: Should have one listen parametre.");
+	else if (serv > 1)
+		throw ParseServerException("Error: Must have one server_name parametre.(Duplicate)");
+	else if (rt > 1)
+		throw ParseServerException("Error: Must have one root parametre.(Duplicate)");
+	else if (loc < 1)
+		throw ParseServerException("Error: Should have at least one block of location.");
+	else if (bd > 1)
+		throw ParseServerException("Error: Must have one body_size parametre.(Duplicate)");
+	else if (aut > 1)
+		throw ParseServerException("Error: Must set one autoindex parametre.(Duplicate)");
+	else if (err > 1)
+		throw ParseServerException("Error: Must set one error_page parametre.(Duplicate)");
 	std::cout << "end of server\n";
 	if (it->_type != "}")
 		throw ParseServerException("Error: expected '}' in the end of server directive.");
@@ -67,12 +93,15 @@ void	Config::parse()
 	try {
 		this->_tokens = ParseFile::readFile(this->_fileName);
 		std::vector<t_tokens>::iterator it = _tokens.begin();
-		if (it->_type != "server")
-			throw ParseServerException("Error: Unexpected token.");
-		while (it != this->_tokens.end())
-		{
-			if (it->_type == "server")
+		while (it != this->_tokens.end()) {
+			if (it->_type.empty()) {
+				it++;
+				continue;
+			}
+			else if (it->_type == "server")
 				this->_servers.push_back(parseServerConfig(it));
+			else
+				throw ParseServerException("Error: Unexpected token.");
 			it++;
 		}
 		this->_serverCount = this->_servers.size();
@@ -88,12 +117,12 @@ void	Config::parse()
 			}
 			break;
 		}
-		std::cout << "Host: " << _servers[0].getHost() << ", Port: " << _servers[0].getPort() 
-		<< ", ServerName: " << _servers[0].getServerName()
-		<< ", BodySize: " << _servers[0].getMaxBodySize() << std::endl;
-		// for (std::vector<t_tokens>::iterator it =_tokens.begin(); it != this->_tokens.end(); ++it) {
-		// 	std::cout << "type: " << it->_type << ", Value: " << it->_value << std::endl;
-        // }
+		// std::cout << "Host: " << _servers[0].getHost() << ", Port: " << _servers[0].getPort() 
+		// << ", ServerName: " << _servers[0].getServerName()
+		// << ", BodySize: " << _servers[0].getMaxBodySize() << std::endl;
+		for (std::vector<t_tokens>::iterator it =_tokens.begin(); it != this->_tokens.end(); ++it) {
+			std::cout << "type: " << it->_type << ", Value: " << it->_value << std::endl;
+        }
 	} catch(const std::exception &e) {
 		std::cout << e.what() << std::endl;
 		exit(1);

@@ -170,23 +170,23 @@ ConfigLocation	ConfigServer::parseLocation(std::vector<t_tokens> &tok, std::vect
 		}
 		else
 			break; //error invalid type
-		std::cout << "loccc: " << it->_type << "\n";
+		// std::cout << "loccc: " << it->_type << "\n";
 		it++;
     }
 	if (rt != 1 || ind != 1)
-		throw ConfigServerException("Error: Must have one root/index parametre.");
+		throw ConfigServerException("Error: Should have one root/index parametre.");
 	else if (met != 1)
-		throw ConfigServerException("Error: Must set one allowed_methods parametre.");
+		throw ConfigServerException("Error: Should have one allowed_methods parametre.");
 	else if (bd > 1)
-		throw ConfigServerException("Error: Must have one body_size parametre.");
+		throw ConfigServerException("Error: Must have one body_size parametre.(Duplicate)");
 	else if (aut != 1)
-		throw ConfigServerException("Error: Must set one autoindex parametre.");
+		throw ConfigServerException("Error: Should have one autoindex parametre.");
 	else if (up > 1)
-		throw ConfigServerException("Error: Must have one uplod parametre.");
+		throw ConfigServerException("Error: Must have one uplod parametre.(Duplicate)");
 	else if (err > 1)
-		throw ConfigServerException("Error: Must set one error_page parametre.");
+		throw ConfigServerException("Error: Must set one error_page parametre.(Duplicate)");
 	else if (red > 1)
-		throw ConfigServerException("Error: Must have one return parametre.");
+		throw ConfigServerException("Error: Must have one return parametre.(Duplicate)");
 
 	if (it->_type != "}")
 		throw ConfigServerException("Error: expected '}' in the end of location directive.");

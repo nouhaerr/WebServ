@@ -1,4 +1,4 @@
-#include "../Macros.hpp"
+#include "Macros.hpp"
 #include "parsing/Config.hpp"
 
 int	main(int ac, char **av)

@@ -1,16 +1,10 @@
 #ifndef CONFIGLOCATION_HPP
 # define CONFIGLOCATION_HPP
 
-#include <iostream>
-#include <string>
-#include <fstream>
-#include <vector>
-#include <iterator>
-#include <algorithm>
-#include <map>
-#include <exception>
+#include "../Macros.hpp"
+#include <stdexcept>
 #include <cstdlib>
-#include <sstream>
+
 #include "Config.hpp"
 #include "ConfigServer.hpp"
 

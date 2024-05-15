@@ -1,14 +1,7 @@
 #ifndef CONFIG_HPP
 # define CONFIG_HPP
 
-#include <iostream>
-#include <string>
-#include <fstream>
-#include <vector>
-#include <iterator>
-#include <algorithm>
-#include <limits.h>
-#include <map>
+#include "../Macros.hpp"
 #include <stdexcept>
 
 
