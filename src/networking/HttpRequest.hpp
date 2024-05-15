@@ -1,11 +1,10 @@
 #ifndef HTTPREQUEST_HPP
 #define HTTPREQUEST_HPP
 
-#include <string>
-#include <map>
-#include <vector>
-#include <fstream>
-#include <sstream>
+#include "../Macros.hpp"
+#include <cstdlib>
+#include <ctime>
+#include <cstring>
 
 class HttpRequest {
 public:

@@ -1,23 +1,4 @@
 #include "HttpRequest.hpp"
-#include <iostream>
-#include <algorithm>
-#include <cstdlib>
-#include <ctime>
-#include <cstring>
-
-#include "HttpRequest.hpp"
-#include <iostream>
-#include <algorithm>
-#include <cstdlib>
-#include <ctime>
-#include <cstring>
-
-#include "HttpRequest.hpp"
-#include <iostream>
-#include <algorithm>
-#include <cstdlib>
-#include <ctime>
-#include <cstring>
 
 HttpRequest::HttpRequest() : isChunked(false), errorCode(0) {}
 
