@@ -1,21 +1,37 @@
-NAME = WebServer
+CPP = c++
 
-CFILES = main.cpp WebServer.cpp  NetworkClient.cpp HttpRequest.cpp
+FLAGS = -Wall -Wextra -Werror -fsanitize=address -g3 #-std=c++98 
 
-HFILES = WebServer.hpp  NetworkClient.hpp HttpRequest.hpp
+SRC =	src/main.cpp \
+		src/parsing/Config.cpp src/parsing/ParseFile.cpp\
+		src/parsing/ConfigServer.cpp src/parsing/utils.cpp\
+		src/parsing/ConfigLocation.cpp \
 
-CC = c++
+OBJS = $(SRC:.cpp=.o)
 
-FLAGS = -Wall -Wextra -Werror -std=c++98
+NAME = webserv
 
-all: $(NAME)
 
-$(NAME): $(CFILES) $(HFILES)
-	$(CC) $(FLAGS) $(CFILES) -o $@
+$(NAME) : $(OBJS)
+	@$(CPP) $(FLAGS) $(OBJS) -o $(NAME)
+	@echo "\033[0;32m- Webserver is ready ^^ \033[0m"
 
-clean:
-	rm -f $(NAME)
+%.o: %.cpp
+	@printf "\033[0;93m- Waiting...\033[0m \n"
+	@$(CPP) $(FLAGS) -c $< -o $@
 
-fclean: clean
+all : $(NAME) $(SRC)
 
-re: fclean all
+clean :
+	@rm -rf $(OBJS)
+	@echo "\033[1;31m- Object files removed !\033[0m"
+
+fclean : clean
+	@rm -rf $(NAME)
+	@echo "\033[1;31m- Binaries removed !\033[0;0m"
+
+re : clean all
+
+.SILENT : $(OBJS)
+
+.PHONY: all clean fclean re
