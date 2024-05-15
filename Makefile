@@ -2,10 +2,10 @@ CPP = c++
 
 FLAGS = -Wall -Wextra -Werror -fsanitize=address -g3 #-std=c++98
 
-SRC =   main.cpp \
-                src/parsing/Config.cpp src/parsing/ParseFile.cpp\
-                src/parsing/ConfigServer.cpp src/parsing/utils.cpp\
-                src/parsing/ConfigLocation.cpp WebServer.cpp  NetworkClient.cpp HttpRequest.cpp\
+SRC = networking/main.cpp \
+	src/parsing/Config.cpp src/parsing/ParseFile.cpp\
+	src/parsing/ConfigServer.cpp src/parsing/utils.cpp\
+	src/parsing/ConfigLocation.cpp networking/WebServer.cpp  networking/NetworkClient.cpp networking/HttpRequest.cpp\
 
 OBJS = $(SRC:.cpp=.o)
 
