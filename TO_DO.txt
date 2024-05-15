@@ -1,2 +1,0 @@
--Rsponse header function (content-type, content-length, first line, status_code nbr and message, )
--Index of page 
