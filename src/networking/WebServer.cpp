@@ -1,8 +1,4 @@
 #include "WebServer.hpp"
-#include "HttpRequest.hpp"
-#include "HttpRequestParser.hpp"
-#include <arpa/inet.h>
-#include <cctype>
 
 std::string trimm(const std::string& str) 
 {
@@ -216,6 +212,8 @@ void WebServer::processClientRequests(NetworkClient& client)
         // std::cout << "Received Host header: " << hostHeader << std::endl;
         hostHeader = trimm(hostHeader);
         const ConfigServer& clientServer = matchServerByName(hostHeader);
+        // HttpResponse	resp(clientServer);
+		// resp.generateResponse(request);
         std::string response = generateResponse(clientServer);
         send(client.fetchConnectionSocket(), response.c_str(), response.size(), 0);
     } 

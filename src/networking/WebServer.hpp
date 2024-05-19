@@ -7,6 +7,11 @@
 #include "HttpRequest.hpp"
 #include "../parsing/Config.hpp"
 #include "../parsing/ConfigServer.hpp"
+#include "HttpRequest.hpp"
+#include "HttpRequestParser.hpp"
+#include <arpa/inet.h>
+#include <cctype>
+#include "../response/HttpResponse.hpp"
 
 class NetworkClient;
 
