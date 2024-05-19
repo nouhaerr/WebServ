@@ -175,7 +175,7 @@ void WebServer::processClientRequests(NetworkClient& client)
     }
 
     std::cout << "Full request received:\n" << requestString << std::endl;
-    std::cout << "Request size: " << requestString.size() << std::endl;
+    // std::cout << "Request size: " << requestString.size() << std::endl;
 
     HttpRequest request;
     request.parseHttpRequest(requestString);
@@ -184,15 +184,15 @@ void WebServer::processClientRequests(NetworkClient& client)
     if (bodypos != std::string::npos) 
     {
         bodypos += 4;
-        std::cout << "Body starts at position: " << bodypos << std::endl;
+        // std::cout << "Body starts at position: " << bodypos << std::endl;
 
-        if (bodypos < requestString.size()) 
-        {
-            std::cout << "Character at position " << bodypos << ": " << requestString[bodypos] << std::endl;
-            std::cout << "Substring starting at position " << bodypos << ": " << requestString.substr(bodypos) << std::endl;
-        } 
-        else 
-            std::cerr << "Error: bodypos is out of range." << std::endl;
+        // if (bodypos < requestString.size()) 
+        // {
+        //     std::cout << "Character at position " << bodypos << ": " << requestString[bodypos] << std::endl;
+        //     std::cout << "Substring starting at position " << bodypos << ": " << requestString.substr(bodypos) << std::endl;
+        // } 
+        // else 
+        //     std::cerr << "Error: bodypos is out of range." << std::endl;
     } 
     else 
     {
@@ -213,7 +213,7 @@ void WebServer::processClientRequests(NetworkClient& client)
     std::string hostHeader = request.getHeader("Host");
     if (!hostHeader.empty())
     {
-        std::cout << "Received Host header: " << hostHeader << std::endl;
+        // std::cout << "Received Host header: " << hostHeader << std::endl;
         hostHeader = trimm(hostHeader);
         const ConfigServer& clientServer = matchServerByName(hostHeader);
         std::string response = generateResponse(clientServer);

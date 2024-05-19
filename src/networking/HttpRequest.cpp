@@ -67,8 +67,6 @@ void HttpRequest::parseHttpRequest(const std::string& req)
 				{
 					std::string headerName = line.substr(0, colonPos);
 					std::string headerValue = line.substr(colonPos + 2);
-					std::cout << headerName << "\n";
-					std::cout << headerValue << "\n";
 					_headerFields[headerName] = headerValue;
 				}
 			}
