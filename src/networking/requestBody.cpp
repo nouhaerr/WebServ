@@ -1,8 +1,9 @@
 #include "HttpRequest.hpp"
 
-void	HttpRequest::parseBody(size_t &bodypos) 
+void	HttpRequest::parseBody(size_t &bodypos, const std::string &requestString) 
 {
-    long long contentLength = 0;
+    (void)requestString;
+    long contentLength = 0;
     if (is_body(contentLength)) 
     {
         if (this->isChunked) {
@@ -28,14 +29,19 @@ void	HttpRequest::parseBody(size_t &bodypos)
 		}
         else if (this->_method == "POST" && contentLength > 0)
         {
-            std::string bodyContent(this->_request.begin() + bodypos, this->_request.end());
-            this->_body = bodyContent;
-			this->_bodySize = contentLength;
+            if (bodypos + contentLength <= requestString.size()) 
+            {
+                std::string bodyContent = requestString.substr(bodypos, contentLength);
+                this->_body = bodyContent;
+                // std::cout << "Extracted body: " << this->_body << std::endl; 
+            } 
+            else 
+                std::cerr << "Error: bodypos is out of range. Request size: " << requestString.size() << " bodypos: " << bodypos << std::endl;
         }
     }
 }
 
-bool	HttpRequest::is_body(long long& contentLength) {
+bool	HttpRequest::is_body(long& contentLength) {
 	std::map<std::string, std::string>::const_iterator it = _headerFields.find("Content-Length");
 
 	if (it != _headerFields.end()) {
@@ -54,7 +60,7 @@ bool	HttpRequest::is_body(long long& contentLength) {
 		this->_errorCode = 501; //Not implemented
 		return false;
 	}
-	else if (this->_method == "post" && _headerFields.find("Content-Length") == _headerFields.end()
+	else if (this->_method == "POST" && _headerFields.find("Content-Length") == _headerFields.end()
 		&& _headerFields.find("Transfer-Encoding") == _headerFields.end()) {
 		this->_errorCode = 400; //Bad Request
 		return false;
@@ -83,27 +89,27 @@ void	HttpRequest::_getChunkedBody(size_t &bodypos) {
 }
 
 // bool	HttpRequest::_isSupportedMethod() {
-	// std::vector<std::string> _isAllowedMeth = this->_confServ._methods;
-	// size_t	len = this->_confServ.loc.size();
+// 	std::vector<std::string> _isAllowedMeth = this->_confServ.getMethods();
+// 	size_t	len = this->_confServ.getLocation().size();
 
-	// std::vector<std::string>::iterator it = this->_confServ._methods.begin();
-	// for(; it != this->_confServ._methods.end(); it++)
-	// 	std::cout << *it << " ";
-	// printf("\n");
-	// for(size_t i = 0; i < len; i++) {
-	// 	if (this->_uri.find(this->_confServ.loc[i].name) != std::string::npos
-	// 		&& this->_confServ.loc[i]._methods.empty()) {//find the location Name in the uri
-	// 		_isAllowedMeth = this->_confServ.loc[i]._methods;
-	// 		break ;
-	// 	} //update the method vector
-	// }
-		// Check if the request method is found in the vect of allowed methods
-    // return (std::find(_isAllowedMeth.begin(), _isAllowedMeth.end(), this->_method) != _isAllowedMeth.end());
+// 	std::vector<std::string>::iterator it = this->_confServ.getMethods().begin();
+// 	for(; it != this->_confServ.getMethods().end(); it++)
+// 		std::cout << *it << " ";
+// 	printf("\n");
+// 	for(size_t i = 0; i < len; i++) {
+// 		if (this->_uri.find(this->_confServ.getLocation()[i].name) != std::string::npos
+// 			&& this->_confServ.getLocation()[i].getMethods().empty()) {//find the location Name in the uri
+// 			_isAllowedMeth = this->_confServ.getLocation()[i].getMethods();
+// 			break ;
+// 		} //update the method vector
+// 	}
+// 	// Check if the request method is found in the vect of allowed methods
+//     return (std::find(_isAllowedMeth.begin(), _isAllowedMeth.end(), this->_method) != _isAllowedMeth.end());
 // }
 
 std::string	HttpRequest::_findUploadPath() {
     // Find upload path logic
-	// size_t	len = this->_confServ.getLocation.size();
+	// size_t	len = this->_confServ.getLocation().size();
 	// std::string	download = this->_confServ.uploads; // get the uploadPath in the conf File if there is a section named upload
 
 	// std::cout << "Upload Path: " << download << std::endl;

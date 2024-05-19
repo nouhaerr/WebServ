@@ -1,13 +1,18 @@
 #ifndef NETWORK_CLIENT_HPP
 #define NETWORK_CLIENT_HPP
 
-#include <string>
 #include <netinet/in.h>
+#include "WebServer.hpp"
+#include <cstring>
+#include "../parsing/ConfigServer.hpp"
+
+class ConfigServer;
+class WebServer;
 
 class NetworkClient {
 public:
     NetworkClient();
-    NetworkClient(int socketDescriptor);
+    NetworkClient(int socketDescriptor, int serverSocket);
     NetworkClient(const NetworkClient& source);
     ~NetworkClient();
     NetworkClient& operator=(const NetworkClient& source);
@@ -30,17 +35,18 @@ public:
     int fetchServerSocket() const;
     int fetchConnectionSocket() const;
     void assignConnectionSocket(int socket);
-
     sockaddr_in* fetchClientInfo();
     socklen_t* fetchAddressLength();
 
     bool isResponsePrepared() const;
-
+    void setServer(const ConfigServer& server);
     friend bool operator==(const NetworkClient& lhs, const NetworkClient& rhs);
+    const ConfigServer* getConfigServer() const;
 
 private:
     int serverSocketId;
     int connectionSocketId;
+    const ConfigServer *server;
     socklen_t clientAddressSize;
     sockaddr_in clientDetails;
     std::string responseHeader;
@@ -51,3 +57,4 @@ private:
 };
 
 #endif
+

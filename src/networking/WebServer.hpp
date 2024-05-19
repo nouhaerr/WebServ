@@ -1,31 +1,45 @@
 #ifndef WEBSERVER_HPP
 #define WEBSERVER_HPP
 
-#include "NetworkClient.hpp"
-#include <vector>
-#include <sys/socket.h>
+#include "../Macros.hpp"
 #include <netinet/in.h>
+#include "NetworkClient.hpp"
+#include "HttpRequest.hpp"
+#include "../parsing/Config.hpp"
+#include "../parsing/ConfigServer.hpp"
+
+class NetworkClient;
+
+template <typename T>
+std::string toString(const T& value) {
+    std::ostringstream oss;
+    oss << value;
+    return oss.str();
+}
 
 class WebServer {
 public:
-    WebServer(int port, const std::string& host);
+    WebServer(const Config& config);
     ~WebServer();
+
     void run();
 
 private:
+     fd_set masterSet, readSet;
+    int highestFd;  
+    std::vector<int> serverSockets;
     std::vector<NetworkClient> clients;
-    fd_set masterSet, readSet;
-    int serverSocket;
-    int highestFd;
+    std::vector<ConfigServer> serverConfigs;
 
-    void setupServerSocket(int port, const std::string& host);
-    void acceptNewClient();
+    void setupServerSockets();
+    void acceptNewClient(int serverSocket);
     void closeClient(NetworkClient& client);
     void processClientRequests(NetworkClient& client);
     void sendDataToClient(NetworkClient& client);
     NetworkClient* findClientBySocket(int socket);
+    const ConfigServer& matchServerByName(const std::string& host);
+    const ConfigServer& matchServerByFd(int fd);
 
+    std::string generateResponse(const ConfigServer& server);
 };
-
 #endif
-

@@ -8,6 +8,7 @@
 #include "Config.hpp"
 #include "ConfigLocation.hpp"
 
+
 class Config;
 class ConfigLocation;
 class	ConfigServer {
@@ -40,6 +41,9 @@ class	ConfigServer {
 		void	setIndex(std::string &index);
 		void	setErrorPage(std::string& errorPage);
 
+		int		getSocket() const;
+		void	setSocket(int sock);
+
 		class	ConfigServerException: public std::exception{
 			std::string message;
 			public:
@@ -61,6 +65,8 @@ class	ConfigServer {
 		std::string					_root;
 		std::vector<std::string>	_index;
 		std::map<int, std::string>	_errorPage;
+		int _socket;
+		int socketFD;
 };
 
 bool						isValidIPAddress(const std::string& ip);

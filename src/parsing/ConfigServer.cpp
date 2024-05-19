@@ -33,6 +33,14 @@ ConfigServer&	ConfigServer::operator=(const ConfigServer &src) {
 
 ConfigServer::~ConfigServer() {}
 
+int	ConfigServer::getSocket() const {
+    return this->socketFD;
+}
+
+void	ConfigServer::setSocket(int sock) {
+	this->socketFD = sock;
+}
+
 void	ConfigServer::setListen(std::string& listen) {
 	int	count = 0;
 	std::size_t	pos = listen.find(':');

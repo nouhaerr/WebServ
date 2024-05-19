@@ -5,7 +5,7 @@ ConfigLocation::ConfigLocation() :
 	_root(""),
 	_index(std::vector<std::string>()),
 	_methods(std::vector<std::string>()),
-	_maxBodySize(100000),
+	_maxBodySize(10000),
 	_autoindex(false),
 	_upload(""),
 	_errorPage(std::map<int , std::string>()),
