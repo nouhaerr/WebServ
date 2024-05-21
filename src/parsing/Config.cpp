@@ -22,7 +22,7 @@ Config&	Config::operator=(const Config &other) {
 Config::~Config() {}
 
 std::vector<ConfigServer> Config::getServers() const {
-    return _servers;
+    return this->_servers;
 }
 
 ConfigServer Config::parseServerConfig(std::vector<t_tokens>::iterator& it) {

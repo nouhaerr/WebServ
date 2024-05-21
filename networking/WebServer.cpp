@@ -221,6 +221,7 @@ void WebServer::processClientRequests(NetworkClient& client)
         std::cout << "Received Host header: " << hostHeader << std::endl;
         hostHeader = trimm(hostHeader);
         const ConfigServer& clientServer = matchServerByName(hostHeader);
+        client.setServer(clientServer);
         std::string response = generateResponse(clientServer);
         send(client.fetchConnectionSocket(), response.c_str(), response.size(), 0);
     } 

@@ -3,10 +3,9 @@
 
 #include <string>
 #include <netinet/in.h>
-#include "WebServer.hpp"
+#include "../src/parsing/ConfigServer.hpp"
 
-class ConfigServer;
-class WebServer;
+
 
 class NetworkClient {
 public:
@@ -40,12 +39,13 @@ public:
     bool isResponsePrepared() const;
     void setServer(const ConfigServer& server);
     friend bool operator==(const NetworkClient& lhs, const NetworkClient& rhs);
-    const ConfigServer* getConfigServer() const;
+    const ConfigServer& getConfigServer() const;
 
+    ConfigServer& getServer();
 private:
     int serverSocketId;
     int connectionSocketId;
-    const ConfigServer *server;
+    ConfigServer server;
     socklen_t clientAddressSize;
     sockaddr_in clientDetails;
     std::string responseHeader;

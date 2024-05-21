@@ -131,10 +131,15 @@ bool NetworkClient::isResponsePrepared() const
 
 void NetworkClient::setServer(const ConfigServer& server) 
 {
-    this->server = &server; 
+    this->server = server; 
 }
 
-const ConfigServer* NetworkClient::getConfigServer() const 
+const ConfigServer& NetworkClient::getConfigServer() const 
 {
     return server;
+}
+
+ConfigServer& NetworkClient::getServer()
+{
+    return this->server;
 }
