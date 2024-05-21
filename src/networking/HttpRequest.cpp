@@ -37,7 +37,9 @@ HttpRequest& HttpRequest::operator=(const HttpRequest& other) {
 	return *this;
 }
 
-HttpRequest::~HttpRequest() {}
+HttpRequest::~HttpRequest() {
+	_headerFields.clear();
+}
 
 std::string toLower(const std::string& str) 
 {

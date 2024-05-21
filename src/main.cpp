@@ -4,7 +4,7 @@
 
 int main(int argc, char* argv[]) 
 {
-	const char* conFile;
+	const char*	conFile;
 	if (argc == 2)
 		conFile = argv[1];
 	else{	

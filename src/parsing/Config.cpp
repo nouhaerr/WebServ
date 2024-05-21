@@ -15,6 +15,7 @@ Config::Config(const Config &other) {
 Config&	Config::operator=(const Config &other) {
 	if (this != &other) {
 		this->_fileName = other._fileName;
+		this->_servers = other._servers;
 	}
 	return *this;
 }

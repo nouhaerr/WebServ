@@ -149,7 +149,6 @@ void WebServer::closeClient(NetworkClient& client)
     clients.erase(std::remove(clients.begin(), clients.end(), client), clients.end());
 }
 
-
 void WebServer::processClientRequests(NetworkClient& client) 
 {
     std::string requestString;
@@ -212,18 +211,18 @@ void WebServer::processClientRequests(NetworkClient& client)
         // std::cout << "Received Host header: " << hostHeader << std::endl;
         hostHeader = trimm(hostHeader);
         const ConfigServer& clientServer = matchServerByName(hostHeader);
+        client.setServer(clientServer);
         // HttpResponse	resp(clientServer);
 		// resp.generateResponse(request);
         std::string response = generateResponse(clientServer);
         send(client.fetchConnectionSocket(), response.c_str(), response.size(), 0);
-    } 
+    }
     else 
     {
         std::cerr << "Host header not found in the request." << std::endl;
         closeClient(client);
         return;
     }
-
     closeClient(client);
 }
 

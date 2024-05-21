@@ -139,10 +139,14 @@ void	HttpRequest::_createFile(const std::string& name, const std::string& reqBod
 
 std::string	HttpRequest::_generateTempFileName() {
 	const char* alphanum = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_-";
-    std::string	tempName = "";
+    const int charsetSize = sizeof(alphanum) - 1;
+	std::string	tempName;
+
 	std::srand(static_cast<unsigned int>(time(NULL)));
-    for (int i = 0; i < 10; ++i) 
-        tempName += alphanum[std::rand() % (sizeof(alphanum) - 1)];
+    for (int i = 0; i < 10; ++i) {
+		int randomIndex = std::rand() % charsetSize;
+        tempName += alphanum[randomIndex];
+	}
     return tempName;
 }
 

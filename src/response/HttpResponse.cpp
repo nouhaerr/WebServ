@@ -16,9 +16,7 @@ HttpResponse::HttpResponse(const ConfigServer &clientServer) :
 HttpResponse::~HttpResponse(){}
 
 void	HttpResponse::generateResponse(HttpRequest &req) {
-	// if (_isCgi == false)
-	// 	_respFile(req);
-	// int re = get_requested_resource(req);
+	
 	try {
 		// if (_fd == 0)
 			// initHeader(req);
