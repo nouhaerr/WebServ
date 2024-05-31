@@ -172,23 +172,22 @@ void	HttpResponse::checkHttpVersion(HttpRequest &req) {
 
 std::string HttpResponse::deleteRedundantSlash(std::string uri)
 {
-    std::string cleanedURI;
-    bool previousCharWasSlash = false;
+    std::string newUri;
+    std::string::size_type i = 0;
 
-    for (std::string::iterator it = uri.begin(); it != uri.end(); ++it)
-    {
-        char c = *it;
-
-        if (c != '/') {
-            cleanedURI.push_back(c);
-            previousCharWasSlash = false;
-        }
-        else if (!previousCharWasSlash) {
-            cleanedURI.push_back(c);
-            previousCharWasSlash = true;
+    while (i < uri.size()) {
+		// Add current character to newUri
+        newUri.push_back(uri[i]);
+        // If the current character is a slash, skip all subsequent slashes
+        if (uri[i] == '/') {
+            while (i < uri.size() && uri[i] == '/') {
+                ++i;
+            }
+        } else {
+            ++i;
         }
     }
-    return cleanedURI;
+    return newUri;
 }
 
 std::string	HttpResponse::getRequestedResource(HttpRequest &req) {

@@ -5,6 +5,7 @@ void	HttpResponse::handleGetMethod() {
 		buildResponse(405);
 		return ;
 	}
+	
 }
 
 bool	HttpResponse::_isSupportedMethod(std::string meth) {
@@ -14,6 +15,5 @@ bool	HttpResponse::_isSupportedMethod(std::string meth) {
 		if (_methods[i] == meth)
 			return true ;
 	}
-	// Check if the request method is found in the vect of allowed methods
     return false;
 }
