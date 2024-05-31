@@ -3,18 +3,31 @@
 
 #include "../Macros.hpp"
 #include "../parsing/Config.hpp"
+#include "../networking/NetworkClient.hpp"
 #include "../networking/HttpRequest.hpp"
 
+class NetworkClient;
 class HttpRequest;
 class HttpResponse {
 	public:
-		HttpResponse();
-		HttpResponse(const ConfigServer &clientServer);
+		HttpResponse(NetworkClient &client);
 		~HttpResponse();
 
 		void	generateResponse(HttpRequest &req);
-
+		void	buildResponse(int errCode);
+		void	locateErrorPage(int errCode);
+		void	checkHttpVersion(HttpRequest &req);
+		std::string	getContentLength();
+		std::string	createResponseHeader(int errCode, std::string contentType);
+		void	findStatusCode(int code);
+		void	initHeader();
+		void	getRequestedResource(HttpRequest &req);
+		std::string generateDate();
+	
+	
+	
 	private:
+		NetworkClient&	_client;
 		int				_clSocket;
 		ConfigServer	_serv;
 		std::string		_body;
@@ -22,13 +35,18 @@ class HttpResponse {
 		std::string		_statusCode;
 		bool			_isCgi;
 		std::string		_root;
+		std::vector<std::string> _indexes;
 		std::string		_index;
-		std::string		_error_page;
+		std::map<int, std::string>	_errorPage;
+		std::string		_errorPath;
 		int				_autoindex;
 		std::string		_redirection;
-		std::vector<ConfigLocation>	_loc;
+		std::vector<ConfigLocation>	_locations;
+		std::string	_uri;
 		int			_fd;
-		std::string _path;
+		std::map<std::string, std::string> _headers;
+		std::string _filePath;
+		std::string _buffer;
 };
 
 class HttpException : public std::exception {

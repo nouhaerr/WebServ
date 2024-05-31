@@ -15,13 +15,6 @@
 
 class NetworkClient;
 
-template <typename T>
-std::string toString(const T& value) {
-    std::ostringstream oss;
-    oss << value;
-    return oss.str();
-}
-
 class WebServer {
 public:
     WebServer(const Config& config);
@@ -46,5 +39,6 @@ private:
     const ConfigServer& matchServerByFd(int fd);
 
     std::string generateResponse(const ConfigServer& server);
+    void sendResponse(HttpRequest &req, NetworkClient &client);
 };
 #endif

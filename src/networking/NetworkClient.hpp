@@ -40,6 +40,16 @@ public:
     const ConfigServer& getConfigServer() const;
 
     ConfigServer& getServer();
+
+    void	setResponseHeader(std::string respHeader);
+    void    setResponseBody(std::string body);
+    void    setHeaderSent(bool value);
+    void    setResponse(std::string response);
+    std::string getResponseHeader();
+    std::string getResponseBody();
+    bool        getHeaderSent();
+    std::string getResponse();
+
 private:
     int serverSocketId;
     int connectionSocketId;
@@ -51,6 +61,8 @@ private:
     std::string fullResponse;
     bool headerDispatched;
     bool fileAccessed;
+    bool    _headersSent;
+    std::string _response;
 };
 
 #endif

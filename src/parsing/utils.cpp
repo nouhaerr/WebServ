@@ -161,6 +161,7 @@ ConfigLocation	ConfigServer::parseLocation(std::vector<t_tokens> &tok, std::vect
 			err++;
 		}
 		else if (it->_type == "return") {
+			loc.setRedirect(true);
 			loc.setRedirection(it->_value);
 			red++;
 		}

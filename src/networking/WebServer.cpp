@@ -212,8 +212,8 @@ void WebServer::processClientRequests(NetworkClient& client)
         hostHeader = trimm(hostHeader);
         const ConfigServer& clientServer = matchServerByName(hostHeader);
         client.setServer(clientServer);
-        // HttpResponse	resp(clientServer);
-		// resp.generateResponse(request);
+        //RESPONSE
+        // sendResponse(request, client);
         std::string response = generateResponse(clientServer);
         send(client.fetchConnectionSocket(), response.c_str(), response.size(), 0);
     }
@@ -224,6 +224,17 @@ void WebServer::processClientRequests(NetworkClient& client)
         return;
     }
     closeClient(client);
+}
+
+void WebServer::sendResponse(HttpRequest &req, NetworkClient &client) {
+    HttpResponse resp(client);
+
+    resp.generateResponse(req);
+    if (client.getHeaderSent() == false) {
+        client.setResponse(client.getResponseHeader());
+		client.setHeaderSent(true);
+    }
+    send(client.fetchConnectionSocket(), client.getResponse().c_str(), client.getResponse().length(), 0);
 }
 
 void WebServer::sendDataToClient(NetworkClient& client) 

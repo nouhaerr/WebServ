@@ -26,6 +26,7 @@ class ConfigLocation {
 		void	setAutoIndex(std::string& autoindex);
 		void	setUpload(std::string& upload);
 		void	setErrorPage(std::string& errorPage);
+		void	setRedirect(bool redirect);
 		void	setRedirection(std::string& redirection);
 
 		// Getters
@@ -37,6 +38,7 @@ class ConfigLocation {
 		bool&						getAutoIndex();
 		std::string&				getUpload();
 		std::map<int, std::string>&	getErrorPage();
+		bool&						getRedirect();
 		int&						getRedirectCode();
 		std::string&				getRedirection();
 
@@ -61,6 +63,7 @@ class ConfigLocation {
 		bool						_autoindex;
 		std::string					_upload;
 		std::map<int, std::string>	_errorPage;
+		bool						_redirect;
 		std::string					_redirection;
 		int							_redirectCode;
 };

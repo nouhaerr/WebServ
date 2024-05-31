@@ -45,4 +45,12 @@
 # define YELLOW "\033[33m"
 # define RESET "\033[0m"
 
+
+template <typename T>
+std::string toString(const T& value) {
+    std::ostringstream oss;
+    oss << value;
+    return oss.str();
+}
+
 # endif

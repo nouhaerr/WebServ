@@ -10,6 +10,7 @@ SRC = src/main.cpp\
 	src/networking/HttpRequest.cpp \
 	src/networking/requestBody.cpp \
 	src/networking/HttpRequestParser.cpp\
+	src/response/HttpResponse.cpp\
 
 OBJS = $(SRC:.cpp=.o)
 

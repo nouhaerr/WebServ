@@ -58,10 +58,10 @@ void HttpRequest::parseHttpRequest(const std::string& req)
     lineStream >> this->_method >> this->_uri >> this->_httpVersion;
 
     _parseMethod();
-	if (this->_errorCode != 501) {
+	// if (this->_errorCode != 501) {
 		_parseURI();
-		if (this->_errorCode != 400 && this->_errorCode != 414)
-		{
+		// if (this->_errorCode != 400 && this->_errorCode != 414)
+		// {
 			while (std::getline(requestStream, line) && line != "\r" && !line.empty()) 
 			{
 				size_t colonPos = line.find(':');
@@ -72,8 +72,8 @@ void HttpRequest::parseHttpRequest(const std::string& req)
 					_headerFields[headerName] = headerValue;
 				}
 			}
-		}
-	}
+		// }
+	// }
 }
 
 void	HttpRequest::_parseMethod() {
@@ -162,4 +162,8 @@ bool HttpRequest::getIsChunked() const {
 
 std::string HttpRequest::getRequest() const { 
     return this->_request; 
+}
+
+int	HttpRequest::getErrorCode() const {
+	return this->_errorCode;
 }

@@ -50,6 +50,7 @@ class HttpRequest {
 		const std::map<std::string, std::string>& getHeaderFields() const;
 		std::string	getBody() const;
 		bool		getIsChunked() const;
+		int			getErrorCode() const;
 
 		static int	hexToInt(const std::string& str);
 		void		parseBody(size_t &bodypos, const std::string &requestString);

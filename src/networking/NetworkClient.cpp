@@ -3,7 +3,8 @@
 
 NetworkClient::NetworkClient()
   : serverSocketId(-1), connectionSocketId(-1), clientAddressSize(0),
-    headerDispatched(false), fileAccessed(false) {
+    headerDispatched(false), fileAccessed(false) ,
+    _headersSent(false) {
     std::memset(&clientDetails, 0, sizeof(clientDetails));
 }
 
@@ -12,7 +13,8 @@ NetworkClient::NetworkClient(int socketDescriptor, int serverSocket)
     connectionSocketId(socketDescriptor),
     clientAddressSize(0),
     headerDispatched(false),
-    fileAccessed(false) {
+    fileAccessed(false),
+    _headersSent(false) {
     std::memset(&clientDetails, 0, sizeof(clientDetails));
 }
 
@@ -21,7 +23,8 @@ NetworkClient::NetworkClient(const NetworkClient& source)
     clientAddressSize(source.clientAddressSize), clientDetails(source.clientDetails),
     responseHeader(source.responseHeader), responseBody(source.responseBody),
     fullResponse(source.fullResponse), headerDispatched(source.headerDispatched),
-    fileAccessed(source.fileAccessed) {
+    fileAccessed(source.fileAccessed),
+    _headersSent(source._headersSent) {
 }
 
 bool operator==(const NetworkClient& lhs, const NetworkClient& rhs) 
@@ -45,6 +48,7 @@ NetworkClient& NetworkClient::operator=(const NetworkClient& source)
         fullResponse = source.fullResponse;
         headerDispatched = source.headerDispatched;
         fileAccessed = source.fileAccessed;
+        _headersSent = source._headersSent;
     }
     return *this;
 }
@@ -141,4 +145,34 @@ const ConfigServer& NetworkClient::getConfigServer() const
 ConfigServer& NetworkClient::getServer()
 {
     return this->server;
+}
+
+void	NetworkClient::setResponseHeader(std::string respHeader) {
+    this->responseHeader = respHeader;
+}
+
+std::string NetworkClient::getResponseHeader() {
+    return this->responseHeader;
+}
+
+std::string NetworkClient::getResponseBody() {
+    return this->responseBody;
+}
+
+void NetworkClient::setResponseBody(std::string body) {
+    this->responseBody = body;
+}
+
+bool NetworkClient::getHeaderSent() {
+    return this->_headersSent;
+}
+void NetworkClient::setHeaderSent(bool value) {
+    this->_headersSent = value;
+}
+
+std::string NetworkClient::getResponse() {
+    return this->_response;
+}
+void NetworkClient::setResponse(std::string response) {
+    this->_response = response;
 }
