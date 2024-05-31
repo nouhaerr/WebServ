@@ -41,6 +41,7 @@ class HttpResponse {
 		std::map<int, std::string>	_errorPage;
 		std::string		_errorPath;
 		int				_autoindex;
+		std::vector<std::string>	_methods;
 		std::string		_redirection;
 		std::vector<ConfigLocation>	_locations;
 		std::string	_uri;
@@ -50,7 +51,7 @@ class HttpResponse {
 		std::string _buffer;
 
 
-		bool	_isSupportedMethod();
+		bool	_isSupportedMethod(std::string meth);
 };
 
 class HttpException : public std::exception {

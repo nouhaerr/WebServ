@@ -229,6 +229,7 @@ std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
     }
 
 		if (_locations[match_index].getLocationName() == location) {
+			_methods = _locations[match_index].getMethods();
 			_autoindex = _locations[match_index].getAutoIndex();
 			_root = _locations[match_index].getRoot();
 			_errorPage = _locations[match_index].getErrorPage();

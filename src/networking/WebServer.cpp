@@ -237,8 +237,8 @@ void WebServer::sendResponse(HttpRequest &req, NetworkClient &client) {
     int result = send(client.fetchConnectionSocket(), client.getResponse().c_str(), client.getResponse().length(), 0);
     if (result <= 0)
 		closeClient(client);
-    // else if (client.getHeaderSent() == true)
-    // {
+    else if (client.getHeaderSent() == true)
+    {
         std::cout << "Body: " << client.getResponseBody() << "\n";
 		if (client.getResponseBody().length() > 0)
 		{
@@ -262,7 +262,7 @@ void WebServer::sendResponse(HttpRequest &req, NetworkClient &client) {
 					closeClient(client);
 				return;
 			}
-		// }
+		}
     }
     std::cout << client.getHeaderSent() << "\n";
     std::cout << client.getResponse() << "\n";
