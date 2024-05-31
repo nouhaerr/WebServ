@@ -23,8 +23,9 @@ class HttpResponse {
 		void	initHeader();
 		std::string	getRequestedResource(HttpRequest &req);
 		std::string generateDate();
-	std::string deleteRedundantSlash(std::string uri);
-	
+		std::string deleteRedundantSlash(std::string uri);
+
+		void	handleGetMethod();
 	
 	private:
 		NetworkClient&	_client;
@@ -47,6 +48,9 @@ class HttpResponse {
 		std::map<std::string, std::string> _headers;
 		std::string _filePath;
 		std::string _buffer;
+
+
+		bool	_isSupportedMethod();
 };
 
 class HttpException : public std::exception {

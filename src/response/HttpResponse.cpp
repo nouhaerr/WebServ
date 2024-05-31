@@ -38,8 +38,21 @@ void	HttpResponse::generateResponse(HttpRequest &req) {
 		buildResponse(505);
 		return ;
 	}
-	else if (_errCode == 501) {
+	if (_errCode == 501) {
 		buildResponse(501);
+		return ;
+	}
+	if (_errCode == 404 || _errCode == 414) {
+		buildResponse(_errCode);
+		return ;
+	}
+	if (!_redirection.empty()) {
+		std::string header = createResponseHeader(301, "text/html");
+    	_client.setResponseHeader(header);
+		return;
+	}
+	if (req.getMethod() == "GET") {
+	 	handleGetMethod();
 		return ;
 	}
 	return ;
@@ -72,6 +85,9 @@ void	HttpResponse::findStatusCode(int code) {
         case 413:
             _statusCode = "413 Payload Too Large\r\n";
             break;
+		case 414:
+			_statusCode = "414 URI Too Long\r\n";
+			break;
         case 500:
             _statusCode = "500 Internal Server Error\r\n";
             break;
@@ -111,12 +127,11 @@ std::string HttpResponse::generateDate()
 std::string	HttpResponse::createResponseHeader(int errCode, std::string contentType) {
 	std::string	respHeader;
 
-	findStatusCode(errCode);
 	_headers["server"] = "Webserv/1.0";
-		if (!_redirection.empty()) {
-			_headers["Location"] = _redirection;
-			_errCode = 301;
-		}
+	if (!_redirection.empty()) {
+		_headers["Location"] = _redirection;
+		_errCode = 301;
+	}
 	_headers["Content-Length"] = getContentLength();
 	// std::cout << getContentLength() << "\n";
 	_headers["Content-Type"] = contentType;
@@ -124,6 +139,7 @@ std::string	HttpResponse::createResponseHeader(int errCode, std::string contentT
 	// _headers["Content-Type"] = getContentType(_filePath);
 	std::stringstream ss;
 
+	findStatusCode(errCode);
     if (_errCode == 0)
         findStatusCode(0);	
     ss << "HTTP/1.1 " << _statusCode;
