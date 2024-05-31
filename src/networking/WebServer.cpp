@@ -226,6 +226,10 @@ void WebServer::processClientRequests(NetworkClient& client)
     closeClient(client);
 }
 
+int WebServer::sendResponseBody(NetworkClient &client) {
+    return send(client.fetchConnectionSocket(), client.getResponseBody().c_str(), client.getResponseBody().length(), 0);
+}
+
 void WebServer::sendResponse(HttpRequest &req, NetworkClient &client) {
     HttpResponse resp(client);
 
@@ -234,35 +238,28 @@ void WebServer::sendResponse(HttpRequest &req, NetworkClient &client) {
         client.setResponse(client.getResponseHeader());
 		client.setHeaderSent(true);
     }
-    int result = send(client.fetchConnectionSocket(), client.getResponse().c_str(), client.getResponse().length(), 0);
-    if (result <= 0)
-		closeClient(client);
     else if (client.getHeaderSent() == true)
     {
         std::cout << "Body: " << client.getResponseBody() << "\n";
-		if (client.getResponseBody().length() > 0)
-		{
-			char buffer[1024];
-			if (client.getOpenFile() == false)
-			{
-				client._file.open(client.getResponseBody().c_str(), std::ios::in | std::ios::binary);
-				client.setOpenFile(true);
-			}
-			if (client._file.good())
-			{
-				client._file.read(buffer, 1024);
-				client.bytes_read = client._file.gcount();
-				client.setResponse(std::string(buffer, client.bytes_read));
-			}
-			else
-			{
-				int ss =send(client.fetchConnectionSocket(), client.getResponseBody().c_str(), client.getResponseBody().length(), 0);
-				 
-                if (ss < 0 || ss == (int)client.getResponseBody().length())
-					closeClient(client);
+        char buffer[1024];
+		if (!client.getOpenFile()) 
+			client.openFileForReading();
+
+		if (client.isFileOpen()) {
+			client.readFromFile(buffer, 1024);
+			if (client.bytesRead() > 0) {
+				client.setResponse(std::string(buffer, client.bytesRead()));
+			} else {
+				closeClient(client);
 				return;
 			}
-		}
+		} else {
+			int bytesSent = sendResponseBody(client);
+			if (bytesSent <= 0 || bytesSent == client.getResponseBody().length()) {
+				closeClient(client);
+				return;
+			}
+		} 
     }
     std::cout << client.getHeaderSent() << "\n";
     std::cout << client.getResponse() << "\n";

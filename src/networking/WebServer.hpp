@@ -40,5 +40,6 @@ private:
 
     std::string generateResponse(const ConfigServer& server);
     void sendResponse(HttpRequest &req, NetworkClient &client);
+    int sendResponseBody(NetworkClient &client);
 };
 #endif

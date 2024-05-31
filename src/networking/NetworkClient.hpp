@@ -51,6 +51,10 @@ public:
     bool        getHeaderSent();
     std::string getResponse();
     bool        getOpenFile();
+    void openFileForReading();
+    bool isFileOpen() const;
+    void readFromFile(char* buffer, std::streamsize bufferSize);
+    std::streamsize bytesRead() const;
     std::ifstream _file;
     int			bytes_read;
 

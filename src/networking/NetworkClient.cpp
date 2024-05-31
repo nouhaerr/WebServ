@@ -193,3 +193,22 @@ void    NetworkClient::setOpenFile(bool value) {
 bool    NetworkClient::getOpenFile() {
     return this->_openFile;
 }
+
+
+void NetworkClient::openFileForReading() {
+    _file.open(getResponseBody().c_str(), std::ios::in | std::ios::binary);
+    setOpenFile(_file.is_open());
+}
+
+bool NetworkClient::isFileOpen() const {
+    return _file.is_open();
+}
+
+void NetworkClient::readFromFile(char* buffer, std::streamsize bufferSize) {
+    _file.read(buffer, bufferSize);
+    bytes_read = _file.gcount();
+}
+
+std::streamsize NetworkClient::bytesRead() const {
+    return this->bytes_read;
+}
