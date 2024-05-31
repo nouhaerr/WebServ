@@ -45,10 +45,14 @@ public:
     void    setResponseBody(std::string body);
     void    setHeaderSent(bool value);
     void    setResponse(std::string response);
+    void    setOpenFile(bool value);
     std::string getResponseHeader();
     std::string getResponseBody();
     bool        getHeaderSent();
     std::string getResponse();
+    bool        getOpenFile();
+    std::ifstream _file;
+    int			bytes_read;
 
 private:
     int serverSocketId;
@@ -62,6 +66,7 @@ private:
     bool headerDispatched;
     bool fileAccessed;
     bool    _headersSent;
+    bool    _openFile;
     std::string _response;
 };
 

@@ -4,7 +4,9 @@
 NetworkClient::NetworkClient()
   : serverSocketId(-1), connectionSocketId(-1), clientAddressSize(0),
     headerDispatched(false), fileAccessed(false) ,
-    _headersSent(false) {
+    _headersSent(false),
+    _openFile(false),
+    _response("") {
     std::memset(&clientDetails, 0, sizeof(clientDetails));
 }
 
@@ -14,7 +16,9 @@ NetworkClient::NetworkClient(int socketDescriptor, int serverSocket)
     clientAddressSize(0),
     headerDispatched(false),
     fileAccessed(false),
-    _headersSent(false) {
+    _headersSent(false),
+    _openFile(false),
+    _response("") {
     std::memset(&clientDetails, 0, sizeof(clientDetails));
 }
 
@@ -24,7 +28,9 @@ NetworkClient::NetworkClient(const NetworkClient& source)
     responseHeader(source.responseHeader), responseBody(source.responseBody),
     fullResponse(source.fullResponse), headerDispatched(source.headerDispatched),
     fileAccessed(source.fileAccessed),
-    _headersSent(source._headersSent) {
+    _headersSent(source._headersSent),
+    _openFile(source._openFile),
+    _response(source._response) {
 }
 
 bool operator==(const NetworkClient& lhs, const NetworkClient& rhs) 
@@ -49,6 +55,8 @@ NetworkClient& NetworkClient::operator=(const NetworkClient& source)
         headerDispatched = source.headerDispatched;
         fileAccessed = source.fileAccessed;
         _headersSent = source._headersSent;
+        _openFile = source._openFile;
+        _response = source._response;
     }
     return *this;
 }
@@ -173,6 +181,15 @@ void NetworkClient::setHeaderSent(bool value) {
 std::string NetworkClient::getResponse() {
     return this->_response;
 }
+
 void NetworkClient::setResponse(std::string response) {
     this->_response = response;
+}
+
+void    NetworkClient::setOpenFile(bool value) {
+    this->_openFile = value;
+}
+
+bool    NetworkClient::getOpenFile() {
+    return this->_openFile;
 }

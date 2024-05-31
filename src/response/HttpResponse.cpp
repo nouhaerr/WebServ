@@ -18,12 +18,31 @@ HttpResponse::~HttpResponse(){}
 void	HttpResponse::locateErrorPage(int errCode) {
 	for (std::map<int, std::string>::iterator it = _errorPage.begin(); it != _errorPage.end(); it++) {
 		if (it->first == errCode) {
-			_errorPath = it->second;
+			_errorPath = _root + it->second;
+			_errorPath = deleteRedundantSlash(_errorPath);
 			std::cout << _errorPath << "\n";
 			return ;
 		}
 	}
 	_errorPath = "";
+}
+
+void	HttpResponse::generateResponse(HttpRequest &req) {
+	_errCode = req.getErrorCode();
+	if (getRequestedResource(req).empty()) {
+		buildResponse(404);
+		return;
+	}
+	checkHttpVersion(req);
+	if (_errCode == 505) {
+		buildResponse(505);
+		return ;
+	}
+	else if (_errCode == 501) {
+		buildResponse(501);
+		return ;
+	}
+	return ;
 }
 
 void	HttpResponse::findStatusCode(int code) {
@@ -72,7 +91,7 @@ std::string	HttpResponse::getContentLength() {
 	struct stat fileStat;
     if (stat(_errorPath.c_str(), &fileStat) == 0) 
     {
-		// std::cout << "exist\n";
+		std::cout << "exist\n";
         std::ostringstream oss;
         oss << fileStat.st_size;
         return oss.str();
@@ -89,41 +108,38 @@ std::string HttpResponse::generateDate()
     return (std::string(date_buffer));
 }
 
-void	HttpResponse::initHeader() {
-	_headers["server"] = "Webserv/1.0";
-	if (!_redirection.empty()) {
-		_headers["Location"] = _redirection;
-		_errCode = 301;
-	}
-	_headers["Content-Length"] = getContentLength();
-	_headers["Date"] = generateDate();
-	// _headers["Content-Type"] = getContentType(_filePath);
-}
-
 std::string	HttpResponse::createResponseHeader(int errCode, std::string contentType) {
 	std::string	respHeader;
 
 	findStatusCode(errCode);
+	_headers["server"] = "Webserv/1.0";
+		if (!_redirection.empty()) {
+			_headers["Location"] = _redirection;
+			_errCode = 301;
+		}
+	_headers["Content-Length"] = getContentLength();
+	// std::cout << getContentLength() << "\n";
+	_headers["Content-Type"] = contentType;
+	_headers["Date"] = generateDate();
+	// _headers["Content-Type"] = getContentType(_filePath);
 	std::stringstream ss;
-    
-        if (_errCode == 0)
-            findStatusCode(0);
-        ss << "HTTP/1.1 " << _statusCode;
-		_headers["Content-Type"] = contentType;
-        for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); it++)
-        {
-            ss << it->first << ": " << it->second << "\r\n";
-        }
-        ss << "\r\n";
-        _buffer = ss.str();
-		return _buffer;
+
+    if (_errCode == 0)
+        findStatusCode(0);	
+    ss << "HTTP/1.1 " << _statusCode;
+    for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); it++)
+	{
+		ss << it->first << ": " << it->second << "\r\n";
+	}
+	ss << "\r\n";
+	_buffer = ss.str();
+	return _buffer;
 }
 
 void	HttpResponse::buildResponse(int errCode) {
 	_errCode = errCode;
 	std::string statusCodeStr = toString(_errCode);
     locateErrorPage(_errCode);
-    initHeader();
     std::string header = createResponseHeader(_errCode, "text/html");
 
     _client.setResponseHeader(header);
@@ -138,25 +154,31 @@ void	HttpResponse::checkHttpVersion(HttpRequest &req) {
 	}
 }
 
-void	HttpResponse::generateResponse(HttpRequest &req) {
-	getRequestedResource(req);
-	_errCode = req.getErrorCode();
-	checkHttpVersion(req);
-	if (_errCode == 505) {
-		buildResponse(505);
-		return ;
-	}
-	else if (_errCode == 501) {
-		buildResponse(501);
-		return ;
-	}
-	return ;
+std::string HttpResponse::deleteRedundantSlash(std::string uri)
+{
+    std::string cleanedURI;
+    bool previousCharWasSlash = false;
+
+    for (std::string::iterator it = uri.begin(); it != uri.end(); ++it)
+    {
+        char c = *it;
+
+        if (c != '/') {
+            cleanedURI.push_back(c);
+            previousCharWasSlash = false;
+        }
+        else if (!previousCharWasSlash) {
+            cleanedURI.push_back(c);
+            previousCharWasSlash = true;
+        }
+    }
+    return cleanedURI;
 }
 
-void	HttpResponse::getRequestedResource(HttpRequest &req) {
+std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
 	_uri = req.getUri();
 	_locations = _serv.getLocation();
-	size_t longest_match_index = _locations.size(); // Initialize to an invalid index
+	size_t match_index = _locations.size(); // Initialize to an invalid index
 	std::string	location;
 
 	for (size_t i = 0; i < _locations.size(); ++i) {
@@ -173,27 +195,15 @@ void	HttpResponse::getRequestedResource(HttpRequest &req) {
             }
             if (locationName.size() > location.size()) {
                 location = locationName;
-			std::cout << "locationName: "<< locationName << "\n";
-                longest_match_index = i;
+                match_index = i;
             }
         }
     }
 
-	for (size_t i = 0; i < _locations.size(); ++i) {
-		if (_locations[i].getLocationName() == location) {
-			_autoindex = _locations[i].getAutoIndex();
-			_root = _locations[i].getRoot();
-			_errorPage = _locations[i].getErrorPage();
-			_indexes = _locations[i].getIndex();
-			if (_locations[i].getRedirect() == true)
-				_redirection = _locations[i].getRedirection();
-		}
-	}
-
-    if (longest_match_index == _locations.size() || _serv.getLocation()[longest_match_index].getRoot().empty()) {
+    if (match_index == _locations.size() || _serv.getLocation()[match_index].getRoot().empty()) {
         req.getUri() = "";
     } else {
-        const std::string& root = _serv.getLocation()[longest_match_index].getRoot();
+        const std::string& root = _serv.getLocation()[match_index].getRoot();
         size_t root_pos = _uri.find(root);
         if (root_pos != std::string::npos) {
             req.getUri() = _uri;
@@ -202,6 +212,15 @@ void	HttpResponse::getRequestedResource(HttpRequest &req) {
         }
     }
 
-    // req.getUri() = Clean_URI(req.getUri());
-    // return req.getUri();
+		if (_locations[match_index].getLocationName() == location) {
+			_autoindex = _locations[match_index].getAutoIndex();
+			_root = _locations[match_index].getRoot();
+			_errorPage = _locations[match_index].getErrorPage();
+			_indexes = _locations[match_index].getIndex();
+			if (_locations[match_index].getRedirect() == true)
+				_redirection = _locations[match_index].getRedirection();
+		}
+    req.getUri() = deleteRedundantSlash(req.getUri());
+	std::cout << "uri: "<< req.getUri() << "\n";
+    return req.getUri();
 }

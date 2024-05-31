@@ -21,9 +21,9 @@ class HttpResponse {
 		std::string	createResponseHeader(int errCode, std::string contentType);
 		void	findStatusCode(int code);
 		void	initHeader();
-		void	getRequestedResource(HttpRequest &req);
+		std::string	getRequestedResource(HttpRequest &req);
 		std::string generateDate();
-	
+	std::string deleteRedundantSlash(std::string uri);
 	
 	
 	private:

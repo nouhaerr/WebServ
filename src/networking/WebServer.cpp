@@ -84,7 +84,7 @@ void WebServer::run()
                 else 
                 {
                     NetworkClient* client = findClientBySocket(i);
-                    if (client != NULL) 
+                    if (client != NULL)
                     {
                         if (!client->isResponsePrepared()) 
                             processClientRequests(*client); 
@@ -213,9 +213,9 @@ void WebServer::processClientRequests(NetworkClient& client)
         const ConfigServer& clientServer = matchServerByName(hostHeader);
         client.setServer(clientServer);
         //RESPONSE
-        // sendResponse(request, client);
-        std::string response = generateResponse(clientServer);
-        send(client.fetchConnectionSocket(), response.c_str(), response.size(), 0);
+        sendResponse(request, client);
+        // std::string response = generateResponse(clientServer);
+        // send(client.fetchConnectionSocket(), response.c_str(), response.size(), 0);
     }
     else 
     {
@@ -234,7 +234,41 @@ void WebServer::sendResponse(HttpRequest &req, NetworkClient &client) {
         client.setResponse(client.getResponseHeader());
 		client.setHeaderSent(true);
     }
-    send(client.fetchConnectionSocket(), client.getResponse().c_str(), client.getResponse().length(), 0);
+    int result = send(client.fetchConnectionSocket(), client.getResponse().c_str(), client.getResponse().length(), 0);
+    if (result <= 0)
+		closeClient(client);
+    // else if (client.getHeaderSent() == true)
+    // {
+        std::cout << "Body: " << client.getResponseBody() << "\n";
+		if (client.getResponseBody().length() > 0)
+		{
+			char buffer[1024];
+			if (client.getOpenFile() == false)
+			{
+				client._file.open(client.getResponseBody().c_str(), std::ios::in | std::ios::binary);
+				client.setOpenFile(true);
+			}
+			if (client._file.good())
+			{
+				client._file.read(buffer, 1024);
+				client.bytes_read = client._file.gcount();
+				client.setResponse(std::string(buffer, client.bytes_read));
+			}
+			else
+			{
+				int ss =send(client.fetchConnectionSocket(), client.getResponseBody().c_str(), client.getResponseBody().length(), 0);
+				 
+                if (ss < 0 || ss == (int)client.getResponseBody().length())
+					closeClient(client);
+				return;
+			}
+		// }
+    }
+    std::cout << client.getHeaderSent() << "\n";
+    std::cout << client.getResponse() << "\n";
+    int res = send(client.fetchConnectionSocket(), client.getResponse().c_str(), client.getResponse().length(), 0);
+    if (res <= 0)
+		closeClient(client);
 }
 
 void WebServer::sendDataToClient(NetworkClient& client) 
