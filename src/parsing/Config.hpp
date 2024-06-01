@@ -23,9 +23,10 @@ class Config {
 		Config(const Config &other);
 		Config& operator=(const Config &other);
 		~Config();
+
 		void						parse();
 		ConfigServer				parseServerConfig(std::vector<t_tokens>::iterator& it);
-		std::vector<ConfigServer>	&get_servers();
+		const std::vector<ConfigServer>	&getServers() const;
 
 		class	ParseServerException: public std::exception{
 			std::string message;
@@ -37,13 +38,13 @@ class Config {
 			}
 			~ParseServerException() throw(){};
 		};
+
 	private:
 		size_t		_serverCount;
 		const char* _fileName;
 		typedef std::vector<t_tokens>	tokenVector;
 		tokenVector	_tokens;
         std::vector<ConfigServer>  _servers;
-       
 };
 
 #endif

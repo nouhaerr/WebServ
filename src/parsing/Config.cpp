@@ -19,7 +19,6 @@ Config::Config(const Config &other) {
 Config&	Config::operator=(const Config &other) {
 	if (this != &other) {
 		this->_fileName = other._fileName;
-
 		this->_serverCount = other._serverCount;
 		this->_servers = other._servers;
 		this->_tokens = other._tokens;
@@ -29,7 +28,7 @@ Config&	Config::operator=(const Config &other) {
 
 Config::~Config() {}
 
-std::vector<ConfigServer> Config::getServers() const {
+const std::vector<ConfigServer>	&Config::getServers() const{
     return this->_servers;
 }
 
@@ -97,10 +96,10 @@ ConfigServer Config::parseServerConfig(std::vector<t_tokens>::iterator& it) {
 	else if (aut > 1)
 		throw ParseServerException("Error: Must set one autoindex parametre.(Duplicate)");
 	else if ((rt == 1 && ind != 1) || ind > 1)
-		throw ParseServerException("Error: Should have one index parametre.(Duplicate)");
+		throw ParseServerException("Error: Should have one index parametre.(Duplicate)...");
 	else if (err > 1)
 		throw ParseServerException("Error: Must set one error_page parametre.(Duplicate)");
-	std::cout << "end of server\n";
+	// std::cout << "end of server\n";
 	if (it->_type != "}")
 		throw ParseServerException("Error: expected '}' in the end of server directive.");
 	return (server);
@@ -114,9 +113,10 @@ void	Config::parse()
 	try {
 		this->_tokens = ParseFile::readFile(this->_fileName);
 		std::vector<t_tokens>::iterator it = _tokens.begin();
-
-		while (it != this->_tokens.end()) {
-			if (it->_type.empty()) {
+		while (it != this->_tokens.end()) 
+		{
+			if (it->_type.empty()) 
+			{
 				it++;
 				continue;
 			}
@@ -145,9 +145,8 @@ void	Config::parse()
 		// std::cout << "Host: " << _servers[0].getHost() << ", Port: " << _servers[0].getPort() 
 		// << ", ServerName: " << _servers[0].getServerName()
 		// << ", BodySize: " << _servers[0].getMaxBodySize() << std::endl;
-		for (std::vector<t_tokens>::iterator it =_tokens.begin(); it != this->_tokens.end(); ++it) {
-			std::cout << "type: " << it->_type << ", Value: " << it->_value << std::endl;
-        }
+		// for (std::vector<t_tokens>::iterator it =_tokens.begin(); it != this->_tokens.end(); ++it) 
+		// 	std::cout << "type: " << it->_type << ", Value: " << it->_value << std::endl;
 	} catch(const std::exception &e) {
 		std::cout << e.what() << std::endl;
 		exit(1);

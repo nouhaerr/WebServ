@@ -33,6 +33,14 @@ ConfigServer&	ConfigServer::operator=(const ConfigServer &src) {
 
 ConfigServer::~ConfigServer() {}
 
+int	ConfigServer::getSocket() const {
+    return this->socketFD;
+}
+
+void	ConfigServer::setSocket(int sock) {
+	this->socketFD = sock;
+}
+
 void	ConfigServer::setListen(std::string& listen) {
 	int	count = 0;
 	std::size_t	pos = listen.find(':');
@@ -100,8 +108,8 @@ void	ConfigServer::setLocation(std::vector<t_tokens> &tok, std::vector<t_tokens>
 	this->_location.push_back(parseLocation(tok, it));
 }
 
-std::vector<ConfigLocation> &ConfigServer::getLocation() {
-	return (this->_location);
+std::vector<ConfigLocation>	&ConfigServer::getLocation() {
+	return this->_location;
 }
 
 void	ConfigServer::setAutoIndex(std::string& autoindex) {	
@@ -126,6 +134,16 @@ void	ConfigServer::setRoot(std::string& root) {
 std::string	&ConfigServer::getRoot() {
 	return this->_root;
 }
+void	ConfigServer::setIndex(std::string &index) {
+	if (index.empty())
+		throw ConfigServerException("Error: Empty index!");
+	this->_index = splitVal(index);
+}
+
+std::vector<std::string>	&ConfigServer::getIndex() {
+	return this->_index;
+}
+
 void	ConfigServer::setIndex(std::string &index) {
 	if (index.empty())
 		throw ConfigServerException("Error: Empty index!");

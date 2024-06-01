@@ -8,6 +8,7 @@
 #include "Config.hpp"
 #include "ConfigLocation.hpp"
 
+
 class Config;
 class ConfigLocation;
 class	ConfigServer {
@@ -37,18 +38,11 @@ class	ConfigServer {
 		void	setLocation(std::vector<t_tokens> &tok, std::vector<t_tokens>::iterator& it);
 		void	setAutoIndex(std::string& autoindex);
 		void	setRoot(std::string& root);
-  	void	setIndex(std::string &index);
+		void	setIndex(std::string &index);
 		void	setErrorPage(std::string& errorPage);
 
-		int getSocket() const 
-		{
-        	return socketFD;
-    	}
-
-		void setSocket(int sock) 
-		{
-			socketFD = sock;
-		}
+		int		getSocket() const;
+		void	setSocket(int sock);
 
 		class	ConfigServerException: public std::exception{
 			std::string message;
