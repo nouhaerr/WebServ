@@ -1,7 +1,11 @@
 #include "Config.hpp"
 #include "ParseFile.hpp"
 
-Config::Config() {}
+
+Config::Config() :
+	_serverCount(0),
+	_fileName(DEFAULT_CONFIG)
+{}
 
 Config::Config(const char *fileName) :
 	_serverCount(0),
@@ -15,6 +19,10 @@ Config::Config(const Config &other) {
 Config&	Config::operator=(const Config &other) {
 	if (this != &other) {
 		this->_fileName = other._fileName;
+
+		this->_serverCount = other._serverCount;
+		this->_servers = other._servers;
+		this->_tokens = other._tokens;
 	}
 	return *this;
 }
@@ -29,7 +37,7 @@ ConfigServer Config::parseServerConfig(std::vector<t_tokens>::iterator& it) {
 
 	++it;
 	int lis = 0, serv = 0, rt = 0, bd = 0;
-	int	loc = 0, aut = 0, err = 0;
+	int	loc = 0, aut = 0, ind = 0, err = 0;
 	ConfigServer	server;
     // Parse server configuration settings
 	while (it != this->_tokens.end() && it->_type != "}") {
@@ -60,6 +68,10 @@ ConfigServer Config::parseServerConfig(std::vector<t_tokens>::iterator& it) {
 			server.setRoot(it->_value);
 			rt++;
 		}
+		else if (it->_type == "index") {
+			server.setIndex(it->_value);
+			ind++;
+		}
 		else if (it->_type == "error_page") {
 			server.setErrorPage(it->_value);
 			err++;
@@ -84,6 +96,8 @@ ConfigServer Config::parseServerConfig(std::vector<t_tokens>::iterator& it) {
 		throw ParseServerException("Error: Must have one body_size parametre.(Duplicate)");
 	else if (aut > 1)
 		throw ParseServerException("Error: Must set one autoindex parametre.(Duplicate)");
+	else if ((rt == 1 && ind != 1) || ind > 1)
+		throw ParseServerException("Error: Should have one index parametre.(Duplicate)");
 	else if (err > 1)
 		throw ParseServerException("Error: Must set one error_page parametre.(Duplicate)");
 	std::cout << "end of server\n";
@@ -91,16 +105,18 @@ ConfigServer Config::parseServerConfig(std::vector<t_tokens>::iterator& it) {
 		throw ParseServerException("Error: expected '}' in the end of server directive.");
 	return (server);
 }
+std::vector<ConfigServer>	&Config::get_servers() {
+	return this->_servers;
+}
 
 void	Config::parse()
 {
 	try {
 		this->_tokens = ParseFile::readFile(this->_fileName);
 		std::vector<t_tokens>::iterator it = _tokens.begin();
-		while (it != this->_tokens.end()) 
-		{
-			if (it->_type.empty()) 
-			{
+
+		while (it != this->_tokens.end()) {
+			if (it->_type.empty()) {
 				it++;
 				continue;
 			}
@@ -129,8 +145,9 @@ void	Config::parse()
 		// std::cout << "Host: " << _servers[0].getHost() << ", Port: " << _servers[0].getPort() 
 		// << ", ServerName: " << _servers[0].getServerName()
 		// << ", BodySize: " << _servers[0].getMaxBodySize() << std::endl;
-		for (std::vector<t_tokens>::iterator it =_tokens.begin(); it != this->_tokens.end(); ++it) 
+		for (std::vector<t_tokens>::iterator it =_tokens.begin(); it != this->_tokens.end(); ++it) {
 			std::cout << "type: " << it->_type << ", Value: " << it->_value << std::endl;
+        }
 	} catch(const std::exception &e) {
 		std::cout << e.what() << std::endl;
 		exit(1);

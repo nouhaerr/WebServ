@@ -2,15 +2,16 @@ CPP = c++
 
 FLAGS = -Wall -Wextra -Werror -fsanitize=address -g3 #-std=c++98
 
-SRC = networking/main.cpp \
-	src/parsing/Config.cpp src/parsing/ParseFile.cpp\
-	src/parsing/ConfigServer.cpp src/parsing/utils.cpp\
-	src/parsing/ConfigLocation.cpp networking/WebServer.cpp  networking/NetworkClient.cpp networking/HttpRequest.cpp  networking/HttpRequestParser.cpp\
+SRC =	src/main.cpp src/networking/main.cpp \
+		src/parsing/Config.cpp src/parsing/ParseFile.cpp\
+		src/parsing/ConfigServer.cpp src/parsing/utils.cpp\
+		src/parsing/ConfigLocation.cpp \
+		src/networking/WebServer.cpp src/networking/NetworkClient.cpp \
+		src/networking/HttpRequest.cpp\
 
 OBJS = $(SRC:.cpp=.o)
 
 NAME = webserv
-
 
 $(NAME) : $(OBJS)
 	@$(CPP) $(FLAGS) $(OBJS) -o $(NAME)
