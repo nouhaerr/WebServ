@@ -12,6 +12,7 @@
 #include <arpa/inet.h>
 #include <cctype>
 #include "../response/HttpResponse.hpp"
+#include <sys/sendfile.h>
 
 class NetworkClient;
 
