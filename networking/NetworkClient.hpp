@@ -3,7 +3,9 @@
 
 #include <string>
 #include <netinet/in.h>
-#include "../parsing/ConfigServer.hpp"
+#include "../src/parsing/ConfigServer.hpp"
+
+
 
 class NetworkClient {
 public:
@@ -40,24 +42,6 @@ public:
     const ConfigServer& getConfigServer() const;
 
     ConfigServer& getServer();
-
-    void	setResponseHeader(std::string respHeader);
-    void    setResponseBody(std::string body);
-    void    setHeaderSent(bool value);
-    void    setResponse(std::string response);
-    void    setOpenFile(bool value);
-    std::string getResponseHeader();
-    std::string getResponseBody();
-    bool        getHeaderSent();
-    std::string getResponse();
-    bool        getOpenFile();
-    void openFileForReading();
-    bool isFileOpen() const;
-    void readFromFile(char* buffer, std::streamsize bufferSize);
-    std::streamsize bytesRead() const;
-    std::ifstream _file;
-    int			bytes_read;
-
 private:
     int serverSocketId;
     int connectionSocketId;
@@ -69,9 +53,7 @@ private:
     std::string fullResponse;
     bool headerDispatched;
     bool fileAccessed;
-    bool    _headersSent;
-    bool    _openFile;
-    std::string _response;
 };
 
 #endif
+

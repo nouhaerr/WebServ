@@ -134,6 +134,15 @@ void	ConfigServer::setRoot(std::string& root) {
 std::string	&ConfigServer::getRoot() {
 	return this->_root;
 }
+void	ConfigServer::setIndex(std::string &index) {
+	if (index.empty())
+		throw ConfigServerException("Error: Empty index!");
+	this->_index = splitVal(index);
+}
+
+std::vector<std::string>	&ConfigServer::getIndex() {
+	return this->_index;
+}
 
 void	ConfigServer::setIndex(std::string &index) {
 	if (index.empty())

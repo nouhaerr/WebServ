@@ -17,7 +17,6 @@ OBJS = $(SRC:.cpp=.o)
 
 NAME = webserv
 
-
 $(NAME) : $(OBJS)
 	@$(CPP) $(FLAGS) $(OBJS) -o $(NAME)
 	@echo "\033[0;32m- Webserver is ready ^^ \033[0m"

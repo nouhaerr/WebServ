@@ -1,7 +1,11 @@
 #include "Config.hpp"
 #include "ParseFile.hpp"
 
-Config::Config() {}
+
+Config::Config() :
+	_serverCount(0),
+	_fileName(DEFAULT_CONFIG)
+{}
 
 Config::Config(const char *fileName) :
 	_serverCount(0),
@@ -15,7 +19,9 @@ Config::Config(const Config &other) {
 Config&	Config::operator=(const Config &other) {
 	if (this != &other) {
 		this->_fileName = other._fileName;
+		this->_serverCount = other._serverCount;
 		this->_servers = other._servers;
+		this->_tokens = other._tokens;
 	}
 	return *this;
 }
@@ -97,6 +103,9 @@ ConfigServer Config::parseServerConfig(std::vector<t_tokens>::iterator& it) {
 	if (it->_type != "}")
 		throw ParseServerException("Error: expected '}' in the end of server directive.");
 	return (server);
+}
+std::vector<ConfigServer>	&Config::get_servers() {
+	return this->_servers;
 }
 
 void	Config::parse()
