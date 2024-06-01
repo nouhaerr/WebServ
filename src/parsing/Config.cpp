@@ -1,6 +1,7 @@
 #include "Config.hpp"
 #include "ParseFile.hpp"
 
+
 Config::Config() :
 	_serverCount(0),
 	_fileName(DEFAULT_CONFIG)
@@ -18,6 +19,7 @@ Config::Config(const Config &other) {
 Config&	Config::operator=(const Config &other) {
 	if (this != &other) {
 		this->_fileName = other._fileName;
+
 		this->_serverCount = other._serverCount;
 		this->_servers = other._servers;
 		this->_tokens = other._tokens;
@@ -26,6 +28,10 @@ Config&	Config::operator=(const Config &other) {
 }
 
 Config::~Config() {}
+
+std::vector<ConfigServer> Config::getServers() const {
+    return this->_servers;
+}
 
 ConfigServer Config::parseServerConfig(std::vector<t_tokens>::iterator& it) {
 
@@ -99,7 +105,6 @@ ConfigServer Config::parseServerConfig(std::vector<t_tokens>::iterator& it) {
 		throw ParseServerException("Error: expected '}' in the end of server directive.");
 	return (server);
 }
-
 std::vector<ConfigServer>	&Config::get_servers() {
 	return this->_servers;
 }
@@ -109,6 +114,7 @@ void	Config::parse()
 	try {
 		this->_tokens = ParseFile::readFile(this->_fileName);
 		std::vector<t_tokens>::iterator it = _tokens.begin();
+
 		while (it != this->_tokens.end()) {
 			if (it->_type.empty()) {
 				it++;
@@ -123,9 +129,12 @@ void	Config::parse()
 		this->_serverCount = this->_servers.size();
 		if (this->_serverCount == 0)
 			throw ParseServerException("Error: Must have at least one server.");
-		while (this->_serverCount > 1) {
-			for (size_t i = 0; i < this->_serverCount - 1; i++) {
-				for (size_t j = i + 1; j < this->_serverCount; j++) {
+		while (this->_serverCount > 1) 
+		{
+			for (size_t i = 0; i < this->_serverCount - 1; i++) 
+			{
+				for (size_t j = i + 1; j < this->_serverCount; j++) 
+				{
 					if (this->_servers[i].getPort() == this->_servers[j].getPort()
 						&& this->_servers[i].getServerName() == this->_servers[j].getServerName())
 						throw ParseServerException("Error: Same Server.");

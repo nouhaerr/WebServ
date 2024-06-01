@@ -37,8 +37,18 @@ class	ConfigServer {
 		void	setLocation(std::vector<t_tokens> &tok, std::vector<t_tokens>::iterator& it);
 		void	setAutoIndex(std::string& autoindex);
 		void	setRoot(std::string& root);
-		void	setIndex(std::string &index);
+  	void	setIndex(std::string &index);
 		void	setErrorPage(std::string& errorPage);
+
+		int getSocket() const 
+		{
+        	return socketFD;
+    	}
+
+		void setSocket(int sock) 
+		{
+			socketFD = sock;
+		}
 
 		class	ConfigServerException: public std::exception{
 			std::string message;
@@ -61,6 +71,8 @@ class	ConfigServer {
 		std::string					_root;
 		std::vector<std::string>	_index;
 		std::map<int, std::string>	_errorPage;
+		int _socket;
+		int socketFD;
 };
 
 bool						isValidIPAddress(const std::string& ip);
