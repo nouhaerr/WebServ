@@ -29,6 +29,7 @@ void	HttpResponse::locateErrorPage(int errCode) {
 
 void	HttpResponse::generateResponse(HttpRequest &req) {
 	_errCode = req.getErrorCode();
+	_uri = getRequestedResource(req);
 	if (getRequestedResource(req).empty()) {
 		buildResponse(404);
 		return;
@@ -107,7 +108,8 @@ std::string	HttpResponse::getContentLength() {
 	struct stat fileStat;
     if (stat(_errorPath.c_str(), &fileStat) == 0) 
     {
-		std::cout << "exist\n";
+		_fileSize = fileStat.st_size;
+		std::cout << "file exist of size: " << _fileSize << "\n";
         std::ostringstream oss;
         oss << fileStat.st_size;
         return oss.str();

@@ -212,10 +212,9 @@ void WebServer::processClientRequests(NetworkClient& client)
         hostHeader = trimm(hostHeader);
         const ConfigServer& clientServer = matchServerByName(hostHeader);
         client.setServer(clientServer);
+		client.setRequest(request);
         //RESPONSE
         sendResponse(request, client);
-        // std::string response = generateResponse(clientServer);
-        // send(client.fetchConnectionSocket(), response.c_str(), response.size(), 0);
     }
     else 
     {
@@ -226,56 +225,167 @@ void WebServer::processClientRequests(NetworkClient& client)
     closeClient(client);
 }
 
+// int WebServer::sendResponseBody(NetworkClient &client) {
+//     return send(client.fetchConnectionSocket(), client.getResponseBody().c_str(), client.getResponseBody().length(), 0);
+// }
+
 int WebServer::sendResponseBody(NetworkClient &client) {
-    return send(client.fetchConnectionSocket(), client.getResponseBody().c_str(), client.getResponseBody().length(), 0);
+    std::size_t bytesSent = 0;
+    std::size_t totalBytesSent = 0;
+    const char* responseBody = client.getResponseBody().c_str();
+    std::size_t responseBodyLength = client.getResponseBody().length();
+
+    while (totalBytesSent < responseBodyLength) {
+        bytesSent = send(client.fetchConnectionSocket(), responseBody + totalBytesSent, responseBodyLength - totalBytesSent, 0);
+        if (bytesSent <= 0) {
+            return bytesSent;
+        }
+        totalBytesSent += bytesSent;
+    }
+    return totalBytesSent;
 }
 
 void WebServer::sendResponse(HttpRequest &req, NetworkClient &client) {
     HttpResponse resp(client);
 
     resp.generateResponse(req);
-    if (client.getHeaderSent() == false) {
+    if (!client.getHeaderSent()) {
         client.setResponse(client.getResponseHeader());
-		client.setHeaderSent(true);
+        client.setHeaderSent(true);
     }
-    else if (client.getHeaderSent() == true)
-    {
-        std::cout << "Body: " << client.getResponseBody() << "\n";
+    int result = send(client.fetchConnectionSocket(), client.getResponse().c_str(), client.getResponse().length(), 0);
+    if (result <= 0) {
+        closeClient(client);
+        return;
+    }
+    if (client.getHeaderSent())
+	{
         char buffer[1024];
-		if (!client.getOpenFile()) 
-			client.openFileForReading();
+        if (!client.getOpenFile()) {
+            client.openFileForReading();
+        }
 
-		if (client.isFileOpen()) {
-			client.readFromFile(buffer, 1024);
-			if (client.bytesRead() > 0) {
-				client.setResponse(std::string(buffer, client.bytesRead()));
-			} else {
-				closeClient(client);
-				return;
-			}
-		} else {
-			int bytesSent = sendResponseBody(client);
-			if (bytesSent <= 0 || bytesSent == client.getResponseBody().length()) {
-				closeClient(client);
-				return;
-			}
-		} 
+        if (client.isFileOpen()) {
+            while (client.isFileOpen()) {
+                client.readFromFile(buffer, 1024);
+                std::size_t bytesToRead = static_cast<std::size_t>(client.bytesRead());
+                if (bytesToRead > 0) {
+                    std::size_t totalBytesSent = 0;
+                    std::size_t bytesSent = 0;
+                    while (totalBytesSent < bytesToRead) {
+                        bytesSent = send(client.fetchConnectionSocket(), buffer + totalBytesSent, bytesToRead - totalBytesSent, 0);
+                        if (bytesSent <= 0) {
+                            closeClient(client);
+                            return;
+                        }
+                        totalBytesSent += bytesSent;
+                    }
+                } else {
+                    closeClient(client);
+                    return;
+                }
+            }
+        } else {
+            std::size_t bytesSent = sendResponseBody(client);
+            if (bytesSent <= 0 || bytesSent == client.getResponseBody().length()) {
+                closeClient(client);
+                return;
+            }
+        }
     }
+
     std::cout << client.getHeaderSent() << "\n";
     std::cout << client.getResponse() << "\n";
+
     int res = send(client.fetchConnectionSocket(), client.getResponse().c_str(), client.getResponse().length(), 0);
-    if (res <= 0)
-		closeClient(client);
+    if (res <= 0) {
+        closeClient(client);
+    }
 }
+
+// void WebServer::sendResponse(HttpRequest &req, NetworkClient &client) {
+//     HttpResponse resp(client);
+
+//     resp.generateResponse(req);
+//     if (client.getHeaderSent() == false) {
+//         client.setResponse(client.getResponseHeader());
+// 		client.setHeaderSent(true);
+//     }
+// 	// int result = send(client.fetchConnectionSocket(), client.getResponse().c_str(), client.getResponse().length(), 0);
+//     // if (result <= 0)
+// 	// 	closeClient(client);
+//     if (client.getHeaderSent() == true)
+//     {
+// 	std::cout << "Body: " << client.getResponseBody() << "\n";
+//         char buffer[1024];
+// 		if (!client.getOpenFile()) 
+// 			client.openFileForReading();
+
+// 		if (client.isFileOpen()) {
+// 			client.readFromFile(buffer, 1024);
+// 			if (client.bytesRead() > 0) {
+// 				client.setResponse(std::string(buffer, client.bytesRead()));
+// 			} else {
+// 				closeClient(client);
+// 				return;
+// 			}
+// 		} else {
+// 			std::size_t bytesSent = sendResponseBody(client);
+// 			if (bytesSent <= 0 || bytesSent == client.getResponseBody().length()) {
+// 				closeClient(client);
+// 				return;
+// 			}
+// 		}
+//     }
+//     std::cout << client.getHeaderSent() << "\n";
+//     std::cout << client.getResponse() << "\n";
+//     int res = send(client.fetchConnectionSocket(), client.getResponse().c_str(), client.getResponse().length(), 0);
+//     if (res <= 0)
+// 		closeClient(client);
+// }
 
 void WebServer::sendDataToClient(NetworkClient& client) 
 {
-    if (!client.isResponsePrepared()) 
+    if (!client.isResponsePrepared()) {
         return;
+	}
 
+	// HttpResponse resp(client);
+
+    // resp.generateResponse(client.getRequest());
+    // if (client.getHeaderSent() == false) {
+    //     client.setResponse(client.getResponseHeader());
+	// 	client.setHeaderSent(true);
+    // }
+	//  else if (client.getHeaderSent() == true)
+    // {
+    //     std::cout << "Body: " << client.getResponseBody() << "\n";
+    //     char buffer[1024];
+	// 	if (!client.getOpenFile()) 
+	// 		client.openFileForReading();
+
+	// 	if (client.isFileOpen()) {
+	// 		client.readFromFile(buffer, 1024);
+	// 		if (client.bytesRead() > 0) {
+	// 			client.setResponse(std::string(buffer, client.bytesRead()));
+	// 		} else {
+	// 			closeClient(client);
+	// 			return;
+	// 		}
+	// 	} else {
+	// 		std::size_t bytesSent = sendResponseBody(client);
+	// 		if (bytesSent <= 0 || bytesSent == client.getResponseBody().length()) {
+	// 			closeClient(client);
+	// 			return;
+	// 		}
+	// 	} 
+    // }
+	// std::cout << client.getHeaderSent() << "\n";
+    // std::cout << client.getResponse() << "\n";
     std::string response = client.retrieveResponseContent();
+    // int sentBytes = send(client.fetchConnectionSocket(), client.getResponse().c_str(), client.getResponse().length(), 0);
     int sentBytes = send(client.fetchConnectionSocket(), response.c_str(), response.size(), 0);
-    if (sentBytes < 0)
+	if (sentBytes < 0)
         std::cerr << "Failed to send response." << std::endl;
     closeClient(client);
 }
@@ -320,17 +430,16 @@ const ConfigServer& WebServer::matchServerByName(const std::string& host)
     return serverConfigs[0]; 
 }
 
-std::string WebServer::generateResponse(const ConfigServer& server) 
-{
-    std::string responseContent = "<html><body><h1>Hello, World!</h1><p>This is a simple web server.</p>";
-    responseContent += "<p>Served by: " + server.getServerName() + "</p></body></html>";
+// std::string WebServer::generateResponse(const ConfigServer& server) 
+// {
+//     std::string responseContent = "<html><body><h1>Hello, World!</h1><p>This is a simple web server.</p>";
+//     responseContent += "<p>Served by: " + server.getServerName() + "</p></body></html>";
 
-    std::string response = "HTTP/1.1 200 OK\r\n";
-    response += "Content-Type: text/html; charset=UTF-8\r\n";
-    response += "Content-Length: " + toString(responseContent.size()) + "\r\n";
-    response += "Connection: close\r\n\r\n";
-    response += responseContent;
+//     std::string response = "HTTP/1.1 200 OK\r\n";
+//     response += "Content-Type: text/html; charset=UTF-8\r\n";
+//     response += "Content-Length: " + toString(responseContent.size()) + "\r\n";
+//     response += "Connection: close\r\n\r\n";
+//     response += responseContent;
 
-    return response;
-}
-
+//     return response;
+// }

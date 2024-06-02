@@ -90,7 +90,7 @@ void	HttpRequest::_parseURI() {
 		this->_uri = this->_uri.substr(0, questionMarkPos);
 	}
 	else {
-		this->_uri = this->_uri;
+		// this->_uri = this->_uri;
 		queryString.clear();
 	}
 	if (!this->_uri.find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;="))
