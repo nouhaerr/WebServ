@@ -93,7 +93,7 @@ void	HttpRequest::_parseURI() {
 		// this->_uri = this->_uri;
 		queryString.clear();
 	}
-	if (!this->_uri.find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;="))
+	if (this->_uri.find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=") != std::string::npos)
 		this->_errorCode = 400; //Bad Request
 	if (this->_uri.length() > 2048)
 		this->_errorCode = 414; //414 URI Too Long

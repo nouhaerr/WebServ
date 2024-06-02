@@ -29,7 +29,8 @@ void	HttpResponse::locateErrorPage(int errCode) {
 
 void	HttpResponse::generateResponse(HttpRequest &req) {
 	_errCode = req.getErrorCode();
-	_uri = getRequestedResource(req);
+	// _uri = getRequestedResource(req);
+	std::cout << _errCode << "\n";
 	if (getRequestedResource(req).empty()) {
 		buildResponse(404);
 		return;
@@ -43,7 +44,7 @@ void	HttpResponse::generateResponse(HttpRequest &req) {
 		buildResponse(501);
 		return ;
 	}
-	if (_errCode == 404 || _errCode == 414) {
+	if (_errCode == 400 || _errCode == 414) {
 		buildResponse(_errCode);
 		return ;
 	}

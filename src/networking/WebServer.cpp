@@ -86,8 +86,10 @@ void WebServer::run()
                     NetworkClient* client = findClientBySocket(i);
                     if (client != NULL)
                     {
-                        if (!client->isResponsePrepared()) 
+                        if (!client->isResponsePrepared()) {
+                            // std::cout << "HnNNAAAAAAAAA\n";
                             processClientRequests(*client); 
+                        }
                         else 
                             sendDataToClient(*client);
                     }
@@ -216,7 +218,7 @@ void WebServer::processClientRequests(NetworkClient& client)
         //RESPONSE
         sendResponse(request, client);
     }
-    else 
+    else
     {
         std::cerr << "Host header not found in the request." << std::endl;
         closeClient(client);
@@ -235,6 +237,7 @@ int WebServer::sendResponseBody(NetworkClient &client) {
     const char* responseBody = client.getResponseBody().c_str();
     std::size_t responseBodyLength = client.getResponseBody().length();
 
+    std::cout <<"Response Body: " << client.getResponseBody() << "\n";
     while (totalBytesSent < responseBodyLength) {
         bytesSent = send(client.fetchConnectionSocket(), responseBody + totalBytesSent, responseBodyLength - totalBytesSent, 0);
         if (bytesSent <= 0) {
@@ -253,6 +256,7 @@ void WebServer::sendResponse(HttpRequest &req, NetworkClient &client) {
         client.setResponse(client.getResponseHeader());
         client.setHeaderSent(true);
     }
+    std::cout << client.getResponse() << "\n";
     int result = send(client.fetchConnectionSocket(), client.getResponse().c_str(), client.getResponse().length(), 0);
     if (result <= 0) {
         closeClient(client);
@@ -266,7 +270,8 @@ void WebServer::sendResponse(HttpRequest &req, NetworkClient &client) {
         }
 
         if (client.isFileOpen()) {
-            while (client.isFileOpen()) {
+            while (client.isFileOpen())
+            {
                 client.readFromFile(buffer, 1024);
                 std::size_t bytesToRead = static_cast<std::size_t>(client.bytesRead());
                 if (bytesToRead > 0) {
@@ -285,6 +290,7 @@ void WebServer::sendResponse(HttpRequest &req, NetworkClient &client) {
                     return;
                 }
             }
+            
         } else {
             std::size_t bytesSent = sendResponseBody(client);
             if (bytesSent <= 0 || bytesSent == client.getResponseBody().length()) {

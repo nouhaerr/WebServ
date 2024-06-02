@@ -56,9 +56,9 @@ public:
     bool        getHeaderSent();
     std::string getResponse();
     bool        getOpenFile();
-    void openFileForReading();
-    bool isFileOpen() const;
-    void readFromFile(char* buffer, std::streamsize bufferSize);
+    void		openFileForReading();
+    bool		isFileOpen() const;
+    void		readFromFile(char* buffer, std::streamsize bufferSize);
     std::streamsize bytesRead() const;
 
     HttpRequest		_req;
@@ -76,9 +76,9 @@ private:
     std::string fullResponse;
     bool headerDispatched;
     bool fileAccessed;
-    bool    _headersSent;
-    bool    _openFile;
-    std::string _response;
+    bool		_headersSent;
+    bool		_openFile;
+    std::string	_response;
 };
 
 #endif
