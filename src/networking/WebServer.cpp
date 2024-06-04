@@ -101,7 +101,7 @@ void WebServer::run()
 
 const ConfigServer& WebServer::matchServerByFd(int fd) 
 {
-    for (size_t i = 0; i < serverConfigs.size(); ++i) 
+    for (size_t i = 0; i < serverConfigs.size(); ++i)
     {
         if (serverConfigs[i].getSocket() == fd) 
         {
@@ -171,25 +171,16 @@ void WebServer::processClientRequests(NetworkClient& client)
         return;
     }
 
-    std::cout << "Full request received:\n" << requestString << std::endl;
+    std::cout << "\n" << requestString << std::endl;
     // std::cout << "Request size: " << requestString.size() << std::endl;
 
-    HttpRequest request;
+    ConfigServer	conf = client.getServer();
+    HttpRequest request(conf);
     request.parseHttpRequest(requestString);
 
     size_t bodypos = requestString.find("\r\n\r\n");
-    if (bodypos != std::string::npos) 
-    {
+    if (bodypos != std::string::npos) {
         bodypos += 4;
-        // std::cout << "Body starts at position: " << bodypos << std::endl;
-
-        // if (bodypos < requestString.size()) 
-        // {
-        //     std::cout << "Character at position " << bodypos << ": " << requestString[bodypos] << std::endl;
-        //     std::cout << "Substring starting at position " << bodypos << ": " << requestString.substr(bodypos) << std::endl;
-        // } 
-        // else 
-        //     std::cerr << "Error: bodypos is out of range." << std::endl;
     } 
     else 
     {
@@ -204,26 +195,27 @@ void WebServer::processClientRequests(NetworkClient& client)
         closeClient(client);
         return;
     }
-    request.parseBody(bodypos, requestString);
+    request.parseBody(bodypos);
     // std::cout << "Processed body: " << request.getBody() << std::endl;
+    std::cout << "Matched one: " << client.getServer().getServerName() << " with "<< client.getServer().getHost() <<":" <<client.getServer().getPort() << std::endl;
+	client.setRequest(request);
+    //RESPONSE
+    // std::string hostHeader = request.getHeader("Host");
+	// hostHeader = trimm(hostHeader);
+    // const ConfigServer& clientServer = matchServerByName(hostHeader);
+    // client.setServer(clientServer);
+    sendResponse(request, client);
 
-    std::string hostHeader = request.getHeader("Host");
-    if (!hostHeader.empty())
-    {
-        // std::cout << "Received Host header: " << hostHeader << std::endl;
-        hostHeader = trimm(hostHeader);
-        const ConfigServer& clientServer = matchServerByName(hostHeader);
-        client.setServer(clientServer);
-		client.setRequest(request);
-        //RESPONSE
-        sendResponse(request, client);
-    }
-    else
-    {
-        std::cerr << "Host header not found in the request." << std::endl;
-        closeClient(client);
-        return;
-    }
+    // if (!hostHeader.empty())
+    // {
+    //     std::cout << "Received Host header: " << hostHeader << std::endl;
+    // }
+    // else
+    // {
+    //     std::cerr << "Host header not found in the request." << std::endl;
+    //     closeClient(client);
+    //     return;
+    // }
     closeClient(client);
 }
 
@@ -249,9 +241,10 @@ int WebServer::sendResponseBody(NetworkClient &client) {
 }
 
 void WebServer::sendResponse(HttpRequest &req, NetworkClient &client) {
-    HttpResponse resp(client);
+    
+	HttpResponse *resp = new HttpResponse(client);
 
-    resp.generateResponse(req);
+    resp->generateResponse(req);
     if (!client.getHeaderSent()) {
         client.setResponse(client.getResponseHeader());
         client.setHeaderSent(true);
@@ -260,6 +253,7 @@ void WebServer::sendResponse(HttpRequest &req, NetworkClient &client) {
     int result = send(client.fetchConnectionSocket(), client.getResponse().c_str(), client.getResponse().length(), 0);
     if (result <= 0) {
         closeClient(client);
+		delete resp;
         return;
     }
     if (client.getHeaderSent())
@@ -281,12 +275,14 @@ void WebServer::sendResponse(HttpRequest &req, NetworkClient &client) {
                         bytesSent = send(client.fetchConnectionSocket(), buffer + totalBytesSent, bytesToRead - totalBytesSent, 0);
                         if (bytesSent <= 0) {
                             closeClient(client);
+							delete resp;
                             return;
                         }
                         totalBytesSent += bytesSent;
                     }
                 } else {
                     closeClient(client);
+					delete resp;
                     return;
                 }
             }
@@ -295,6 +291,7 @@ void WebServer::sendResponse(HttpRequest &req, NetworkClient &client) {
             std::size_t bytesSent = sendResponseBody(client);
             if (bytesSent <= 0 || bytesSent == client.getResponseBody().length()) {
                 closeClient(client);
+				delete resp;
                 return;
             }
         }
@@ -423,11 +420,11 @@ const ConfigServer& WebServer::matchServerByName(const std::string& host)
         std::string serverName = trimm(it->getServerName());
         std::string serverHost = trimm(it->getHost());
 
-        std::cout << "Checking server: " << serverName << " with host: " << serverHost << std::endl;
+        // std::cout << "Checking server: " << serverName << " with host: " << serverHost << std::endl;
 
         if (serverName == hostName || serverHost == hostName) 
         {
-            std::cout << "Matched server: " << serverName << " with host: " << serverHost << std::endl;
+            // std::cout << "Matched server: " << serverName << " with host: " << serverHost << std::endl;
             return *it;
         }
     }

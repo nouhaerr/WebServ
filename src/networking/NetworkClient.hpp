@@ -37,7 +37,7 @@ public:
     socklen_t* fetchAddressLength();
 
     bool isResponsePrepared() const;
-    void setServer(const ConfigServer& server);
+    void setServer(const ConfigServer &server);
     friend bool operator==(const NetworkClient& lhs, const NetworkClient& rhs);
     const ConfigServer& getConfigServer() const;
 

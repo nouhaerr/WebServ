@@ -8,7 +8,31 @@ HttpRequest::HttpRequest() :
 	_body(""),
 	isChunked(false),
 	_bodySize(0),
-	_errorCode(0) {}
+	_errorCode(0),
+	_serv() {}
+
+// HttpRequest::HttpRequest(std::vector<ConfigServer> serverConfig) :
+// 	_request(""),
+// 	_method(""),
+// 	_uri(""),
+// 	_httpVersion(""),
+// 	_body(""),
+// 	isChunked(false),
+// 	_bodySize(0),
+// 	_errorCode(0),
+// 	_confServ(serverConfig) {}
+
+HttpRequest::HttpRequest(ConfigServer serverConfig) :
+	_request(""),
+	_method(""),
+	_uri(""),
+	_httpVersion(""),
+	_body(""),
+	isChunked(false),
+	_bodySize(0),
+	_errorCode(0),
+	_confServ(),
+	_serv(serverConfig) {}
 
 HttpRequest::HttpRequest(const HttpRequest& other) :
 	_request(other._request),
@@ -19,7 +43,9 @@ HttpRequest::HttpRequest(const HttpRequest& other) :
 	_body(other._body),
 	isChunked(other.isChunked),
 	_bodySize(other._bodySize),
-	_errorCode(other._errorCode) {}
+	_errorCode(other._errorCode),
+	_confServ(other._confServ),
+	_serv(other._serv) {}
 
 HttpRequest& HttpRequest::operator=(const HttpRequest& other) {
 	if (this != &other) 
@@ -33,6 +59,8 @@ HttpRequest& HttpRequest::operator=(const HttpRequest& other) {
 		_body = other._body;
 		_bodySize = other._bodySize;
 		_errorCode = other._errorCode;
+		_confServ = other._confServ;
+		_serv = other._serv;
 	}
 	return *this;
 }
@@ -58,10 +86,10 @@ void HttpRequest::parseHttpRequest(const std::string& req)
     lineStream >> this->_method >> this->_uri >> this->_httpVersion;
 
     _parseMethod();
-	// if (this->_errorCode != 501) {
+	if (this->_errorCode != 501) {
 		_parseURI();
-		// if (this->_errorCode != 400 && this->_errorCode != 414)
-		// {
+		if (this->_errorCode != 400 && this->_errorCode != 414)
+		{
 			while (std::getline(requestStream, line) && line != "\r" && !line.empty()) 
 			{
 				size_t colonPos = line.find(':');
@@ -72,8 +100,8 @@ void HttpRequest::parseHttpRequest(const std::string& req)
 					_headerFields[headerName] = headerValue;
 				}
 			}
-		// }
-	// }
+		}
+	}
 }
 
 void	HttpRequest::_parseMethod() {
@@ -166,4 +194,15 @@ std::string HttpRequest::getRequest() const {
 
 int	HttpRequest::getErrorCode() const {
 	return this->_errorCode;
+}
+
+std::string trimHeader(const std::string& str) 
+{
+    size_t first = str.find_first_not_of(" \t\r\n");
+    size_t last = str.find_last_not_of(" \t\r\n");
+
+    if (first == std::string::npos || last == std::string::npos)
+        return "";
+
+    return str.substr(first, (last - first + 1));
 }

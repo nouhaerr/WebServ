@@ -18,7 +18,6 @@
 # include <list>
 # include <utility>
 
-
 // C Includes
 # include <unistd.h>
 # include <stdio.h>
@@ -45,6 +44,7 @@
 # define YELLOW "\033[33m"
 # define RESET "\033[0m"
 
+extern std::map<std::string, std::string> mimeTypes;
 
 template <typename T>
 std::string toString(const T& value) {

@@ -2,7 +2,9 @@
 #include <cstring>
 
 NetworkClient::NetworkClient()
-  : serverSocketId(-1), connectionSocketId(-1), clientAddressSize(0),
+  : serverSocketId(-1), connectionSocketId(-1),
+    server(),
+    clientAddressSize(0),
     headerDispatched(false), fileAccessed(false) ,
     _headersSent(false),
     _openFile(false),
@@ -13,6 +15,7 @@ NetworkClient::NetworkClient()
 NetworkClient::NetworkClient(int socketDescriptor, int serverSocket)
   : serverSocketId(serverSocket),
     connectionSocketId(socketDescriptor),
+    server(),
     clientAddressSize(0),
     headerDispatched(false),
     fileAccessed(false),
@@ -24,6 +27,7 @@ NetworkClient::NetworkClient(int socketDescriptor, int serverSocket)
 
 NetworkClient::NetworkClient(const NetworkClient& source)
   : serverSocketId(source.serverSocketId), connectionSocketId(source.connectionSocketId),
+	server(source.server),
     clientAddressSize(source.clientAddressSize), clientDetails(source.clientDetails),
     responseHeader(source.responseHeader), responseBody(source.responseBody),
     fullResponse(source.fullResponse), headerDispatched(source.headerDispatched),
@@ -38,7 +42,6 @@ bool operator==(const NetworkClient& lhs, const NetworkClient& rhs)
     return lhs.fetchConnectionSocket() == rhs.fetchConnectionSocket();
 }
 
-
 NetworkClient::~NetworkClient() {}
 
 NetworkClient& NetworkClient::operator=(const NetworkClient& source) 
@@ -47,6 +50,7 @@ NetworkClient& NetworkClient::operator=(const NetworkClient& source)
     {
         serverSocketId = source.serverSocketId;
         connectionSocketId = source.connectionSocketId;
+		server = source.server;
         clientAddressSize = source.clientAddressSize;
         clientDetails = source.clientDetails;
         responseHeader = source.responseHeader;
@@ -140,9 +144,9 @@ bool NetworkClient::isResponsePrepared() const
     return !fullResponse.empty();
 }
 
-void NetworkClient::setServer(const ConfigServer& server) 
+void NetworkClient::setServer(const ConfigServer &server) 
 {
-    this->server = server; 
+    this->server = server;
 }
 
 const ConfigServer& NetworkClient::getConfigServer() const 

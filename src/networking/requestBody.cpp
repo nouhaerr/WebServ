@@ -1,15 +1,40 @@
 #include "HttpRequest.hpp"
 
-void	HttpRequest::parseBody(size_t &bodypos, const std::string &requestString) 
+// void	HttpRequest::_matchServer() {
+// 	if (_headerFields.find("Host") != _headerFields.end())
+//     {
+//         std::string host = trimHeader(_headerFields["Host"]);
+
+// 		std::cout << "'" << host << "'" << std::endl;
+//         for (std::vector<ConfigServer>::iterator it = _confServ.begin(); it != _confServ.end(); it++)
+//         {
+// 			std::string hostServerName = it->getServerName() + ':' + toString(it->getPort());
+// 			std::string hostServerIp = it->getHost() + ":" + toString(it->getPort());
+            
+// 			// check if the host is found in the servers vector
+//             if (hostServerIp == host || hostServerName == host)
+//             {
+// 				std::cout << "Matched server: " << hostServerName << " with host: " << host << std::endl;
+//                 _serv = *it;
+//                 return ;
+//             }
+//         }
+//     }
+// 	_serv = _confServ[0];
+// }
+
+void	HttpRequest::parseBody(size_t &bodypos) 
 {
-    (void)requestString;
+	// _matchServer();
     long contentLength = 0;
     if (is_body(contentLength)) 
     {
-        if (this->isChunked) {
+        if (this->_method == "POST" && this->isChunked)
+		{
             _getChunkedBody(bodypos);
 			this->_bodySize = this->_body.size();
-			// if (this->_confServ.getMaxBodySize() >= this->_bodySize) {//should check the max body in the conf file >= _bodySize
+            std::cout << "Extracted body: " << this->_body << std::endl;
+			// if (this->_serv.getMaxBodySize() >= this->_bodySize) {//should check the max body in the conf file >= _bodySize
 			// 	if (this->_method == "POST")
 			// 		{
 			// 			if (_isSupportedMethod())
@@ -22,21 +47,26 @@ void	HttpRequest::parseBody(size_t &bodypos, const std::string &requestString)
 			// 			else
 			// 				this->_errorCode = 405; //Method Not Allowed
 			// 	}
-			// }
+			if (this->_serv.getMaxBodySize() < this->_bodySize)
+				this->_errorCode = 413;
 			// else
 			// 	this->_errorCode = 413; /*Content Too Large response status code indicates that
 			// the request entity is larger than limits defined by server*/
 		}
         else if (this->_method == "POST" && contentLength > 0)
         {
-            if (bodypos + contentLength <= requestString.size()) 
+            if (bodypos + contentLength <= this->_request.size()) 
             {
+				std::string requestString = this->_request;
                 std::string bodyContent = requestString.substr(bodypos, contentLength);
                 this->_body = bodyContent;
-                // std::cout << "Extracted body: " << this->_body << std::endl; 
+				this->_bodySize = contentLength;
+				if (this->_serv.getMaxBodySize() < this->_bodySize)
+					this->_errorCode = 413;
+                std::cout << "Extracted body: " << this->_body << std::endl;
             } 
             else 
-                std::cerr << "Error: bodypos is out of range. Request size: " << requestString.size() << " bodypos: " << bodypos << std::endl;
+                std::cerr << "Error: bodypos is out of range. Request size: " << this->_request.size() << " bodypos: " << bodypos << std::endl;
         }
     }
 }

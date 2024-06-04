@@ -43,4 +43,5 @@ private:
     void sendResponse(HttpRequest &req, NetworkClient &client);
     int sendResponseBody(NetworkClient &client);
 };
+
 #endif

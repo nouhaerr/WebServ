@@ -9,7 +9,8 @@ Config::Config() :
 
 Config::Config(const char *fileName) :
 	_serverCount(0),
-	_fileName(fileName)
+	_fileName(fileName),
+	_servers()
 {}
 
 Config::Config(const Config &other) {
@@ -132,8 +133,10 @@ void	Config::parse()
 			{
 				for (size_t j = i + 1; j < this->_serverCount; j++) 
 				{
-					if (this->_servers[i].getPort() == this->_servers[j].getPort()
-						&& this->_servers[i].getServerName() == this->_servers[j].getServerName())
+					if ((this->_servers[i].getPort() == this->_servers[j].getPort()
+						&& this->_servers[i].getHost() == this->_servers[j].getHost())
+						|| (this->_servers[i].getPort() == this->_servers[j].getPort()
+						&& this->_servers[i].getServerName() == this->_servers[j].getServerName()))
 						throw ParseServerException("Error: Same Server.");
 				}
 			}
@@ -142,8 +145,8 @@ void	Config::parse()
 		// std::cout << "Host: " << _servers[0].getHost() << ", Port: " << _servers[0].getPort() 
 		// << ", ServerName: " << _servers[0].getServerName()
 		// << ", BodySize: " << _servers[0].getMaxBodySize() << std::endl;
-		for (std::vector<t_tokens>::iterator it =_tokens.begin(); it != this->_tokens.end(); ++it) 
-			std::cout << "type: " << it->_type << ", Value: " << it->_value << std::endl;
+		// for (std::vector<t_tokens>::iterator it =_tokens.begin(); it != this->_tokens.end(); ++it) 
+		// 	std::cout << "type: " << it->_type << ", Value: " << it->_value << std::endl;
 	} catch(const std::exception &e) {
 		std::cout << e.what() << std::endl;
 		exit(1);

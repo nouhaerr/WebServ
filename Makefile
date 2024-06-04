@@ -12,6 +12,7 @@ SRC = src/main.cpp\
 	src/networking/HttpRequestParser.cpp\
 	src/response/HttpResponse.cpp\
 	src/response/GET.cpp\
+	src/response/mimeTypes.cpp\
 
 OBJS = $(SRC:.cpp=.o)
 

@@ -2,6 +2,7 @@
 #define HTTPREQUEST_HPP
 
 #include "../Macros.hpp"
+#include "../parsing/ConfigServer.hpp"
 
 class HttpRequest {
 	private:
@@ -12,13 +13,15 @@ class HttpRequest {
 		std::map<std::string, std::string> _headerFields;
 		std::string		_body;
 		bool			isChunked;
-		int				_bodySize;
+		size_t			_bodySize;
 		int				_errorCode;
-		// ConfigServer	_confServ;
+		std::vector<ConfigServer>	_confServ;
+		ConfigServer	_serv;
 		// int				_port;
 
 		void		_parseMethod();
 		void		_parseURI();
+		void		_matchServer();
 		void		_getChunkedBody(size_t &bodypos);
 		bool		_isSupportedMethod();
 		std::string	_generateTempFileName();
@@ -27,12 +30,18 @@ class HttpRequest {
 
 	public:
 		HttpRequest();
+		// HttpRequest(std::vector<ConfigServer> serverConfig);
+		HttpRequest(ConfigServer serverConfig);
 		HttpRequest(const HttpRequest&);
 		HttpRequest& operator=(const HttpRequest&);
 		~HttpRequest();
 
 		void	parseHttpRequest(const std::string& req);
 		void	printRequestDetails() const;
+		void	parseBody(size_t &bodypos);
+		bool	is_body(long& contentLength);
+		void	getChunkedBody(size_t &bodypos);
+
 
 		//Setters
 		void	setMethod(const std::string& m);
@@ -53,9 +62,8 @@ class HttpRequest {
 		int			getErrorCode() const;
 
 		static int	hexToInt(const std::string& str);
-		void		parseBody(size_t &bodypos, const std::string &requestString);
-		bool		is_body(long& contentLength);
-		void		getChunkedBody(size_t &bodypos);
 };
+
+std::string trimHeader(const std::string& str);
 
 #endif
