@@ -9,6 +9,7 @@ ConfigLocation::ConfigLocation() :
 	_autoindex(false),
 	_upload(""),
 	_errorPage(std::map<int , std::string>()),
+	_redirect(false),
 	_redirection(""),
 	_redirectCode(0)
 {}
@@ -27,6 +28,7 @@ ConfigLocation& ConfigLocation::operator=(const ConfigLocation &src) {
 		this->_autoindex = src._autoindex;
 		this->_upload = src._upload;
 		this->_errorPage = src._errorPage;
+		this->_redirect = src._redirect;
 		this->_redirection = src._redirection;
 		this->_redirectCode = src._redirectCode;
 	}
@@ -138,9 +140,15 @@ std::map<int, std::string>&	ConfigLocation::getErrorPage() {
 	return this->_errorPage;
 }
 
+void	ConfigLocation::setRedirect(bool redirect) {
+	this->_redirect = redirect;
+}
+
+bool&	ConfigLocation::getRedirect() {
+	return this->_redirect;
+}
+
 void	ConfigLocation::setRedirection(std::string& redirection) {
-	if (redirection.empty())
-		throw ConfigLocationException("Error: Empty redirection!");
 	std::vector<std::string> args = splitArgs(redirection);
 
 	if (args.size() > 2)
@@ -151,8 +159,8 @@ void	ConfigLocation::setRedirection(std::string& redirection) {
 		this->_redirectCode = isNum(args[0]);
 		this->_redirection = args[1];
 	}
-	else
-		throw ConfigLocationException("Error: Invalid redirection URL!");
+	// else
+	// 	throw ConfigLocationException("Error: Invalid redirection URL!");
 }
 
 std::string&	ConfigLocation::getRedirection() {

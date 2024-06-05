@@ -7,7 +7,7 @@ class HttpRequestParser {
 public:
     static void parseHttpRequest(HttpRequest& request, const std::string& req);
     static void parseBody(HttpRequest& request, size_t &bodypos);
-    static bool is_body(HttpRequest& request, int& contentLength);
+    static bool is_body(HttpRequest& request, long& contentLength);
     static void getChunkedBody(HttpRequest& request, size_t &bodypos);
 };
 

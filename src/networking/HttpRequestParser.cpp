@@ -28,7 +28,7 @@ void HttpRequestParser::parseHttpRequest(HttpRequest& request, const std::string
 
     if (request.getHeaderFields().find("Content-Length") != request.getHeaderFields().end()) 
     {
-        int contentLength = std::stoi(request.getHeaderFields().at("Content-Length"));
+        long contentLength = std::strtol(request.getHeaderFields().at("Content-Length").c_str(), NULL, 10);
         if (contentLength > 0) {
             std::vector<char> buffer(contentLength);
             requestStream.read(&buffer[0], contentLength);
@@ -40,7 +40,7 @@ void HttpRequestParser::parseHttpRequest(HttpRequest& request, const std::string
 
 void HttpRequestParser::parseBody(HttpRequest& request, size_t &bodypos) 
 {
-    int contentLength = 0;
+    long contentLength = 0;
     if (request.is_body(contentLength)) 
     {
         if (request.getIsChunked()) 
@@ -53,12 +53,12 @@ void HttpRequestParser::parseBody(HttpRequest& request, size_t &bodypos)
     }
 }
 
-bool HttpRequestParser::is_body(HttpRequest& request, int& contentLength) 
+bool HttpRequestParser::is_body(HttpRequest& request, long& contentLength) 
 {
     std::map<std::string, std::string>::const_iterator it = request.getHeaderFields().find("Content-Length");
     if (it != request.getHeaderFields().end()) 
     {
-        contentLength = std::stoi(it->second);
+        contentLength = std::strtol(it->second.c_str(), NULL, 10);
         return true;
     }
     return false;
