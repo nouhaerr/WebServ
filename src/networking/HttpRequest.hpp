@@ -16,7 +16,9 @@ class HttpRequest {
 		int				_errorCode;
 		// ConfigServer	_confServ;
 		// int				_port;
+
 		bool parsingFinished;
+
 
 		void		_parseMethod();
 		void		_parseURI();
@@ -31,7 +33,6 @@ class HttpRequest {
 		HttpRequest(const HttpRequest&);
 		HttpRequest& operator=(const HttpRequest&);
 		~HttpRequest();
-
 		void	parseHttpRequest(const std::string& req);
 		void	printRequestDetails() const;
 
@@ -60,6 +61,7 @@ class HttpRequest {
 
 		void setParsingFinished(bool finished);
     	bool isParsingFinished() const;
+
 };
 
 #endif

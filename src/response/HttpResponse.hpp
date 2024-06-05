@@ -5,6 +5,7 @@
 #include "../parsing/Config.hpp"
 #include "../networking/NetworkClient.hpp"
 #include "../networking/HttpRequest.hpp"
+#include <sys/sendfile.h>
 
 class NetworkClient;
 class HttpRequest;
@@ -49,6 +50,8 @@ class HttpResponse {
 		std::map<std::string, std::string> _headers;
 		std::string _filePath;
 		std::string _buffer;
+		off_t		_fileSize;
+		off_t		_offset;
 
 
 		bool	_isSupportedMethod(std::string meth);

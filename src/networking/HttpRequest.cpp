@@ -41,9 +41,45 @@ HttpRequest& HttpRequest::operator=(const HttpRequest& other) {
     }
     return *this;
 }
+HttpRequest::HttpRequest() :
+	_request(""),
+	_method(""),
+	_uri(""),
+	_httpVersion(""),
+	_body(""),
+	isChunked(false),
+	_bodySize(0),
+	_errorCode(0) {}
+
+HttpRequest::HttpRequest(const HttpRequest& other) :
+	_request(other._request),
+	_method(other._method),
+	_uri(other._uri),
+	_httpVersion(other._httpVersion),
+	_headerFields(other._headerFields),
+	_body(other._body),
+	isChunked(other.isChunked),
+	_bodySize(other._bodySize),
+	_errorCode(other._errorCode) {}
+
+HttpRequest& HttpRequest::operator=(const HttpRequest& other) {
+	if (this != &other) 
+	{
+		_request = other._request;
+		_method = other._method;
+		_uri = other._uri;
+		_httpVersion = other._httpVersion;
+		_headerFields = other._headerFields;
+		isChunked = other.isChunked;
+		_body = other._body;
+		_bodySize = other._bodySize;
+		_errorCode = other._errorCode;
+	}
+	return *this;
+}
 
 HttpRequest::~HttpRequest() {
-    _headerFields.clear();
+	_headerFields.clear();
 }
 
 std::string toLower(const std::string& str) 
@@ -105,6 +141,46 @@ void HttpRequest::_parseURI() {
         this->_errorCode = 400; // Bad Request
     if (this->_uri.length() > 2048)
         this->_errorCode = 414; // 414 URI Too Long
+    _parseMethod();
+	// if (this->_errorCode != 501) {
+		_parseURI();
+		// if (this->_errorCode != 400 && this->_errorCode != 414)
+		// {
+			while (std::getline(requestStream, line) && line != "\r" && !line.empty()) 
+			{
+				size_t colonPos = line.find(':');
+				if (colonPos != std::string::npos)
+				{
+					std::string headerName = line.substr(0, colonPos);
+					std::string headerValue = line.substr(colonPos + 2);
+					_headerFields[headerName] = headerValue;
+				}
+			}
+		// }
+	// }
+}
+
+void	HttpRequest::_parseMethod() {
+	if (this->_method != "POST" && this->_method !="GET" && this->_method != "DELETE")
+		this->_errorCode = 501; /*Not Implemented method*/
+}
+
+void	HttpRequest::_parseURI() {
+	size_t questionMarkPos = this->_uri.find_first_of('?'); // Check for query parameters
+	std::string	queryString;
+
+	if (questionMarkPos != std::string::npos) {
+		queryString = this->_uri.substr(questionMarkPos + 1);
+		this->_uri = this->_uri.substr(0, questionMarkPos);
+	}
+	else {
+		// this->_uri = this->_uri;
+		queryString.clear();
+	}
+	if (!this->_uri.find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;="))
+		this->_errorCode = 400; //Bad Request
+	if (this->_uri.length() > 2048)
+		this->_errorCode = 414; //414 URI Too Long
 }
 
 std::string HttpRequest::getHeader(const std::string& headerName) const 

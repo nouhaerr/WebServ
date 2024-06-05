@@ -155,6 +155,14 @@ ConfigServer& NetworkClient::getServer()
     return this->server;
 }
 
+void    NetworkClient::setRequest(HttpRequest req) {
+    this->_req = req;
+}
+
+HttpRequest& NetworkClient::getRequest() {
+    return this->_req;
+}
+
 void	NetworkClient::setResponseHeader(std::string respHeader) {
     this->responseHeader = respHeader;
 }

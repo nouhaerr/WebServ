@@ -5,7 +5,9 @@ void	HttpResponse::handleGetMethod() {
 		buildResponse(405);
 		return ;
 	}
-	
+	// if (isFile(_uri)) {
+
+	// }
 }
 
 bool	HttpResponse::_isSupportedMethod(std::string meth) {

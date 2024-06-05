@@ -7,7 +7,6 @@
 #include <netinet/in.h>
 #include "NetworkClient.hpp"
 #include "../parsing/Config.hpp"
-
 class WebServer {
 public:
     WebServer(const Config& config);

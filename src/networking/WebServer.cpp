@@ -8,6 +8,7 @@
 #include <arpa/inet.h>
 #include <cctype>
 
+
 std::string trimm(const std::string& str) 
 {
     size_t first = str.find_first_not_of(" \t\r\n");
@@ -52,6 +53,7 @@ WebServer::~WebServer()
 void WebServer::setupServerSockets() 
 {
     for (size_t i = 0; i < serverConfigs->size(); ++i) 
+
     {
         int sockfd = socket(AF_INET, SOCK_STREAM, 0);
         if (sockfd < 0) 
@@ -131,6 +133,7 @@ void WebServer::run()
                 {
                     //std::cout << "Processing client requests for socket: " << i << std::endl;
                     processClientRequests(i);                                                                
+
                 }
             }
         }   
@@ -147,12 +150,11 @@ const ConfigServer& WebServer::matchServerByFd(int fd)
    // std::cerr << "No matching server found for socket fd: " << fd << std::endl;
     return (*serverConfigs)[0];
 }
-
-
 void WebServer::acceptNewClient(int serverSocket) 
 {
     sockaddr_in clientAddr;
     socklen_t clientAddrSize = sizeof(clientAddr);
+    
     int clientSocket = accept(serverSocket, (struct sockaddr *)&clientAddr, &clientAddrSize);
     if (clientSocket < 0) 
     {
@@ -205,7 +207,6 @@ void WebServer::processClientRequests(int clientSocket)
         closeClient(client.fetchConnectionSocket());
         return;
     }
-
     HttpRequest request;
     request.parseHttpRequest(requestString);
 
@@ -238,8 +239,10 @@ void WebServer::processClientRequests(int clientSocket)
             totalBytesRead += bytesRead;
             std::cout << "Received chunk of size: " << bytesRead << " for body" << std::endl;
         }
-    }
 
+    }
+    request.parseBody(bodypos, requestString);
+    // std::cout << "Processed body: " << request.getBody() << std::endl;
     size_t bodypos = requestString.find("\r\n\r\n");
     if (bodypos != std::string::npos) 
     {
@@ -257,9 +260,25 @@ void WebServer::processClientRequests(int clientSocket)
     {
         std::cerr << "Error: Could not find the end of the headers in the request." << std::endl;
         closeClient(client.fetchConnectionSocket());
+    std::string hostHeader = request.getHeader("Host");
+    if (!hostHeader.empty())
+    {
+        // std::cout << "Received Host header: " << hostHeader << std::endl;
+        hostHeader = trimm(hostHeader);
+        const ConfigServer& clientServer = matchServerByName(hostHeader);
+        client.setServer(clientServer);
+		client.setRequest(request);
+        //RESPONSE
+        sendResponse(request, client);
+    }
+    else 
+    {
+        std::cerr << "Host header not found in the request." << std::endl;
+        closeClient(client);
         return;
     }
-
+    closeClient(client);
+}
     request.setParsingFinished(true);
     std::cout << "Parsing finished: " << request.isParsingFinished() << std::endl;  
 
@@ -296,10 +315,10 @@ void WebServer::sendDataToClient(NetworkClient& client)
 {
     if (!client.isResponsePrepared()) 
         return;
-
     std::string response = client.retrieveResponseContent();
+    // int sentBytes = send(client.fetchConnectionSocket(), client.getResponse().c_str(), client.getResponse().length(), 0);
     int sentBytes = send(client.fetchConnectionSocket(), response.c_str(), response.size(), 0);
-    if (sentBytes < 0)
+	if (sentBytes < 0)
         std::cerr << "Failed to send response." << std::endl;
     closeClient(client.fetchConnectionSocket());
 }       
@@ -343,7 +362,6 @@ const ConfigServer& WebServer::matchServerByName(const std::string& host, int po
             return *it;
         }
     }
-
     // std::cerr << "\n******* ❌ ❌ ❌ ❌No matching server found for host: " << host << " on port: " << port << ". Defaulting to first server." << std::endl;
     return (*serverConfigs)[0];
 }
@@ -486,6 +504,3 @@ std::string WebServer::generateResponse(const ConfigServer& server)
 
     return response;
 }
-
-
-
