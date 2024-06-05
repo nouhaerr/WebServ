@@ -194,6 +194,7 @@ void WebServer::processClientRequests(int clientSocket)
     while ((bytesRead = recv(client.fetchConnectionSocket(), buffer, sizeof(buffer), 0)) > 0) 
     {
         requestString.append(buffer, bytesRead);
+        std::cout << "Received chunk of size: " << bytesRead << std::endl;
         if (requestString.find("\r\n\r\n") != std::string::npos)
             break;
     }
@@ -208,11 +209,35 @@ void WebServer::processClientRequests(int clientSocket)
     HttpRequest request;
     request.parseHttpRequest(requestString);
 
-    if (request.getErrorCode() != 0) 
+    // if (request.getErrorCode() != 0) 
+    // {
+    //     std::cerr << "Error in request parsing: " << request.getErrorCode() << std::endl;
+    //     closeClient(client.fetchConnectionSocket());
+    //     return;
+    // }
+
+    std::cout << "Full request received:\n" << requestString << std::endl;
+    std::cout << "Request size: " << requestString.size() << std::endl; 
+
+    std::string contentLengthHeader = request.getHeader("Content-Length");
+    if (!contentLengthHeader.empty()) 
     {
-        std::cerr << "Error in request parsing: " << request.getErrorCode() << std::endl;
-        closeClient(client.fetchConnectionSocket());
-        return;
+        size_t contentLength = std::stoul(contentLengthHeader);
+        size_t totalBytesRead = requestString.size() - requestString.find("\r\n\r\n") - 4;
+
+        while (totalBytesRead < contentLength) 
+        {
+            bytesRead = recv(client.fetchConnectionSocket(), buffer, sizeof(buffer), 0);
+            if (bytesRead <= 0) 
+            {
+                std::cerr << "Read failed or connection closed by peer while reading body." << std::endl;
+                closeClient(client.fetchConnectionSocket());
+                return;
+            }
+            requestString.append(buffer, bytesRead);
+            totalBytesRead += bytesRead;
+            std::cout << "Received chunk of size: " << bytesRead << " for body" << std::endl;
+        }
     }
 
     size_t bodypos = requestString.find("\r\n\r\n");
@@ -223,6 +248,7 @@ void WebServer::processClientRequests(int clientSocket)
         {
             std::string bodyContent = requestString.substr(bodypos);
             request.setBody(bodyContent);
+            std::cout << "Processed body: " << request.getBody() << std::endl;
         } 
         else 
             std::cerr << "Error: bodypos is out of range." << std::endl;
@@ -235,6 +261,7 @@ void WebServer::processClientRequests(int clientSocket)
     }
 
     request.setParsingFinished(true);
+    std::cout << "Parsing finished: " << request.isParsingFinished() << std::endl;  
 
     std::string hostHeader = request.getHeader("Host");
     if (!hostHeader.empty()) 
@@ -242,8 +269,9 @@ void WebServer::processClientRequests(int clientSocket)
         hostHeader = trimm(hostHeader);
 
         size_t portPos = hostHeader.find(":");
-        int port = 90; // Default to 80 if no port is specified
-        if (portPos != std::string::npos) {
+        int port = 80;
+        if (portPos != std::string::npos) 
+        {
             port = std::atoi(hostHeader.substr(portPos + 1).c_str());
             hostHeader = hostHeader.substr(0, portPos);
         } 
@@ -263,7 +291,6 @@ void WebServer::processClientRequests(int clientSocket)
     }
     closeClient(client.fetchConnectionSocket());
 }
-
 
 void WebServer::sendDataToClient(NetworkClient& client) 
 {
