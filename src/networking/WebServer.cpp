@@ -160,9 +160,12 @@ void WebServer::processClientRequests(NetworkClient& client)
     while ((bytesRead = recv(client.fetchConnectionSocket(), buffer, sizeof(buffer), 0)) > 0) 
     {
         requestString.append(buffer, bytesRead);
-        if (requestString.find("\r\n\r\n") != std::string::npos) 
+        if (requestString.find("\r\n\r\n") != std::string::npos) {
+    		std::cout << "\n" << requestString << std::endl;
             break;
+		}
     }
+
 
     if (bytesRead <= 0) 
     {
@@ -171,7 +174,6 @@ void WebServer::processClientRequests(NetworkClient& client)
         return;
     }
 
-    std::cout << "\n" << requestString << std::endl;
     // std::cout << "Request size: " << requestString.size() << std::endl;
 
     ConfigServer	conf = client.getServer();
@@ -189,12 +191,7 @@ void WebServer::processClientRequests(NetworkClient& client)
         return;
     }
 
-    if (bodypos > requestString.size()) 
-    {
-        std::cerr << "Error: Calculated body position exceeds request size." << std::endl;
-        closeClient(client);
-        return;
-    }
+	std::cout << requestString[bodypos] << "\n";
     request.parseBody(bodypos);
     // std::cout << "Processed body: " << request.getBody() << std::endl;
     std::cout << "Matched one: " << client.getServer().getServerName() << " with "<< client.getServer().getHost() <<":" <<client.getServer().getPort() << std::endl;
@@ -303,49 +300,9 @@ void WebServer::sendResponse(HttpRequest &req, NetworkClient &client) {
     int res = send(client.fetchConnectionSocket(), client.getResponse().c_str(), client.getResponse().length(), 0);
     if (res <= 0) {
         closeClient(client);
+		delete resp;
     }
 }
-
-// void WebServer::sendResponse(HttpRequest &req, NetworkClient &client) {
-//     HttpResponse resp(client);
-
-//     resp.generateResponse(req);
-//     if (client.getHeaderSent() == false) {
-//         client.setResponse(client.getResponseHeader());
-// 		client.setHeaderSent(true);
-//     }
-// 	// int result = send(client.fetchConnectionSocket(), client.getResponse().c_str(), client.getResponse().length(), 0);
-//     // if (result <= 0)
-// 	// 	closeClient(client);
-//     if (client.getHeaderSent() == true)
-//     {
-// 	std::cout << "Body: " << client.getResponseBody() << "\n";
-//         char buffer[1024];
-// 		if (!client.getOpenFile()) 
-// 			client.openFileForReading();
-
-// 		if (client.isFileOpen()) {
-// 			client.readFromFile(buffer, 1024);
-// 			if (client.bytesRead() > 0) {
-// 				client.setResponse(std::string(buffer, client.bytesRead()));
-// 			} else {
-// 				closeClient(client);
-// 				return;
-// 			}
-// 		} else {
-// 			std::size_t bytesSent = sendResponseBody(client);
-// 			if (bytesSent <= 0 || bytesSent == client.getResponseBody().length()) {
-// 				closeClient(client);
-// 				return;
-// 			}
-// 		}
-//     }
-//     std::cout << client.getHeaderSent() << "\n";
-//     std::cout << client.getResponse() << "\n";
-//     int res = send(client.fetchConnectionSocket(), client.getResponse().c_str(), client.getResponse().length(), 0);
-//     if (res <= 0)
-// 		closeClient(client);
-// }
 
 void WebServer::sendDataToClient(NetworkClient& client) 
 {
@@ -404,45 +361,40 @@ NetworkClient* WebServer::findClientBySocket(int socket)
     return NULL;
 }
 
-const ConfigServer& WebServer::matchServerByName(const std::string& host) 
-{
-    std::string hostName = host;
-    size_t pos = host.find(":");
-    if (pos != std::string::npos) 
-        hostName = host.substr(0, pos);
-
-    hostName = trimm(hostName);
-
-    std::cout << "Looking for server: " << hostName << std::endl;
-
-    for (std::vector<ConfigServer>::const_iterator it = serverConfigs.begin(); it != serverConfigs.end(); ++it) 
-    {
-        std::string serverName = trimm(it->getServerName());
-        std::string serverHost = trimm(it->getHost());
-
-        // std::cout << "Checking server: " << serverName << " with host: " << serverHost << std::endl;
-
-        if (serverName == hostName || serverHost == hostName) 
-        {
-            // std::cout << "Matched server: " << serverName << " with host: " << serverHost << std::endl;
-            return *it;
-        }
-    }
-
-    std::cout << "Defaulting to first server." << std::endl;
-    return serverConfigs[0]; 
-}
-
-// std::string WebServer::generateResponse(const ConfigServer& server) 
+// const ConfigServer& WebServer::matchServerByName(const std::string& host, int port) 
 // {
-//     std::string responseContent = "<html><body><h1>Hello, World!</h1><p>This is a simple web server.</p>";
-//     responseContent += "<p>Served by: " + server.getServerName() + "</p></body></html>";
+//     std::string hostName = trimm(host);
+//     size_t pos = hostName.find(":");
+// 	bool isLocalhost = false;
 
-//     std::string response = "HTTP/1.1 200 OK\r\n";
-//     response += "Content-Type: text/html; charset=UTF-8\r\n";
-//     response += "Content-Length: " + toString(responseContent.size()) + "\r\n";
-//     response += "Connection: close\r\n\r\n";
-//     response += responseContent;
+//     if (pos != std::string::npos) 
+//         hostName = hostName.substr(0, pos);
+// 	if (hostName == "localhost" || hostName == "127.0.0.1")
+//         isLocalhost = true;
 
-//     return response;
+//     std::cout << "Looking for server: " << hostName << std::endl;
+
+//     for (std::vector<ConfigServer>::const_iterator it = serverConfigs.begin(); it != serverConfigs.end(); ++it) 
+//     {
+// 		std::ostringstream portStr;
+//         portStr << it->getPort();
+
+//         // std::cout << "Checking server: " << serverName << " with host: " << serverHost << std::endl;
+// 		if ((it->getHost() == "localhost" || it->getHost() == "127.0.0.1") && isLocalhost)
+//         {
+// 			if (static_cast<size_t>(port) == it->getPort())
+//             {
+//                 // std::cout << "Matched server: " << it->getServerName() << " with host: " << it->getHost() << " on port: " << it->getPort() << std::endl;
+//                 return *it;
+//             }
+// 		}
+// 		else if (it->getHost() == hostName && static_cast<size_t>(port) == it->getPort())
+//         {
+//             // std::cout << "\n******* ✅ ✅ ✅ ✅Matched server: " << it->getServerName() << " with host: " << it->getHost() << " on port: " << it->getPort() << std::endl;
+//             return *it;
+//         }
+//     }
+
+//     std::cout << "Defaulting to first server." << std::endl;
+//     return serverConfigs[0]; 
 // }

@@ -1,6 +1,6 @@
 #include "HttpResponse.hpp"
 
-std::string	getMimeTypes(std::string extension) {
+std::string	getMimeTypes(std::string flag, std::string extension) {
 	std::map<std::string, std::string> mimeTypes;
 
     // Ajout des types MIME courants
@@ -33,6 +33,8 @@ std::string	getMimeTypes(std::string extension) {
     mimeTypes[".mid"] = "audio/midi";
     mimeTypes[".midi"] = "audio/midi";
     mimeTypes[".mpeg"] = "video/mpeg";
+    mimeTypes[".mp4"] = "video/mp4";
+    mimeTypes[".mp4v"] = "video/mp4";
     mimeTypes[".mpkg"] = "application/vnd.apple.installer+xml";
     mimeTypes[".odp"] = "application/vnd.oasis.opendocument.presentation";
     mimeTypes[".ods"] = "application/vnd.oasis.opendocument.spreadsheet";
@@ -67,6 +69,15 @@ std::string	getMimeTypes(std::string extension) {
     mimeTypes[".zip"] = "application/zip";
     mimeTypes[".7z"] = "application/x-7z-compressed";
 
+    if (flag == "second") {
+        std::map<std::string, std::string>::iterator iter;
+        for (iter = mimeTypes.begin(); iter != mimeTypes.end(); ++iter) {
+			if (iter->second == extension) {
+				return iter->first;
+			}
+        }
+        return "";
+	}
     if (mimeTypes.find(extension) != mimeTypes.end()) {
 	    return mimeTypes[extension];
 	}

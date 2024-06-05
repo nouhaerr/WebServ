@@ -30,7 +30,7 @@ std::string getContentType(std::string filename) {
     catch (std::exception &e) {
         return "text/html";
     }
-	return getMimeTypes(extension);
+	return getMimeTypes("", extension);
 }
 
 void	HttpResponse::isUrihasSlashInTHeEnd() {
@@ -57,12 +57,17 @@ bool HttpResponse::isDirHasIndexFiles() {
                 _errCode = 200;
                 _filePath = path;
                 file.close();
-                _contentType = getContentType(_filePath);
-				std::string header = createResponseHeader(_errCode, "Nothing");
-				_client.setResponseHeader(header);
-				_client.setResponseBody(_filePath);
+				_isFile();
+                // _contentType = getContentType(_filePath);
+				// std::string header = createResponseHeader(_errCode, "Nothing");
+				// _client.setResponseHeader(header);
+				// _client.setResponseBody(_filePath);
                 return true;
             }
+			else {
+				buildResponse(404);
+				return true;
+			}
 		}
 		return true;
 	}
@@ -101,10 +106,6 @@ void	HttpResponse::_getAutoIndex() {
 		listeningfile << "<!DOCTYPE html>\n" << "<html lang=\"en\">\n" << "\t<head>\n" << "\t\t<meta charset=\"UTF-8\">\n";
 		listeningfile << "\t\t\t<title>Index of " << directory << "</title>\n";
 		listeningfile << "</head>\n<body bgcolor=\"white\"><h1>Index of " << directory << "</h1><hr><pre>";
-		// if (!directory.empty() && directory[directory.size() - 1] != '/')
-    	// {
-        // 	directory += '/';
-    	// }
 		struct dirent *ent;
     	while ((ent = readdir(dir)) != NULL)
     	{
@@ -142,7 +143,7 @@ void	HttpResponse::_getAutoIndex() {
 			{
 				_errCode = 500;
 				buildResponse(_errCode);
-				std::cerr << "Erreur lors de la création du fichier temporaire." << std::endl;
+				std::cerr << "Error: Failed to Creat Temporary file." << std::endl;
 				return ;
 			}
 		}
@@ -158,37 +159,70 @@ void	HttpResponse::_getAutoIndex() {
 		buildResponse(403);
 }
 
+void	HttpResponse::_isFile() {
+    // Handle file
+    std::ifstream file(_filePath.c_str(), std::ios::in | std::ios::binary);
+	if (file) {
+		printf("fiiiile\n");
+		std::string extension = _filePath.substr(_filePath.find_last_of('.'));
+		// if (extension == ".py" || extension == ".rb" || extension == ".php") {
+		// 	_isCgi = true;
+		// 	return ;
+		// }
+		_contentType = getContentType(_filePath);
+		std::string header = createResponseHeader(200, "Nothing");
+		_client.setResponseHeader(header);
+		_client.setResponseBody(_filePath);
+		// _isfile = true;
+		return ;
+	}
+	else {
+		buildResponse(404);
+		return ;
+	}
+}
+
+int	HttpResponse::_checkRequestedType() {
+	struct stat path_stat;
+	if (stat(_filePath.c_str(), &path_stat) != 0) {
+		_errCode = 404;
+        return ERROR;
+    }
+	if (S_ISREG(path_stat.st_mode))
+		return FILE_TYPE;
+	else if (S_ISDIR(path_stat.st_mode))
+		return FOLDER_TYPE;
+	return 3;
+}
+
+void	HttpResponse::_isFolder() {
+	std::cout << "foldeeer\n";
+	isUrihasSlashInTHeEnd();
+	if (isDirHasIndexFiles())
+		return;
+	else {
+		_getAutoIndex();
+		return ;
+	}
+}
+
 void	HttpResponse::handleGetMethod() {
 	if (!_isSupportedMethod("GET")) {
 		buildResponse(405);
 		return ;
 	}
-	// std::cout << "f get: " << _filePath << "\n";
-	struct stat path_stat;
-	if (stat(_filePath.c_str(), &path_stat) != 0) {
-        buildResponse(404);
-        return;
-    }
-	if (S_ISREG(path_stat.st_mode)) {
-        // Handle file
-        std::ifstream file(_filePath.c_str(), std::ios::in | std::ios::binary);
-		if (file) {
-			printf("fiiiile\n");
-			_contentType = getContentType(_filePath);
-			std::string header = createResponseHeader(200, "Nothing");
-			_client.setResponseHeader(header);
-			_client.setResponseBody(_filePath);
-		} 
-	} else if (S_ISDIR(path_stat.st_mode))
-	{
-		std::cout << "foldeeer\n";
-		isUrihasSlashInTHeEnd();
-		if (isDirHasIndexFiles())
-			return;
-		else {
-			_getAutoIndex();
-			return ;
-		}
+	int type = _checkRequestedType();
+	if (type == FILE_TYPE) {
+		_isFile();
+		return;
+	}
+	else if (type == FOLDER_TYPE) {
+		_isFolder();
+		return ;
+	}
+	else if (type == ERROR){
+		buildResponse(404);
+		return ;
 	}
 }
 
@@ -196,8 +230,9 @@ bool	HttpResponse::_isSupportedMethod(std::string meth) {
 	size_t	len = _methods.size();
 
 	for(size_t i = 0; i < len; i++) {
-		if (_methods[i] == meth)
+		if (_methods[i] == meth) {
 			return true ;
+		}
 	}
     return false;
 }

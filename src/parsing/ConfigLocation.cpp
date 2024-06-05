@@ -110,7 +110,7 @@ bool&	ConfigLocation::getAutoIndex() {
 }
 
 void	ConfigLocation::setUpload(std::string& upload) {	
-	if (upload.empty() || upload.find_first_of(" \t") != std::string::npos)
+	if (upload.find_first_of(" \t") != std::string::npos)
 		throw ConfigLocationException("Error: Wrong Upload!");
 	this->_upload = upload;
 }

@@ -21,11 +21,9 @@ class HttpRequest {
 
 		void		_parseMethod();
 		void		_parseURI();
-		void		_matchServer();
+		// void		_matchServer();
 		void		_getChunkedBody(size_t &bodypos);
-		bool		_isSupportedMethod();
 		std::string	_generateTempFileName();
-		std::string _findUploadPath();
 		void		_createFile(const std::string& name, const std::string& reqBody);
 
 	public:

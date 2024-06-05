@@ -4,7 +4,6 @@
 #include "../Macros.hpp"
 #include <netinet/in.h>
 #include "NetworkClient.hpp"
-#include "HttpRequest.hpp"
 #include "../parsing/Config.hpp"
 #include "../parsing/ConfigServer.hpp"
 #include "HttpRequest.hpp"
@@ -24,7 +23,7 @@ public:
     void run();
 
 private:
-     fd_set masterSet, readSet;
+    fd_set masterSet, readSet;
     int highestFd;  
     std::vector<int> serverSockets;
     std::vector<NetworkClient> clients;
@@ -36,7 +35,7 @@ private:
     void processClientRequests(NetworkClient& client);
     void sendDataToClient(NetworkClient& client);
     NetworkClient* findClientBySocket(int socket);
-    const ConfigServer& matchServerByName(const std::string& host);
+    const ConfigServer& matchServerByName(const std::string& host, int port);
     const ConfigServer& matchServerByFd(int fd);
 
     std::string generateResponse(const ConfigServer& server);

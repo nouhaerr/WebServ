@@ -3,18 +3,26 @@
 HttpResponse::HttpResponse(NetworkClient &client) :
 	_client(client),
 	_serv(client.getConfigServer()),
-	_body(""),
+	_bodyPost(""),
+    _bd(""),
 	_errCode(0),
 	_statusCode(""),
 	_isCgi(false),
 	_root(""),
+    _uploadPath(""),
 	_index(""),
     _idxFiles(),
 	_errorPath(""),
 	_autoindex(0),
+    _methods(),
+    _uri(""),
 	_fd(0),
 	_filePath(""),
-	_contentType("") {}
+    _buffer(""),
+    _isfile(false),
+	_contentType(""),
+    _reqHeader()
+    {}
 
 HttpResponse::~HttpResponse(){}
 
@@ -69,10 +77,12 @@ void	HttpResponse::generateResponse(HttpRequest &req) {
 	 	handleGetMethod();
 		return ;
 	}
-	// if (req.getMethod() == "POST") {
-	// 	handlePostMethod();
-	// 	return ;
-	// }
+	if (req.getMethod() == "POST") {
+        _bodyPost = req.getBody();
+        _reqHeader = req.getHeaderFields();
+		handlePostMethod();
+		return ;
+	}
 	// if (req.getMethod() == "DELETE") {
 	// 	handleDeleteMethod();
 	// 	return ;
@@ -113,6 +123,9 @@ void	HttpResponse::findStatusCode(int code) {
 		case 414:
 			_statusCode = "414 URI Too Long\r\n";
 			break;
+        case 415:
+			_statusCode = "415 Unsupported Media Type\r\n";
+            break;
         case 500:
             _statusCode = "500 Internal Server Error\r\n";
             break;
@@ -158,7 +171,6 @@ std::string	HttpResponse::createResponseHeader(int errCode, std::string flag) {
 		_headers["Location"] = _redirection;
 		_errCode = 301;
 	}
-	// std::cout << getContentLength() << "\n";
     if (flag == "Default") {
 		_headers["Content-Length"] = getContentLength(_errorPath);
     	_headers["Content-Type"] = "text/html";
@@ -168,7 +180,6 @@ std::string	HttpResponse::createResponseHeader(int errCode, std::string flag) {
 		_headers["Content-Type"] = _contentType;
 	}
 	_headers["Date"] = generateDate();
-	// _headers["Content-Type"] = getContentType(_filePath);
 	std::stringstream ss;
 
 	findStatusCode(errCode);
@@ -235,11 +246,12 @@ std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
 			std::cout << "dkhaaaal\n";
             _location = *it;
             _root = it->getRoot();
-            // _index = it->getIndex()[0];
             _idxFiles = it->getIndex();
             _autoindex = it->getAutoIndex();
             _errorPage = it->getErrorPage();
             _methods = it->getMethods();
+            _uploadPath = it->getUpload();
+            std::cout << "inMatch" << _uploadPath << "\n";
 			if (_location.getRedirect() == true)
 				_redirection = _location.getRedirection();
 
@@ -274,7 +286,6 @@ std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
         }
     }
 	_root = _serv.getRoot();
-    // _index = _serv.getIndex()[0];
     _idxFiles = _serv.getIndex();
     _autoindex = _serv.getAutoIndex();
     _errorPage = _serv.getErrorPage();

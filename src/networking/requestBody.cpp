@@ -34,29 +34,15 @@ void	HttpRequest::parseBody(size_t &bodypos)
             _getChunkedBody(bodypos);
 			this->_bodySize = this->_body.size();
             std::cout << "Extracted body: " << this->_body << std::endl;
-			// if (this->_serv.getMaxBodySize() >= this->_bodySize) {//should check the max body in the conf file >= _bodySize
-			// 	if (this->_method == "POST")
-			// 		{
-			// 			if (_isSupportedMethod())
-			// 			{
-			// 				std::string	file = _generateTempFileName();
-			// 				std::string	uploadPath = _findUploadPath();
-			// 				_createFile(uploadPath + file, this->_body);
-			// 				printf("creyina l fileeee\n");
-			// 			}
-			// 			else
-			// 				this->_errorCode = 405; //Method Not Allowed
-			// 	}
 			if (this->_serv.getMaxBodySize() < this->_bodySize)
 				this->_errorCode = 413;
-			// else
 			// 	this->_errorCode = 413; /*Content Too Large response status code indicates that
 			// the request entity is larger than limits defined by server*/
 		}
         else if (this->_method == "POST" && contentLength > 0)
         {
-            if (bodypos + contentLength <= this->_request.size()) 
-            {
+            // if (bodypos + contentLength <= this->_request.size()) 
+            // {
 				std::string requestString = this->_request;
                 std::string bodyContent = requestString.substr(bodypos, contentLength);
                 this->_body = bodyContent;
@@ -64,9 +50,9 @@ void	HttpRequest::parseBody(size_t &bodypos)
 				if (this->_serv.getMaxBodySize() < this->_bodySize)
 					this->_errorCode = 413;
                 std::cout << "Extracted body: " << this->_body << std::endl;
-            } 
-            else 
-                std::cerr << "Error: bodypos is out of range. Request size: " << this->_request.size() << " bodypos: " << bodypos << std::endl;
+            // } 
+            // else 
+            //     std::cerr << "Error: bodypos is out of range. Request size: " << this->_request.size() << " bodypos: " << bodypos << std::endl;
         }
     }
 }
@@ -118,26 +104,7 @@ void	HttpRequest::_getChunkedBody(size_t &bodypos) {
 	}
 }
 
-// bool	HttpRequest::_isSupportedMethod() {
-// 	std::vector<std::string> _isAllowedMeth = this->_confServ.getMethods();
-// 	size_t	len = this->_confServ.getLocation().size();
-
-// 	std::vector<std::string>::iterator it = this->_confServ.getMethods().begin();
-// 	for(; it != this->_confServ.getMethods().end(); it++)
-// 		std::cout << *it << " ";
-// 	printf("\n");
-// 	for(size_t i = 0; i < len; i++) {
-// 		if (this->_uri.find(this->_confServ.getLocation()[i].name) != std::string::npos
-// 			&& this->_confServ.getLocation()[i].getMethods().empty()) {//find the location Name in the uri
-// 			_isAllowedMeth = this->_confServ.getLocation()[i].getMethods();
-// 			break ;
-// 		} //update the method vector
-// 	}
-// 	// Check if the request method is found in the vect of allowed methods
-//     return (std::find(_isAllowedMeth.begin(), _isAllowedMeth.end(), this->_method) != _isAllowedMeth.end());
-// }
-
-std::string	HttpRequest::_findUploadPath() {
+// std::string	HttpRequest::_findUploadPath() {
     // Find upload path logic
 	// size_t	len = this->_confServ.getLocation().size();
 	// std::string	download = this->_confServ.uploads; // get the uploadPath in the conf File if there is a section named upload
@@ -149,8 +116,8 @@ std::string	HttpRequest::_findUploadPath() {
 	// 		download = this->_confServ.loc[i].uploads; //get the upload Path
 	// }
 	// return download;
-    return std::string();
-}
+    // return std::string();
+// }
 
 void	HttpRequest::_createFile(const std::string& name, const std::string& reqBody) {
 	std::ofstream file(name.c_str());
