@@ -5,7 +5,7 @@
 #include "../parsing/Config.hpp"
 #include "../networking/NetworkClient.hpp"
 #include "../networking/HttpRequest.hpp"
-#include <sys/sendfile.h>
+// #include <sys/sendfile.h>
 
 class NetworkClient;
 class HttpRequest;

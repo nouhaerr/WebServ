@@ -5,43 +5,6 @@
 #include <map>
 
 HttpRequest::HttpRequest() :
-    _request(""),
-    _method(""),
-    _uri(""),
-    _httpVersion(""),
-    _body(""),
-    isChunked(false),
-    _bodySize(0),
-    _errorCode(0),
-    parsingFinished(false) {}
-
-HttpRequest::HttpRequest(const HttpRequest& other) :
-    _request(other._request),
-    _method(other._method),
-    _uri(other._uri),
-    _httpVersion(other._httpVersion),
-    _headerFields(other._headerFields),
-    _body(other._body),
-    isChunked(other.isChunked),
-    _bodySize(other._bodySize),
-    _errorCode(other._errorCode) {}
-
-HttpRequest& HttpRequest::operator=(const HttpRequest& other) {
-    if (this != &other) 
-    {
-        _request = other._request;
-        _method = other._method;
-        _uri = other._uri;
-        _httpVersion = other._httpVersion;
-        _headerFields = other._headerFields;
-        isChunked = other.isChunked;
-        _body = other._body;
-        _bodySize = other._bodySize;
-        _errorCode = other._errorCode;
-    }
-    return *this;
-}
-HttpRequest::HttpRequest() :
 	_request(""),
 	_method(""),
 	_uri(""),
@@ -49,7 +12,31 @@ HttpRequest::HttpRequest() :
 	_body(""),
 	isChunked(false),
 	_bodySize(0),
-	_errorCode(0) {}
+	_errorCode(0),
+	_serv() {}
+
+// HttpRequest::HttpRequest(std::vector<ConfigServer> serverConfig) :
+// 	_request(""),
+// 	_method(""),
+// 	_uri(""),
+// 	_httpVersion(""),
+// 	_body(""),
+// 	isChunked(false),
+// 	_bodySize(0),
+// 	_errorCode(0),
+// 	_confServ(serverConfig) {}
+
+HttpRequest::HttpRequest(ConfigServer serverConfig) :
+	_request(""),
+	_method(""),
+	_uri(""),
+	_httpVersion(""),
+	_body(""),
+	isChunked(false),
+	_bodySize(0),
+	_errorCode(0),
+	_confServ(),
+	_serv(serverConfig) {}
 
 HttpRequest::HttpRequest(const HttpRequest& other) :
 	_request(other._request),
@@ -60,7 +47,9 @@ HttpRequest::HttpRequest(const HttpRequest& other) :
 	_body(other._body),
 	isChunked(other.isChunked),
 	_bodySize(other._bodySize),
-	_errorCode(other._errorCode) {}
+	_errorCode(other._errorCode),
+	_confServ(other._confServ),
+	_serv(other._serv) {}
 
 HttpRequest& HttpRequest::operator=(const HttpRequest& other) {
 	if (this != &other) 
@@ -74,6 +63,8 @@ HttpRequest& HttpRequest::operator=(const HttpRequest& other) {
 		_body = other._body;
 		_bodySize = other._bodySize;
 		_errorCode = other._errorCode;
+		_confServ = other._confServ;
+		_serv = other._serv;
 	}
 	return *this;
 }
@@ -127,43 +118,11 @@ void HttpRequest::_parseMethod() {
         this->_errorCode = 501; /*Not Implemented method*/
 }
 
-void HttpRequest::_parseURI() {
-    size_t questionMarkPos = this->_uri.find_first_of('?'); // Check for query parameters
-    std::string queryString;
 
-    if (questionMarkPos != std::string::npos) {
-        queryString = this->_uri.substr(questionMarkPos + 1);
-        this->_uri = this->_uri.substr(0, questionMarkPos);
-    } else {
-        queryString.clear();
-    }
-    if (!this->_uri.find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;="))
-        this->_errorCode = 400; // Bad Request
-    if (this->_uri.length() > 2048)
-        this->_errorCode = 414; // 414 URI Too Long
-    _parseMethod();
-	// if (this->_errorCode != 501) {
-		_parseURI();
-		// if (this->_errorCode != 400 && this->_errorCode != 414)
-		// {
-			while (std::getline(requestStream, line) && line != "\r" && !line.empty()) 
-			{
-				size_t colonPos = line.find(':');
-				if (colonPos != std::string::npos)
-				{
-					std::string headerName = line.substr(0, colonPos);
-					std::string headerValue = line.substr(colonPos + 2);
-					_headerFields[headerName] = headerValue;
-				}
-			}
-		// }
-	// }
-}
-
-void	HttpRequest::_parseMethod() {
-	if (this->_method != "POST" && this->_method !="GET" && this->_method != "DELETE")
-		this->_errorCode = 501; /*Not Implemented method*/
-}
+// void	HttpRequest::_parseMethod() {
+// 	if (this->_method != "POST" && this->_method !="GET" && this->_method != "DELETE")
+// 		this->_errorCode = 501; /*Not Implemented method*/
+// }
 
 void	HttpRequest::_parseURI() {
 	size_t questionMarkPos = this->_uri.find_first_of('?'); // Check for query parameters
@@ -258,4 +217,15 @@ void HttpRequest::setParsingFinished(bool finished) {
 
 bool HttpRequest::isParsingFinished() const {
     return parsingFinished;
+}
+
+std::string trimHeader(const std::string& str) 
+{
+    size_t first = str.find_first_not_of(" \t\r\n");
+    size_t last = str.find_last_not_of(" \t\r\n");
+
+    if (first == std::string::npos || last == std::string::npos)
+        return "";
+
+    return str.substr(first, (last - first + 1));
 }

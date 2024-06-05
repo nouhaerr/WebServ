@@ -1,45 +1,45 @@
 #include "HttpRequest.hpp"
 
-void	HttpRequest::parseBody(size_t &bodypos, const std::string &requestString) 
-{
-    (void)requestString;
-    long contentLength = 0;
-    if (is_body(contentLength)) 
-    {
-        if (this->isChunked) {
-            _getChunkedBody(bodypos);
-			this->_bodySize = this->_body.size();
-			// if (this->_confServ.getMaxBodySize() >= this->_bodySize) {//should check the max body in the conf file >= _bodySize
-			// 	if (this->_method == "POST")
-			// 		{
-			// 			if (_isSupportedMethod())
-			// 			{
-			// 				std::string	file = _generateTempFileName();
-			// 				std::string	uploadPath = _findUploadPath();
-			// 				_createFile(uploadPath + file, this->_body);
-			// 				printf("creyina l fileeee\n");
-			// 			}
-			// 			else
-			// 				this->_errorCode = 405; //Method Not Allowed
-			// 	}
-			// }
-			// else
-			// 	this->_errorCode = 413; /*Content Too Large response status code indicates that
-			// the request entity is larger than limits defined by server*/
-		}
-        else if (this->_method == "POST" && contentLength > 0)
-        {
-            if (bodypos + contentLength <= requestString.size()) 
-            {
-                std::string bodyContent = requestString.substr(bodypos, contentLength);
-                this->_body = bodyContent;
-                // std::cout << "Extracted body: " << this->_body << std::endl; 
-            } 
-            else 
-                std::cerr << "Error: bodypos is out of range. Request size: " << requestString.size() << " bodypos: " << bodypos << std::endl;
-        }
-    }
-}
+// void	HttpRequest::parseBody(size_t &bodypos, const std::string &requestString) 
+// {
+//     (void)requestString;
+//     long contentLength = 0;
+//     if (is_body(contentLength)) 
+//     {
+//         if (this->isChunked) {
+//             _getChunkedBody(bodypos);
+// 			this->_bodySize = this->_body.size();
+// 			// if (this->_confServ.getMaxBodySize() >= this->_bodySize) {//should check the max body in the conf file >= _bodySize
+// 			// 	if (this->_method == "POST")
+// 			// 		{
+// 			// 			if (_isSupportedMethod())
+// 			// 			{
+// 			// 				std::string	file = _generateTempFileName();
+// 			// 				std::string	uploadPath = _findUploadPath();
+// 			// 				_createFile(uploadPath + file, this->_body);
+// 			// 				printf("creyina l fileeee\n");
+// 			// 			}
+// 			// 			else
+// 			// 				this->_errorCode = 405; //Method Not Allowed
+// 			// 	}
+// 			// }
+// 			// else
+// 			// 	this->_errorCode = 413; /*Content Too Large response status code indicates that
+// 			// the request entity is larger than limits defined by server*/
+// 		}
+//         else if (this->_method == "POST" && contentLength > 0)
+//         {
+//             if (bodypos + contentLength <= requestString.size()) 
+//             {
+//                 std::string bodyContent = requestString.substr(bodypos, contentLength);
+//                 this->_body = bodyContent;
+//                 // std::cout << "Extracted body: " << this->_body << std::endl; 
+//             } 
+//             else 
+//                 std::cerr << "Error: bodypos is out of range. Request size: " << requestString.size() << " bodypos: " << bodypos << std::endl;
+//         }
+//     }
+// }
 
 bool	HttpRequest::is_body(long& contentLength) {
 	std::map<std::string, std::string>::const_iterator it = _headerFields.find("Content-Length");
@@ -107,7 +107,7 @@ void	HttpRequest::_getChunkedBody(size_t &bodypos) {
 //     return (std::find(_isAllowedMeth.begin(), _isAllowedMeth.end(), this->_method) != _isAllowedMeth.end());
 // }
 
-std::string	HttpRequest::_findUploadPath() {
+// std::string	HttpRequest::_findUploadPath() {
     // Find upload path logic
 	// size_t	len = this->_confServ.getLocation().size();
 	// std::string	download = this->_confServ.uploads; // get the uploadPath in the conf File if there is a section named upload
@@ -119,8 +119,8 @@ std::string	HttpRequest::_findUploadPath() {
 	// 		download = this->_confServ.loc[i].uploads; //get the upload Path
 	// }
 	// return download;
-    return std::string();
-}
+    // return std::string();
+// }
 
 void	HttpRequest::_createFile(const std::string& name, const std::string& reqBody) {
 	std::ofstream file(name.c_str());
