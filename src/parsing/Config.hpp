@@ -27,6 +27,7 @@ class Config {
 		void						parse();
 		ConfigServer				parseServerConfig(std::vector<t_tokens>::iterator& it);
 		const std::vector<ConfigServer>	&getServers() const;
+		std::vector<ConfigServer>	&get_servers();
 
 		class	ParseServerException: public std::exception{
 			std::string message;

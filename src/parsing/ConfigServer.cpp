@@ -143,7 +143,6 @@ void	ConfigServer::setIndex(std::string &index) {
 std::vector<std::string>	&ConfigServer::getIndex() {
 	return this->_index;
 }
-
 void	ConfigServer::setIndex(std::string &index) {
 	if (index.empty())
 		throw ConfigServerException("Error: Empty index!");

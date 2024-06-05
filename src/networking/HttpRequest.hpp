@@ -17,6 +17,9 @@ class HttpRequest {
 		// ConfigServer	_confServ;
 		// int				_port;
 
+		bool parsingFinished;
+
+
 		void		_parseMethod();
 		void		_parseURI();
 		void		_getChunkedBody(size_t &bodypos);
@@ -30,7 +33,6 @@ class HttpRequest {
 		HttpRequest(const HttpRequest&);
 		HttpRequest& operator=(const HttpRequest&);
 		~HttpRequest();
-
 		void	parseHttpRequest(const std::string& req);
 		void	printRequestDetails() const;
 
@@ -56,6 +58,10 @@ class HttpRequest {
 		void		parseBody(size_t &bodypos, const std::string &requestString);
 		bool		is_body(long& contentLength);
 		void		getChunkedBody(size_t &bodypos);
+
+		void setParsingFinished(bool finished);
+    	bool isParsingFinished() const;
+
 };
 
 #endif

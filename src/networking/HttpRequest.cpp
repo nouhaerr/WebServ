@@ -1,5 +1,46 @@
 #include "HttpRequest.hpp"
+#include <iostream>
+#include <algorithm>
+#include <sstream>
+#include <map>
 
+HttpRequest::HttpRequest() :
+    _request(""),
+    _method(""),
+    _uri(""),
+    _httpVersion(""),
+    _body(""),
+    isChunked(false),
+    _bodySize(0),
+    _errorCode(0),
+    parsingFinished(false) {}
+
+HttpRequest::HttpRequest(const HttpRequest& other) :
+    _request(other._request),
+    _method(other._method),
+    _uri(other._uri),
+    _httpVersion(other._httpVersion),
+    _headerFields(other._headerFields),
+    _body(other._body),
+    isChunked(other.isChunked),
+    _bodySize(other._bodySize),
+    _errorCode(other._errorCode) {}
+
+HttpRequest& HttpRequest::operator=(const HttpRequest& other) {
+    if (this != &other) 
+    {
+        _request = other._request;
+        _method = other._method;
+        _uri = other._uri;
+        _httpVersion = other._httpVersion;
+        _headerFields = other._headerFields;
+        isChunked = other.isChunked;
+        _body = other._body;
+        _bodySize = other._bodySize;
+        _errorCode = other._errorCode;
+    }
+    return *this;
+}
 HttpRequest::HttpRequest() :
 	_request(""),
 	_method(""),
@@ -57,6 +98,49 @@ void HttpRequest::parseHttpRequest(const std::string& req)
     std::istringstream lineStream(line);
     lineStream >> this->_method >> this->_uri >> this->_httpVersion;
 
+    // std::cout << "Method: " << this->_method << std::endl;
+    // std::cout << "URI: " << this->_uri << std::endl;
+    // std::cout << "HTTP Version: " << this->_httpVersion << std::endl;
+
+    _parseMethod();
+    if (this->_errorCode != 501) {
+        _parseURI();
+        if (this->_errorCode != 400 && this->_errorCode != 414)
+        {
+            while (std::getline(requestStream, line) && line != "\r" && !line.empty()) 
+            {
+                size_t colonPos = line.find(':');
+                if (colonPos != std::string::npos)
+                {
+                    std::string headerName = line.substr(0, colonPos);
+                    std::string headerValue = line.substr(colonPos + 2);
+                    _headerFields[headerName] = headerValue;
+                    // std::cout << "Header: " << headerName << " = " << headerValue << std::endl;  // Debugging output
+                }
+            }
+        }
+    }
+}
+
+void HttpRequest::_parseMethod() {
+    if (this->_method != "POST" && this->_method !="GET" && this->_method != "DELETE")
+        this->_errorCode = 501; /*Not Implemented method*/
+}
+
+void HttpRequest::_parseURI() {
+    size_t questionMarkPos = this->_uri.find_first_of('?'); // Check for query parameters
+    std::string queryString;
+
+    if (questionMarkPos != std::string::npos) {
+        queryString = this->_uri.substr(questionMarkPos + 1);
+        this->_uri = this->_uri.substr(0, questionMarkPos);
+    } else {
+        queryString.clear();
+    }
+    if (!this->_uri.find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;="))
+        this->_errorCode = 400; // Bad Request
+    if (this->_uri.length() > 2048)
+        this->_errorCode = 414; // 414 URI Too Long
     _parseMethod();
 	// if (this->_errorCode != 501) {
 		_parseURI();
@@ -107,14 +191,14 @@ std::string HttpRequest::getHeader(const std::string& headerName) const
     return "";
 }
 
-void	HttpRequest::printRequestDetails() const {
-    std::cout << "Method: " << _method << std::endl;
-    std::cout << "URI: " << _uri << std::endl;
-    std::cout << "HTTP Version: " << _httpVersion << std::endl;
-    for (std::map<std::string, std::string>::const_iterator it = _headerFields.begin(); it != _headerFields.end(); ++it) 
-        std::cout << it->first << ": " << it->second << std::endl;
-    std::cout << "Body: " << _body << std::endl;
-}
+// void HttpRequest::printRequestDetails() const {
+//     std::cout << "Method: " << _method << std::endl;
+//     std::cout << "URI: " << _uri << std::endl;
+//     std::cout << "HTTP Version: " << _httpVersion << std::endl;
+//     for (std::map<std::string, std::string>::const_iterator it = _headerFields.begin(); it != _headerFields.end(); ++it) 
+//         std::cout << it->first << ": " << it->second << std::endl;
+//     std::cout << "Body: " << _body << std::endl;
+// }
 
 void HttpRequest::setMethod(const std::string& m) { 
     this->_method = m; 
@@ -140,10 +224,10 @@ std::string HttpRequest::getMethod() const {
     return this->_method; 
 }
 
-std::string HttpRequest::getUri() const 
-{ 
+std::string HttpRequest::getUri() const { 
     return this->_uri; 
 }
+
 std::string HttpRequest::getHttpVersion() const { 
     return this->_httpVersion; 
 }
@@ -164,6 +248,14 @@ std::string HttpRequest::getRequest() const {
     return this->_request; 
 }
 
-int	HttpRequest::getErrorCode() const {
-	return this->_errorCode;
+int HttpRequest::getErrorCode() const {
+    return this->_errorCode;
+}
+
+void HttpRequest::setParsingFinished(bool finished) {
+    parsingFinished = finished;
+}
+
+bool HttpRequest::isParsingFinished() const {
+    return parsingFinished;
 }

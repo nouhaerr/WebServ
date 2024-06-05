@@ -1,5 +1,5 @@
 #ifndef HTTPRESPONE_HPP
-# define HTTPRESPONSE_HPP
+# define HTTPRESPONE_HPP
 
 #include "../Macros.hpp"
 #include "../parsing/Config.hpp"
