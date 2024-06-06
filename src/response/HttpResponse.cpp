@@ -83,10 +83,10 @@ void	HttpResponse::generateResponse(HttpRequest &req) {
 		handlePostMethod();
 		return ;
 	}
-	// if (req.getMethod() == "DELETE") {
-	// 	handleDeleteMethod();
-	// 	return ;
-	// }
+	if (req.getMethod() == "DELETE") {
+		handleDeleteMethod(); //where u put the Delete method
+		return ;
+	}
 	return ;
 }
 

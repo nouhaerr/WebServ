@@ -35,6 +35,8 @@ class HttpResponse {
 
 		void	handlePostMethod();
 		void	processPostMethod();
+
+		void	handleDeleteMethod();
 	private:
 		NetworkClient&	_client;
 		ConfigServer	_serv;
