@@ -10,10 +10,9 @@
 #include "HttpRequestParser.hpp"
 #include <arpa/inet.h>
 #include <cctype>
-#include "../response/HttpResponse.hpp"
+#include <cstring>
 #include <sys/sendfile.h>
-
-class NetworkClient;
+#include "../response/HttpResponse.hpp"
 
 class WebServer {
 public:
@@ -21,26 +20,29 @@ public:
     ~WebServer();
 
     void run();
+    NetworkClient& GetRightClient(int fd); 
 
 private:
-    fd_set masterSet, readSet;
-    int highestFd;  
-    std::vector<int> serverSockets;
-    std::vector<NetworkClient> clients;
-    std::vector<ConfigServer> serverConfigs;
-
     void setupServerSockets();
     void acceptNewClient(int serverSocket);
-    void closeClient(NetworkClient& client);
-    void processClientRequests(NetworkClient& client);
+    void closeClient(int clientSocket);
+   void processClientRequests(int clientSocket);
     void sendDataToClient(NetworkClient& client);
     NetworkClient* findClientBySocket(int socket);
-    const ConfigServer& matchServerByName(const std::string& host, int port);
     const ConfigServer& matchServerByFd(int fd);
+    // const ConfigServer& matchServerByName(const std::string& host);
+    const ConfigServer& matchServerByName(const std::string& host, int port);
+    // std::string generateResponse(const ConfigServer& server);
 
-    std::string generateResponse(const ConfigServer& server);
     void sendResponse(HttpRequest &req, NetworkClient &client);
     int sendResponseBody(NetworkClient &client);
+
+    fd_set masterSet, readSet, writeSet;
+    int highestFd;
+    std::vector<int> serverSockets;
+    std::map<int, NetworkClient> clients;  // Changer std::vector en std::map
+    // std::vector<ConfigServer> serverConfigs;
+    std::vector<ConfigServer> *serverConfigs;
 };
 
-#endif
+#endif // WEBSERVER_HPP

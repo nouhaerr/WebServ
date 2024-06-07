@@ -1,7 +1,6 @@
 #include "Config.hpp"
 #include "ParseFile.hpp"
 
-
 Config::Config() :
 	_serverCount(0),
 	_fileName(DEFAULT_CONFIG)

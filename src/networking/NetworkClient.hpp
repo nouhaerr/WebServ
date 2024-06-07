@@ -37,7 +37,7 @@ public:
     socklen_t* fetchAddressLength();
 
     bool isResponsePrepared() const;
-    void setServer(const ConfigServer &server);
+    void setServer(const ConfigServer& server);
     friend bool operator==(const NetworkClient& lhs, const NetworkClient& rhs);
     const ConfigServer& getConfigServer() const;
 
@@ -56,14 +56,16 @@ public:
     bool        getHeaderSent();
     std::string getResponse();
     bool        getOpenFile();
-    void		openFileForReading();
-    bool		isFileOpen() const;
-    void		readFromFile(char* buffer, std::streamsize bufferSize);
+    void openFileForReading();
+    bool isFileOpen() const;
+    void readFromFile(char* buffer, std::streamsize bufferSize);
     std::streamsize bytesRead() const;
 
+    void    setREQ(std::string& requestString);
+    std::string&    getREQ();
     HttpRequest		_req;
-    std::ifstream	_file;
-    int				bytes_read;
+    std::ifstream _file;
+    int			bytes_read;
 
 private:
     int serverSocketId;
@@ -76,9 +78,10 @@ private:
     std::string fullResponse;
     bool headerDispatched;
     bool fileAccessed;
-    bool		_headersSent;
-    bool		_openFile;
-    std::string	_response;
+    bool    _headersSent;
+    bool    _openFile;
+    std::string _response;
+    std::string REQ;
 };
 
 #endif

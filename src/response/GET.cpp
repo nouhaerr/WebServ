@@ -2,11 +2,11 @@
 
 std::string HttpResponse::_constructPath(const std::string& requestPath, const std::string &root, const std::string &index) {
 	std::string path = requestPath;
-	std::cout << path << "\n";
+	// std::cout << path << "\n";
     if (path.empty() || path[0] != '/') {
         path = "/" + path;
     }
-	std::cout << index << "\n";
+	// std::cout << index << "\n";
 	if (!path.empty() && path[path.length() - 1] == '/') {
         path += index;
     }
@@ -110,7 +110,8 @@ void	HttpResponse::_getAutoIndex() {
     	while ((ent = readdir(dir)) != NULL)
     	{
 			std::string	d_nm = ent->d_name;
-			if (d_nm == ".." || d_nm == ".") {
+			if (d_nm == ".." || d_nm == ".")
+			{
 				d_nm += '/';
 			std::cout << d_nm << "\n";
         	listeningfile << "<a href=\"" <<  d_nm << directory<< "\">" << ent->d_name << "</a><br>";
@@ -163,12 +164,12 @@ void	HttpResponse::_isFile() {
     // Handle file
     std::ifstream file(_filePath.c_str(), std::ios::in | std::ios::binary);
 	if (file) {
-		printf("fiiiile\n");
 		std::string extension = _filePath.substr(_filePath.find_last_of('.'));
 		// if (extension == ".py" || extension == ".rb" || extension == ".php") {
 		// 	_isCgi = true;
 		// 	return ;
 		// }
+		std::cout << "the file exist: " << _filePath<< "\n";
 		_contentType = getContentType(_filePath);
 		std::string header = createResponseHeader(200, "Nothing");
 		_client.setResponseHeader(header);
@@ -182,9 +183,12 @@ void	HttpResponse::_isFile() {
 	}
 }
 
+#include <cerrno>
+
 int	HttpResponse::_checkRequestedType() {
 	struct stat path_stat;
 	if (stat(_filePath.c_str(), &path_stat) != 0) {
+		std::cerr << "Error accessing file: " << strerror(errno) << std::endl;
 		_errCode = 404;
         return ERROR;
     }
@@ -212,6 +216,7 @@ void	HttpResponse::handleGetMethod() {
 		return ;
 	}
 	int type = _checkRequestedType();
+	std::cout << "type: "<<type <<std::endl;
 	if (type == FILE_TYPE) {
 		_isFile();
 		return;

@@ -18,6 +18,7 @@ class HttpRequest {
 		std::vector<ConfigServer>	_confServ;
 		ConfigServer	_serv;
 		// int				_port;
+		bool parsingFinished;
 
 		void		_parseMethod();
 		void		_parseURI();
@@ -60,6 +61,9 @@ class HttpRequest {
 		int			getErrorCode() const;
 
 		static int	hexToInt(const std::string& str);
+
+		void setParsingFinished(bool finished);
+    	bool isParsingFinished() const;
 };
 
 std::string trimHeader(const std::string& str);

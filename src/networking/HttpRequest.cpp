@@ -9,18 +9,8 @@ HttpRequest::HttpRequest() :
 	isChunked(false),
 	_bodySize(0),
 	_errorCode(0),
-	_serv() {}
-
-// HttpRequest::HttpRequest(std::vector<ConfigServer> serverConfig) :
-// 	_request(""),
-// 	_method(""),
-// 	_uri(""),
-// 	_httpVersion(""),
-// 	_body(""),
-// 	isChunked(false),
-// 	_bodySize(0),
-// 	_errorCode(0),
-// 	_confServ(serverConfig) {}
+	_serv(),
+    parsingFinished(false) {}
 
 HttpRequest::HttpRequest(ConfigServer serverConfig) :
 	_request(""),
@@ -32,10 +22,11 @@ HttpRequest::HttpRequest(ConfigServer serverConfig) :
 	_bodySize(0),
 	_errorCode(0),
 	_confServ(),
-	_serv(serverConfig) {}
+	_serv(serverConfig),
+	parsingFinished(false) {}
 
 HttpRequest::HttpRequest(const HttpRequest& other) :
-	_request(other._request),
+    _request(other._request),
 	_method(other._method),
 	_uri(other._uri),
 	_httpVersion(other._httpVersion),
@@ -45,12 +36,13 @@ HttpRequest::HttpRequest(const HttpRequest& other) :
 	_bodySize(other._bodySize),
 	_errorCode(other._errorCode),
 	_confServ(other._confServ),
-	_serv(other._serv) {}
+	_serv(other._serv),
+	parsingFinished(other.parsingFinished) {}
 
 HttpRequest& HttpRequest::operator=(const HttpRequest& other) {
-	if (this != &other) 
-	{
-		_request = other._request;
+    if (this != &other) 
+    {
+       _request = other._request;
 		_method = other._method;
 		_uri = other._uri;
 		_httpVersion = other._httpVersion;
@@ -61,12 +53,13 @@ HttpRequest& HttpRequest::operator=(const HttpRequest& other) {
 		_errorCode = other._errorCode;
 		_confServ = other._confServ;
 		_serv = other._serv;
-	}
-	return *this;
+		parsingFinished = other.parsingFinished;
+    }
+    return *this;
 }
 
 HttpRequest::~HttpRequest() {
-	_headerFields.clear();
+    _headerFields.clear();
 }
 
 std::string toLower(const std::string& str) 
@@ -86,45 +79,51 @@ void HttpRequest::parseHttpRequest(const std::string& req)
     lineStream >> this->_method >> this->_uri >> this->_httpVersion;
 
     _parseMethod();
-	if (this->_errorCode != 501) {
-		_parseURI();
-		if (this->_errorCode != 400 && this->_errorCode != 414)
-		{
-			while (std::getline(requestStream, line) && line != "\r" && !line.empty()) 
-			{
-				size_t colonPos = line.find(':');
-				if (colonPos != std::string::npos)
-				{
-					std::string headerName = line.substr(0, colonPos);
-					std::string headerValue = line.substr(colonPos + 2);
-					_headerFields[headerName] = headerValue;
-				}
-			}
-		}
-	}
+    std::cout << "KAYDKHOL\n";
+    if (this->_errorCode != 501) {
+        _parseURI();
+        if (this->_errorCode != 400 && this->_errorCode != 414)
+        {
+            while (std::getline(requestStream, line) && line != "\r" && !line.empty()) 
+            {
+                size_t colonPos = line.find(':');
+                if (colonPos != std::string::npos)
+                {
+                    std::string headerName = line.substr(0, colonPos);
+                    std::string headerValue = line.substr(colonPos + 2);
+                    _headerFields[headerName] = headerValue;
+                    // std::cout << "Header: " << headerName << " = " << headerValue << std::endl;  // Debugging output
+                }
+            }
+            size_t bodypos = req.find("\r\n\r\n");
+            if (bodypos != std::string::npos) 
+            {
+                bodypos += 4;
+                parseBody(bodypos);
+            }
+        }
+    }
 }
 
-void	HttpRequest::_parseMethod() {
-	if (this->_method != "POST" && this->_method !="GET" && this->_method != "DELETE")
-		this->_errorCode = 501; /*Not Implemented method*/
+void HttpRequest::_parseMethod() {
+    if (this->_method != "POST" && this->_method !="GET" && this->_method != "DELETE")
+        this->_errorCode = 501; /*Not Implemented method*/
 }
 
-void	HttpRequest::_parseURI() {
-	size_t questionMarkPos = this->_uri.find_first_of('?'); // Check for query parameters
-	std::string	queryString;
+void HttpRequest::_parseURI() {
+    size_t questionMarkPos = this->_uri.find_first_of('?'); // Check for query parameters
+    std::string queryString;
 
-	if (questionMarkPos != std::string::npos) {
-		queryString = this->_uri.substr(questionMarkPos + 1);
-		this->_uri = this->_uri.substr(0, questionMarkPos);
-	}
-	else {
-		// this->_uri = this->_uri;
-		queryString.clear();
-	}
-	if (this->_uri.find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=") != std::string::npos)
-		this->_errorCode = 400; //Bad Request
-	if (this->_uri.length() > 2048)
-		this->_errorCode = 414; //414 URI Too Long
+    if (questionMarkPos != std::string::npos) {
+        queryString = this->_uri.substr(questionMarkPos + 1);
+        this->_uri = this->_uri.substr(0, questionMarkPos);
+    } else {
+        queryString.clear();
+    }
+    if (!this->_uri.find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;="))
+        this->_errorCode = 400; // Bad Request
+    if (this->_uri.length() > 2048)
+        this->_errorCode = 414; // 414 URI Too Long
 }
 
 std::string HttpRequest::getHeader(const std::string& headerName) const 
@@ -135,7 +134,7 @@ std::string HttpRequest::getHeader(const std::string& headerName) const
     return "";
 }
 
-void	HttpRequest::printRequestDetails() const {
+void HttpRequest::printRequestDetails() const {
     std::cout << "Method: " << _method << std::endl;
     std::cout << "URI: " << _uri << std::endl;
     std::cout << "HTTP Version: " << _httpVersion << std::endl;
@@ -168,10 +167,10 @@ std::string HttpRequest::getMethod() const {
     return this->_method; 
 }
 
-std::string HttpRequest::getUri() const 
-{ 
+std::string HttpRequest::getUri() const { 
     return this->_uri; 
 }
+
 std::string HttpRequest::getHttpVersion() const { 
     return this->_httpVersion; 
 }
@@ -192,8 +191,16 @@ std::string HttpRequest::getRequest() const {
     return this->_request; 
 }
 
-int	HttpRequest::getErrorCode() const {
-	return this->_errorCode;
+int HttpRequest::getErrorCode() const {
+    return this->_errorCode;
+}
+
+void HttpRequest::setParsingFinished(bool finished) {
+    parsingFinished = finished;
+}
+
+bool HttpRequest::isParsingFinished() const {
+    return parsingFinished;
 }
 
 std::string trimHeader(const std::string& str) 

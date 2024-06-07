@@ -55,7 +55,7 @@ void	HttpResponse::_handleDefaultErrors() {
 
 void	HttpResponse::generateResponse(HttpRequest &req) {
 	_errCode = req.getErrorCode();
-	std::cout << _errCode << "\n";
+	std::cout << "errcode result from req:" << _errCode << "\n";
 	_uri = getRequestedResource(req);
 	_filePath = deleteRedundantSlash(_uri);
 	std::cout << "filePath: "<< _filePath << "\n";
@@ -251,7 +251,7 @@ std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
             _errorPage = it->getErrorPage();
             _methods = it->getMethods();
             _uploadPath = it->getUpload();
-            std::cout << "inMatch" << _uploadPath << "\n";
+            // std::cout << "inMatch " << _uploadPath << "\n";
 			if (_location.getRedirect() == true)
 				_redirection = _location.getRedirection();
 
@@ -294,54 +294,4 @@ std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
 
     // std::cout << _filePath << "\n";
     return _filePath;
-
-
-	// _uri = req.getUri();
-	// _locations = _serv.getLocation();
-	// size_t match_index = _locations.size(); // Initialize to an invalid index
-	// std::string	location;
-
-	// for (size_t i = 0; i < _locations.size(); ++i) {
-	// 	const std::string &locationName = _locations[i].getLocationName();
-	// 	size_t foundPos = _uri.find(locationName);
-	// 	if (foundPos == 0)
-	// 	{
-	// 		bool is_longer_uri = _uri.size() > locationName.size();
-	// 		bool not_slash_terminated = locationName != "/" && _uri[locationName.size()] != '/';
-
-    //         if (is_longer_uri && not_slash_terminated) {
-    //             continue;
-    //         }
-    //         if (locationName.size() > location.size()) {
-	// 			std::cout << "FoundPos: "<< foundPos << "\n";
-    //             location = locationName;
-    //             match_index = i;
-    //         }
-    //     }
-    // }
-
-    // if (match_index == _locations.size() || _serv.getLocation()[match_index].getRoot().empty()) {
-    //     req.getUri() = "";
-    // } else {
-    //     const std::string& root = _serv.getLocation()[match_index].getRoot();
-    //     size_t root_pos = _uri.find(root);
-    //     if (root_pos != std::string::npos) {
-    //         req.getUri() = _uri;
-    //     } else {
-    //         req.getUri() = root + "/" + _uri.substr(location.size());
-    //     }
-    // }
-
-	// 	if (_locations[match_index].getLocationName() == location) {
-	// 		_methods = _locations[match_index].getMethods();
-	// 		_autoindex = _locations[match_index].getAutoIndex();
-	// 		_root = _locations[match_index].getRoot();
-	// 		_errorPage = _locations[match_index].getErrorPage();
-	// 		_indexes = _locations[match_index].getIndex();
-	// 		if (_locations[match_index].getRedirect() == true)
-	// 			_redirection = _locations[match_index].getRedirection();
-	// 	}
-    // req.getUri() = deleteRedundantSlash(req.getUri());
-	// std::cout << "uri: "<< req.getUri() << "\n";
-    // return req.getUri();
 }

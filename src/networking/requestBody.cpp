@@ -27,29 +27,28 @@ void	HttpRequest::parseBody(size_t &bodypos)
 {
 	// _matchServer();
     long contentLength = 0;
-    if (is_body(contentLength)) 
+    if (this->_method == "POST" && is_body(contentLength)) 
     {
-        if (this->_method == "POST" && this->isChunked)
+        if (this->isChunked)
 		{
             _getChunkedBody(bodypos);
 			this->_bodySize = this->_body.size();
-            std::cout << "Extracted body: " << this->_body << std::endl;
+            // std::cout << "Extracted body: " << this->_body << std::endl;
 			if (this->_serv.getMaxBodySize() < this->_bodySize)
-				this->_errorCode = 413;
-			// 	this->_errorCode = 413; /*Content Too Large response status code indicates that
+				this->_errorCode = 413; /*Content Too Large response status code indicates that
 			// the request entity is larger than limits defined by server*/
 		}
-        else if (this->_method == "POST" && contentLength > 0)
+        else if (contentLength > 0)
         {
             // if (bodypos + contentLength <= this->_request.size()) 
             // {
 				std::string requestString = this->_request;
                 std::string bodyContent = requestString.substr(bodypos, contentLength);
-                this->_body = bodyContent;
+                this->_body += bodyContent;
 				this->_bodySize = contentLength;
 				if (this->_serv.getMaxBodySize() < this->_bodySize)
 					this->_errorCode = 413;
-                std::cout << "Extracted body: " << this->_body << std::endl;
+                // std::cout << "Extracted body: " << this->_body << std::endl;
             // } 
             // else 
             //     std::cerr << "Error: bodypos is out of range. Request size: " << this->_request.size() << " bodypos: " << bodypos << std::endl;

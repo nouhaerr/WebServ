@@ -64,7 +64,7 @@ void	HttpResponse::handlePostMethod(){
 		filecontent << bodyfile.rdbuf();
 		_bd = filecontent.str();
 		bodyfile.close();
-		// std::remove(_uploadPath.c_str());
+		std::remove(_uploadPath.c_str());
 		processPostMethod();
 		return ;
 	}

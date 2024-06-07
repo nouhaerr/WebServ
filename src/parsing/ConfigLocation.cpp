@@ -170,6 +170,3 @@ std::string&	ConfigLocation::getRedirection() {
 int&	ConfigLocation::getRedirectCode() {
 	return (this->_redirectCode);
 }
-
-
-
