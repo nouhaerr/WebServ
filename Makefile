@@ -6,8 +6,7 @@ SRC = src/main.cpp\
 	src/parsing/Config.cpp src/parsing/ParseFile.cpp\
 	src/parsing/ConfigServer.cpp src/parsing/utils.cpp\
 	src/parsing/ConfigLocation.cpp\
-	src/networking/NetworkClient.cpp \
-	src/networking/WebServer.cpp \
+	src/networking/WebServer.cpp src/networking/NetworkClient.cpp \
 	src/networking/sendResponse.cpp\
 	src/networking/HttpRequest.cpp \
 	src/networking/requestBody.cpp \
