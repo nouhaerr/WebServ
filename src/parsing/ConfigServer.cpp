@@ -1,10 +1,10 @@
 #include "ConfigServer.hpp"
 
 ConfigServer::ConfigServer() : 
-_host("127.0.0.1"),
-_port(8000),
+_host(""),
+_port(0),
 _serverName(""),
-_maxBodySize(100000),
+_maxBodySize(0),
 _autoindex(false),
 _root(""),
 _index(std::vector<std::string>()),
@@ -78,6 +78,7 @@ const size_t &ConfigServer::getPort() const {
 void	ConfigServer::setServerName(std::string& serverName) {
 	if (serverName.empty() || serverName.find_first_of(" \t") != std::string::npos)
 		throw ConfigServerException("Error: Wrong ServerName");
+		
 	this->_serverName = serverName;
 }
 

@@ -13,26 +13,28 @@ public:
     ~WebServer();
 
     void run();
-    NetworkClient& GetRightClient(int fd); 
+    NetworkClient& GetRightClient(int fd);
+
+void CheckRequestStatus(NetworkClient &client);
 
 private:
     void setupServerSockets();
     void acceptNewClient(int serverSocket);
     void closeClient(int clientSocket);
-   void processClientRequests(int clientSocket);
+    void processClientRequests(int clientSocket);
     void sendDataToClient(NetworkClient& client);
     NetworkClient* findClientBySocket(int socket);
     const ConfigServer& matchServerByFd(int fd);
-    // const ConfigServer& matchServerByName(const std::string& host);
     const ConfigServer& matchServerByName(const std::string& host, int port);
     std::string generateResponse(const ConfigServer& server);
+    void readFromClient(int clientSocket, std::string &requestString);
 
     fd_set masterSet, readSet, writeSet;
     int highestFd;
     std::vector<int> serverSockets;
-    std::map<int, NetworkClient> clients;  // Changer std::vector en std::map
-    // std::vector<ConfigServer> serverConfigs;
-    std::vector<ConfigServer> *serverConfigs;
+    std::map<int, NetworkClient> clients;
+    std::vector<ConfigServer>* serverConfigs;
+    std::map<int, std::string> clientRequests; // Stockage des requêtes par client
+    int currentClientIndex;
 };
-
-#endif // WEBSERVER_HPP
+#endif

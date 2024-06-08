@@ -20,7 +20,7 @@ void	HttpResponse::locateErrorPage(int errCode) {
 		if (it->first == errCode) {
 			_errorPath = _root + it->second;
 			_errorPath = deleteRedundantSlash(_errorPath);
-			std::cout << _errorPath << "\n";
+			//std::cout << _errorPath << "\n";
 			return ;
 		}
 	}
@@ -52,7 +52,7 @@ void	HttpResponse::generateResponse(HttpRequest &req) {
     	_client.setResponseHeader(header);
 		return;
 	}
-	if (req.getMethod() == "GET") {
+	if (req.get_httpMethod() == "GET") {
 	 	handleGetMethod();
 		return ;
 	}
@@ -109,7 +109,7 @@ std::string	HttpResponse::getContentLength() {
     if (stat(_errorPath.c_str(), &fileStat) == 0) 
     {
 		_fileSize = fileStat.st_size;
-		std::cout << "file exist of size: " << _fileSize << "\n";
+		//std::cout << "file exist of size: " << _fileSize << "\n";
         std::ostringstream oss;
         oss << fileStat.st_size;
         return oss.str();
@@ -165,7 +165,7 @@ void	HttpResponse::buildResponse(int errCode) {
 }
 
 void	HttpResponse::checkHttpVersion(HttpRequest &req) {
-	std::string const &version = req.getHttpVersion();
+	std::string const &version = req.get_httpVersion();
 	if (version != "HTTP/1.1") {
 		_errCode = 505;
 		return ;
@@ -193,7 +193,7 @@ std::string HttpResponse::deleteRedundantSlash(std::string uri)
 }
 
 std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
-	_uri = req.getUri();
+	_uri = req.get_uri();
 	_locations = _serv.getLocation();
 	size_t match_index = _locations.size(); // Initialize to an invalid index
 	std::string	location;
@@ -203,7 +203,7 @@ std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
 		size_t foundPos = _uri.find(locationName);
 		if (foundPos == 0)
 		{
-			std::cout << "FoundPos: "<< foundPos << "\n";
+			//std::cout << "FoundPos: "<< foundPos << "\n";
 			bool is_longer_uri = _uri.size() > locationName.size();
 			bool not_slash_terminated = locationName != "/" && _uri[locationName.size()] != '/';
 
@@ -218,14 +218,14 @@ std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
     }
 
     if (match_index == _locations.size() || _serv.getLocation()[match_index].getRoot().empty()) {
-        req.getUri() = "";
+        req.get_uri() = "";
     } else {
         const std::string& root = _serv.getLocation()[match_index].getRoot();
         size_t root_pos = _uri.find(root);
         if (root_pos != std::string::npos) {
-            req.getUri() = _uri;
+            req.get_uri() = _uri;
         } else {
-            req.getUri() = root + "/" + _uri.substr(location.size());
+            req.get_uri() = root + "/" + _uri.substr(location.size());
         }
     }
 
@@ -238,7 +238,7 @@ std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
 			if (_locations[match_index].getRedirect() == true)
 				_redirection = _locations[match_index].getRedirection();
 		}
-    req.getUri() = deleteRedundantSlash(req.getUri());
-	std::cout << "uri: "<< req.getUri() << "\n";
-    return req.getUri();
+    req.get_uri() = deleteRedundantSlash(req.get_uri());
+	//std::cout << "uri: "<< req.get_uri() << "\n";
+    return req.get_uri();
 }

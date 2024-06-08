@@ -52,6 +52,7 @@ ConfigServer Config::parseServerConfig(std::vector<t_tokens>::iterator& it) {
 			lis++;
 		}
 		else if (it->_type == "server_name") {
+			
 			server.setServerName(it->_value);
 			serv++;
 		}
