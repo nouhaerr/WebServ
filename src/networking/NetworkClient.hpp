@@ -60,9 +60,12 @@ public:
     bool isFileOpen() const;
     void readFromFile(char* buffer, std::streamsize bufferSize);
     std::streamsize bytesRead() const;
+
+    void    setREQ(std::string& requestString);
+    std::string&    getREQ();
     HttpRequest		_req;
-    std::ifstream	_file;
-    int				bytes_read;
+    std::ifstream _file;
+    int			bytes_read;
 
 private:
     int serverSocketId;
@@ -78,6 +81,7 @@ private:
     bool    _headersSent;
     bool    _openFile;
     std::string _response;
+    std::string REQ;
 };
 
 #endif

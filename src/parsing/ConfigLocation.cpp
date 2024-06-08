@@ -3,12 +3,12 @@
 ConfigLocation::ConfigLocation() :
 	_locationName(""),
 	_root(""),
-	_index(std::vector<std::string>()),
-	_methods(std::vector<std::string>()),
+	_index(),
+	_methods(),
 	_maxBodySize(100000),
 	_autoindex(false),
 	_upload(""),
-	_errorPage(std::map<int , std::string>()),
+	_errorPage(),
 	_redirect(false),
 	_redirection(""),
 	_redirectCode(0)
@@ -58,8 +58,8 @@ std::string& ConfigLocation::getRoot() {
 }
 
 void	ConfigLocation::setIndex(std::string& index) {
-	if (index.empty())
-		throw ConfigLocationException("Error: Empty index!");
+	// if (index.empty())
+	// 	throw ConfigLocationException("Error: Empty index!");
 	this->_index = splitVal(index);
 }
 
@@ -110,7 +110,7 @@ bool&	ConfigLocation::getAutoIndex() {
 }
 
 void	ConfigLocation::setUpload(std::string& upload) {	
-	if (upload.empty() || upload.find_first_of(" \t") != std::string::npos)
+	if (upload.find_first_of(" \t") != std::string::npos)
 		throw ConfigLocationException("Error: Wrong Upload!");
 	this->_upload = upload;
 }
@@ -170,6 +170,3 @@ std::string&	ConfigLocation::getRedirection() {
 int&	ConfigLocation::getRedirectCode() {
 	return (this->_redirectCode);
 }
-
-
-

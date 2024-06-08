@@ -1,12 +1,4 @@
 #include "WebServer.hpp"
-#include "HttpRequest.hpp"
-#include "HttpRequestParser.hpp"
-#include <iostream>
-#include <cstring>
-#include <unistd.h>
-#include <algorithm>
-#include <arpa/inet.h>
-#include <cctype>
 
 std::string trimm(const std::string& str) 
 {
@@ -23,7 +15,10 @@ NetworkClient& WebServer::GetRightClient(int fd)
 {
     std::map<int, NetworkClient>::iterator it = this->clients.find(fd);
     if (it != this->clients.end())
+    {
+        std::cout << "Client found on fd: " << fd << std::endl;
         return it->second;
+    }
     else
         throw std::runtime_error("BUG: Potential Server error");
 }
@@ -33,6 +28,7 @@ WebServer::WebServer(const Config& config)
 {
     serverConfigs = new std::vector<ConfigServer>(config.getServers());
 
+	fd_set masterSet, readSet, writeSet;
     FD_ZERO(&masterSet);
     FD_ZERO(&readSet);
     FD_ZERO(&writeSet);
@@ -88,6 +84,7 @@ void WebServer::setupServerSockets()
             continue;
         }
         FD_SET(sockfd, &this->readSet);
+        FD_SET(sockfd, &this->writeSet);
         FD_SET(sockfd, &this->masterSet);
         if (sockfd > highestFd) 
             highestFd = sockfd;
@@ -114,24 +111,24 @@ void WebServer::run()
 
         for (int i = 3; i <= this->highestFd; i++) 
         { 
-            if(FD_ISSET(i, &writecpy))
-            {
-                NetworkClient client = GetRightClient(i); 
-                // std::cout << "Sending data to client on socket: " << i << std::endl;
-                sendDataToClient(client);
-            }
-            else if (FD_ISSET(i, &readcpy)) 
+            if (FD_ISSET(i, &readcpy)) 
             {
                 if (std::find(serverSockets.begin(), serverSockets.end(), i) != serverSockets.end()) 
                 {
-                    // std::cout << "New client connection on socket: " << i << std::endl;
+                    std::cout << "New client connection on socket: " << i << std::endl;
                     acceptNewClient(i);                                               
                 }
                 else 
                 {
-                    //std::cout << "Processing client requests for socket: " << i << std::endl;
-                    processClientRequests(i);                                                                
-                }
+                    // std::cout << "Processing client requests for socket: " << i << std::endl;
+                    processClientRequests(i);
+				}
+            }
+            if(FD_ISSET(i, &writecpy))
+            {
+                NetworkClient& client = GetRightClient(i);
+                std::cout << "Sending data to client on socket: " << i << std::endl;
+                sendDataToClient(client);
             }
         }   
     }
@@ -139,12 +136,12 @@ void WebServer::run()
 
 const ConfigServer& WebServer::matchServerByFd(int fd) 
 {
-    for (size_t i = 0; i < serverConfigs->size(); ++i) 
+    for (size_t i = 0; i < serverConfigs->size(); ++i)
     {
-        if ((*serverConfigs)[i].getSocket() == fd) 
+        if ((*serverConfigs)[i].getSocket() == fd)
             return (*serverConfigs)[i];
     }
-   // std::cerr << "No matching server found for socket fd: " << fd << std::endl;
+   std::cerr << "No matching server found for socket fd: " << fd << std::endl;
     return (*serverConfigs)[0];
 }
 
@@ -159,11 +156,13 @@ void WebServer::acceptNewClient(int serverSocket)
         std::cerr << "Failed to accept client." << std::endl;
         return;
     }
-
+    //Match ServerConfig with server which the client is connected
+    const ConfigServer& associatedServer = matchServerByFd(serverSocket);
     NetworkClient newClient(clientSocket, serverSocket);
+    newClient.setServer(associatedServer);
     clients[clientSocket] = newClient;
     FD_SET(clientSocket, &this->readSet);
-    if (clientSocket > highestFd) 
+    if (clientSocket > highestFd)
         highestFd = clientSocket;
     // std::cout << "New client on socket " << clientSocket << " accepted." << std::endl;
 }
@@ -178,23 +177,47 @@ void WebServer::closeClient(int clientSocket)
         FD_CLR(it->first, &readSet);
         FD_CLR(it->first, &writeSet);
         clients.erase(it);
-        // std::cout << "Client with socket " << clientSocket << " has been closed and removed." << std::endl;
+        std::cout << "Client with socket " << clientSocket << " has been closed and removed." << std::endl;
     } 
     else
         std::cerr << "Attempt to close non-existent client socket." << std::endl;
 }
 
+// int extractContentLength(const std::string& request) {
+//     std::string contentLengthHeader = "Content-Length: ";
+//     std::size_t pos = request.find(contentLengthHeader);
+//     if (pos != std::string::npos) {
+//         pos += contentLengthHeader.length();
+//         std::size_t endPos = request.find("\r\n", pos);
+//         if (endPos != std::string::npos) {
+//             std::string contentLengthStr = request.substr(pos, endPos - pos);
+//             try {
+//                 return std::stoi(contentLengthStr);
+//             } catch (const std::invalid_argument& e) {
+//                 std::cerr << "Invalid Content-Length value" << std::endl;
+//                 return -1;
+//             }
+//         }
+//     }
+//     return -1; // Return -1 if Content-Length is not found
+// }
+
+void WebServer::sendDataToClient(NetworkClient& client) 
+{
+    sendResponse(client.getRequest(), client);
+}       
+
 void WebServer::processClientRequests(int clientSocket) 
 {
     NetworkClient& client = GetRightClient(clientSocket);
     std::string requestString;
+	// std::stringstream	REQ;
     char buffer[1024];
     int bytesRead = 0;
 
     while ((bytesRead = recv(client.fetchConnectionSocket(), buffer, sizeof(buffer), 0)) > 0) 
     {
         requestString.append(buffer, bytesRead);
-        std::cout << "Received chunk of size: " << bytesRead << std::endl;
         if (requestString.find("\r\n\r\n") != std::string::npos)
             break;
     }
@@ -205,104 +228,44 @@ void WebServer::processClientRequests(int clientSocket)
         closeClient(client.fetchConnectionSocket());
         return;
     }
-
-    HttpRequest request;
+   
+	ConfigServer	conf = client.getServer();
+    HttpRequest request(conf);
     request.parseHttpRequest(requestString);
+    request.setParsingFinished(true);
 
-    // if (request.getErrorCode() != 0) 
+    std::cout << "\n" << requestString << std::endl;
+	std::cout << "durant function process=>fd of client: " << clientSocket << std::endl;
+	clients[clientSocket].setRequest(request);
+	FD_SET(clientSocket, &this->writeSet);
+
+    // std::string hostHeader = request.getHeader("Host");
+    // if (!hostHeader.empty())
     // {
-    //     std::cerr << "Error in request parsing: " << request.getErrorCode() << std::endl;
+    //     hostHeader = trimm(hostHeader);
+
+    //     size_t portPos = hostHeader.find(":");
+    //     int port = 90; // Default to 80 if no port is specified
+    //     if (portPos != std::string::npos) {
+    //         port = std::atoi(hostHeader.substr(portPos + 1).c_str());
+    //         hostHeader = hostHeader.substr(0, portPos);
+    //     } 
+    //     else
+    //         port = client.getServer().getPort();
+
+    //     const ConfigServer& clientServer = matchServerByName(hostHeader, port);
+    //     client.setServer(clientServer);
+        // FD_SET(clientSocket, &this->writeSet);
+    //     sendResponse(request, client);
+    // } 
+    // else 
+    // {
+    //     std::cerr << "Host header not found in the request." << std::endl;
     //     closeClient(client.fetchConnectionSocket());
     //     return;
     // }
-
-    std::cout << "Full request received:\n" << requestString << std::endl;
-    std::cout << "Request size: " << requestString.size() << std::endl; 
-
-    std::string contentLengthHeader = request.getHeader("Content-Length");
-    if (!contentLengthHeader.empty()) 
-    {
-        size_t contentLength = std::stoul(contentLengthHeader);
-        size_t totalBytesRead = requestString.size() - requestString.find("\r\n\r\n") - 4;
-
-        while (totalBytesRead < contentLength) 
-        {
-            bytesRead = recv(client.fetchConnectionSocket(), buffer, sizeof(buffer), 0);
-            if (bytesRead <= 0) 
-            {
-                std::cerr << "Read failed or connection closed by peer while reading body." << std::endl;
-                closeClient(client.fetchConnectionSocket());
-                return;
-            }
-            requestString.append(buffer, bytesRead);
-            totalBytesRead += bytesRead;
-            std::cout << "Received chunk of size: " << bytesRead << " for body" << std::endl;
-        }
-    }
-
-    size_t bodypos = requestString.find("\r\n\r\n");
-    if (bodypos != std::string::npos) 
-    {
-        bodypos += 4;  
-        if (bodypos <= requestString.size()) 
-        {
-            std::string bodyContent = requestString.substr(bodypos);
-            request.setBody(bodyContent);
-            std::cout << "Processed body: " << request.getBody() << std::endl;
-        } 
-        else 
-            std::cerr << "Error: bodypos is out of range." << std::endl;
-    } 
-    else 
-    {
-        std::cerr << "Error: Could not find the end of the headers in the request." << std::endl;
-        closeClient(client.fetchConnectionSocket());
-        return;
-    }
-
-    request.setParsingFinished(true);
-    std::cout << "Parsing finished: " << request.isParsingFinished() << std::endl;  
-
-    std::string hostHeader = request.getHeader("Host");
-    if (!hostHeader.empty()) 
-    {
-        hostHeader = trimm(hostHeader);
-
-        size_t portPos = hostHeader.find(":");
-        int port = 80;
-        if (portPos != std::string::npos) 
-        {
-            port = std::atoi(hostHeader.substr(portPos + 1).c_str());
-            hostHeader = hostHeader.substr(0, portPos);
-        } 
-        else
-            port = client.getServer().getPort();
-
-        const ConfigServer& clientServer = matchServerByName(hostHeader, port);
-        FD_SET(clientSocket, &this->writeSet);
-        std::string response = generateResponse(clientServer);
-        send(client.fetchConnectionSocket(), response.c_str(), response.size(), 0);
-    } 
-    else 
-    {
-        std::cerr << "Host header not found in the request." << std::endl;
-        closeClient(client.fetchConnectionSocket());
-        return;
-    }
-    closeClient(client.fetchConnectionSocket());
 }
 
-void WebServer::sendDataToClient(NetworkClient& client) 
-{
-    if (!client.isResponsePrepared()) 
-        return;
-
-    std::string response = client.retrieveResponseContent();
-    int sentBytes = send(client.fetchConnectionSocket(), response.c_str(), response.size(), 0);
-    if (sentBytes < 0)
-        std::cerr << "Failed to send response." << std::endl;
-    closeClient(client.fetchConnectionSocket());
-}       
 
 NetworkClient* WebServer::findClientBySocket(int socket) 
 {
@@ -347,145 +310,3 @@ const ConfigServer& WebServer::matchServerByName(const std::string& host, int po
     // std::cerr << "\n******* ❌ ❌ ❌ ❌No matching server found for host: " << host << " on port: " << port << ". Defaulting to first server." << std::endl;
     return (*serverConfigs)[0];
 }
-
-std::string WebServer::generateResponse(const ConfigServer& server) 
-{
-    std::string responseContent = 
-        "<!DOCTYPE html>\n"
-        "<html lang=\"en\">\n"
-        "<head>\n"
-        "    <meta charset=\"UTF-8\">\n"
-        "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
-        "    <title>Welcome to My Pro WebServer</title>\n"
-        "    <style>\n"
-        "        body, html {\n"
-        "            margin: 0;\n"
-        "            padding: 0;\n"
-        "            width: 100%;\n"
-        "            height: 100%;\n"
-        "            overflow: hidden;\n"
-        "            font-family: Arial, sans-serif;\n"
-        "        }\n"
-        "        .container {\n"
-        "            position: absolute;\n"
-        "            top: 50%;\n"
-        "            left: 50%;\n"
-        "            transform: translate(-50%, -50%);\n"
-        "            text-align: center;\n"
-        "            background: rgba(255, 255, 255, 0.8);\n"
-        "            padding: 20px;\n"
-        "            border-radius: 10px;\n"
-        "        }\n"
-        "        .matrix-background {\n"
-        "            background-color: black;\n"
-        "            color: green;\n"
-        "            font-family: 'Courier New', Courier, monospace;\n"
-        "        }\n"
-        "        .matrix-text {\n"
-        "            position: absolute;\n"
-        "            top: 90%;\n"
-        "            width: 100%;\n"
-        "            text-align: center;\n"
-        "            font-size: 1.5em;\n"
-        "            color: green;\n"
-        "        }\n"
-        "        canvas {\n"
-        "            display: block;\n"
-        "            position: absolute;\n"
-        "            top: 0;\n"
-        "            left: 0;\n"
-        "            width: 100%;\n"
-        "            height: 100%;\n"
-        "        }\n"
-        "        #movingButton {\n"
-        "            position: absolute;\n"
-        "            padding: 10px 20px;\n"
-        "            background-color: #007BFF;\n"
-        "            color: white;\n"
-        "            border: none;\n"
-        "            border-radius: 5px;\n"
-        "            cursor: pointer;\n"
-        "            font-size: 1em;\n"
-        "            transition: all 0.3s ease;\n"
-        "        }\n"
-        "    </style>\n"
-        "</head>\n"
-        "<body>\n"
-        "    <canvas id=\"matrix\"></canvas>\n"
-        "    <div class=\"container\" id=\"main-container\">\n"
-        "        <h1>Welcome to My Pro WebServer</h1>\n"
-        "        <p>This is a simple web server.</p>\n"
-        "        <p>Served by: <strong>" + server.getServerName() + "</strong></p>\n"
-        "        <button onclick=\"toggleBackground()\">Toggle Background</button>\n"
-        "    </div>\n"
-        "    <div class=\"matrix-text\">By: BG-1337-MAR</div>\n"
-        "    <button id=\"movingButton\" onmouseover=\"moveButton()\">Attrape-moi</button>\n"
-        "    <script>\n"
-        "        var c = document.getElementById('matrix');\n"
-        "        var ctx = c.getContext('2d');\n"
-        "        c.width = window.innerWidth;\n"
-        "        c.height = window.innerHeight;\n"
-        "        var matrix = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789@#$%^&*()*&^%';\n"
-        "        matrix = matrix.split('');\n"
-        "        var font_size = 10;\n"
-        "        var columns = c.width/font_size;\n"
-        "        var drops = [];\n"
-        "        for(var x = 0; x < columns; x++)\n"
-        "            drops[x] = 1;\n"
-        "        function draw() {\n"
-        "            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';\n"
-        "            ctx.fillRect(0, 0, c.width, c.height);\n"
-        "            ctx.fillStyle = '#0F0';\n"
-        "            ctx.font = font_size + 'px arial';\n"
-        "            for(var i = 0; i < drops.length; i++) {\n"
-        "                var text = matrix[Math.floor(Math.random()*matrix.length)];\n"
-        "                ctx.fillText(text, i*font_size, drops[i]*font_size);\n"
-        "                if(drops[i]*font_size > c.height && Math.random() > 0.975)\n"
-        "                    drops[i] = 0;\n"
-        "                drops[i]++;\n"
-        "            }\n"
-        "        }\n"
-        "        setInterval(draw, 33);\n"
-        "        function toggleBackground() {\n"
-        "            var container = document.getElementById('main-container');\n"
-        "            if (container.classList.contains('matrix-background')) {\n"
-        "                container.classList.remove('matrix-background');\n"
-        "                container.style.background = 'rgba(255, 255, 255, 0.8)';\n"
-        "                container.style.color = '#333';\n"
-        "            } else {\n"
-        "                container.classList.add('matrix-background');\n"
-        "                container.style.background = 'rgba(0, 0, 0, 0.8)';\n"
-        "                container.style.color = 'green';\n"
-        "            }\n"
-        "        }\n"
-        "        var clickCount = 0;\n"
-        "        function moveButton() {\n"
-        "            clickCount++;\n"
-        "            if (clickCount > 5) {\n"
-        "                window.location.href = 'https://1337.ma/fr/';\n"
-        "                return;\n"
-        "            }\n"
-        "            var button = document.getElementById('movingButton');\n"
-        "            var x = Math.random() * (window.innerWidth - button.offsetWidth);\n"
-        "            var y = Math.random() * (window.innerHeight - button.offsetHeight);\n"
-        "            button.style.left = x + 'px';\n"
-        "            button.style.top = y + 'px';\n"
-        "            if (clickCount == 5) {\n"
-        "                button.innerText = 'I am here!';\n"
-        "            }\n"
-        "        }\n"
-        "    </script>\n"
-        "</body>\n"
-        "</html>\n";
-
-    std::string response = "HTTP/1.1 200 OK\r\n";
-    response += "Content-Type: text/html; charset=UTF-8\r\n";
-    response += "Content-Length: " + std::to_string(responseContent.size()) + "\r\n";
-    response += "Connection: close\r\n\r\n";
-    response += responseContent;
-
-    return response;
-}
-
-
-

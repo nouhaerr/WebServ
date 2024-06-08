@@ -7,6 +7,15 @@
 #include <netinet/in.h>
 #include "NetworkClient.hpp"
 #include "../parsing/Config.hpp"
+#include "../parsing/ConfigServer.hpp"
+#include "HttpRequest.hpp"
+#include "HttpRequestParser.hpp"
+#include <arpa/inet.h>
+#include <cctype>
+#include <cstring>
+#include <sys/sendfile.h>
+#include "../response/HttpResponse.hpp"
+
 class WebServer {
 public:
     WebServer(const Config& config);
@@ -25,7 +34,10 @@ private:
     const ConfigServer& matchServerByFd(int fd);
     // const ConfigServer& matchServerByName(const std::string& host);
     const ConfigServer& matchServerByName(const std::string& host, int port);
-    std::string generateResponse(const ConfigServer& server);
+    // std::string generateResponse(const ConfigServer& server);
+
+    void sendResponse(HttpRequest &req, NetworkClient &client);
+    int sendResponseBody(NetworkClient &client);
 
     fd_set masterSet, readSet, writeSet;
     int highestFd;

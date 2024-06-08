@@ -1,8 +1,4 @@
 #include "HttpRequest.hpp"
-#include <iostream>
-#include <algorithm>
-#include <sstream>
-#include <map>
 
 HttpRequest::HttpRequest() :
 	_request(""),
@@ -13,18 +9,8 @@ HttpRequest::HttpRequest() :
 	isChunked(false),
 	_bodySize(0),
 	_errorCode(0),
-	_serv() {}
-
-// HttpRequest::HttpRequest(std::vector<ConfigServer> serverConfig) :
-// 	_request(""),
-// 	_method(""),
-// 	_uri(""),
-// 	_httpVersion(""),
-// 	_body(""),
-// 	isChunked(false),
-// 	_bodySize(0),
-// 	_errorCode(0),
-// 	_confServ(serverConfig) {}
+	_serv(),
+    parsingFinished(false) {}
 
 HttpRequest::HttpRequest(ConfigServer serverConfig) :
 	_request(""),
@@ -36,10 +22,11 @@ HttpRequest::HttpRequest(ConfigServer serverConfig) :
 	_bodySize(0),
 	_errorCode(0),
 	_confServ(),
-	_serv(serverConfig) {}
+	_serv(serverConfig),
+	parsingFinished(false) {}
 
 HttpRequest::HttpRequest(const HttpRequest& other) :
-	_request(other._request),
+    _request(other._request),
 	_method(other._method),
 	_uri(other._uri),
 	_httpVersion(other._httpVersion),
@@ -49,12 +36,13 @@ HttpRequest::HttpRequest(const HttpRequest& other) :
 	_bodySize(other._bodySize),
 	_errorCode(other._errorCode),
 	_confServ(other._confServ),
-	_serv(other._serv) {}
+	_serv(other._serv),
+	parsingFinished(other.parsingFinished) {}
 
 HttpRequest& HttpRequest::operator=(const HttpRequest& other) {
-	if (this != &other) 
-	{
-		_request = other._request;
+    if (this != &other) 
+    {
+       _request = other._request;
 		_method = other._method;
 		_uri = other._uri;
 		_httpVersion = other._httpVersion;
@@ -65,12 +53,13 @@ HttpRequest& HttpRequest::operator=(const HttpRequest& other) {
 		_errorCode = other._errorCode;
 		_confServ = other._confServ;
 		_serv = other._serv;
-	}
-	return *this;
+		parsingFinished = other.parsingFinished;
+    }
+    return *this;
 }
 
 HttpRequest::~HttpRequest() {
-	_headerFields.clear();
+    _headerFields.clear();
 }
 
 std::string toLower(const std::string& str) 
@@ -94,6 +83,7 @@ void HttpRequest::parseHttpRequest(const std::string& req)
     // std::cout << "HTTP Version: " << this->_httpVersion << std::endl;
 
     _parseMethod();
+    std::cout << "KAYDKHOL\n";
     if (this->_errorCode != 501) {
         _parseURI();
         if (this->_errorCode != 400 && this->_errorCode != 414)
@@ -109,6 +99,12 @@ void HttpRequest::parseHttpRequest(const std::string& req)
                     // std::cout << "Header: " << headerName << " = " << headerValue << std::endl;  // Debugging output
                 }
             }
+            size_t bodypos = req.find("\r\n\r\n");
+            if (bodypos != std::string::npos) 
+            {
+                bodypos += 4;
+                parseBody(bodypos);
+            }
         }
     }
 }
@@ -118,28 +114,20 @@ void HttpRequest::_parseMethod() {
         this->_errorCode = 501; /*Not Implemented method*/
 }
 
+void HttpRequest::_parseURI() {
+    size_t questionMarkPos = this->_uri.find_first_of('?'); // Check for query parameters
+    std::string queryString;
 
-// void	HttpRequest::_parseMethod() {
-// 	if (this->_method != "POST" && this->_method !="GET" && this->_method != "DELETE")
-// 		this->_errorCode = 501; /*Not Implemented method*/
-// }
-
-void	HttpRequest::_parseURI() {
-	size_t questionMarkPos = this->_uri.find_first_of('?'); // Check for query parameters
-	std::string	queryString;
-
-	if (questionMarkPos != std::string::npos) {
-		queryString = this->_uri.substr(questionMarkPos + 1);
-		this->_uri = this->_uri.substr(0, questionMarkPos);
-	}
-	else {
-		// this->_uri = this->_uri;
-		queryString.clear();
-	}
-	if (!this->_uri.find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;="))
-		this->_errorCode = 400; //Bad Request
-	if (this->_uri.length() > 2048)
-		this->_errorCode = 414; //414 URI Too Long
+    if (questionMarkPos != std::string::npos) {
+        queryString = this->_uri.substr(questionMarkPos + 1);
+        this->_uri = this->_uri.substr(0, questionMarkPos);
+    } else {
+        queryString.clear();
+    }
+    if (!this->_uri.find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;="))
+        this->_errorCode = 400; // Bad Request
+    if (this->_uri.length() > 2048)
+        this->_errorCode = 414; // 414 URI Too Long
 }
 
 std::string HttpRequest::getHeader(const std::string& headerName) const 
@@ -150,14 +138,14 @@ std::string HttpRequest::getHeader(const std::string& headerName) const
     return "";
 }
 
-// void HttpRequest::printRequestDetails() const {
-//     std::cout << "Method: " << _method << std::endl;
-//     std::cout << "URI: " << _uri << std::endl;
-//     std::cout << "HTTP Version: " << _httpVersion << std::endl;
-//     for (std::map<std::string, std::string>::const_iterator it = _headerFields.begin(); it != _headerFields.end(); ++it) 
-//         std::cout << it->first << ": " << it->second << std::endl;
-//     std::cout << "Body: " << _body << std::endl;
-// }
+void HttpRequest::printRequestDetails() const {
+    std::cout << "Method: " << _method << std::endl;
+    std::cout << "URI: " << _uri << std::endl;
+    std::cout << "HTTP Version: " << _httpVersion << std::endl;
+    for (std::map<std::string, std::string>::const_iterator it = _headerFields.begin(); it != _headerFields.end(); ++it) 
+        std::cout << it->first << ": " << it->second << std::endl;
+    std::cout << "Body: " << _body << std::endl;
+}
 
 void HttpRequest::setMethod(const std::string& m) { 
     this->_method = m; 

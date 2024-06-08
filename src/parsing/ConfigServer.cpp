@@ -2,7 +2,7 @@
 
 ConfigServer::ConfigServer() : 
 _host("127.0.0.1"),
-_port(8000),
+_port(8080),
 _serverName(""),
 _maxBodySize(100000),
 _autoindex(false),
@@ -23,6 +23,11 @@ ConfigServer&	ConfigServer::operator=(const ConfigServer &src) {
 		this->_serverName = src._serverName;
 		this->_maxBodySize = src._maxBodySize;
 		this->_location = src._location;
+		// if (!_location.empty())
+		// 	_location.clear();
+        // for (size_t i = 0; i < src._location.size(); ++i) {
+        //     _location.push_back(src._location[i]);
+        // }
 		this->_autoindex = src._autoindex;
 		this->_root = src._root;
 		this->_index = src._index;
@@ -31,7 +36,9 @@ ConfigServer&	ConfigServer::operator=(const ConfigServer &src) {
 	return *this;
 }
 
-ConfigServer::~ConfigServer() {}
+ConfigServer::~ConfigServer() {
+	// std::cout << "ok\n";
+}
 
 int	ConfigServer::getSocket() const {
     return this->socketFD;
@@ -134,24 +141,16 @@ void	ConfigServer::setRoot(std::string& root) {
 std::string	&ConfigServer::getRoot() {
 	return this->_root;
 }
+
 void	ConfigServer::setIndex(std::string &index) {
-	if (index.empty())
-		throw ConfigServerException("Error: Empty index!");
+	// if (index.empty())
+	// 	throw ConfigServerException("Error: Empty index!");
 	this->_index = splitVal(index);
 }
 
 std::vector<std::string>	&ConfigServer::getIndex() {
 	return this->_index;
 }
-// void	ConfigServer::setIndex(std::string &index) {
-// 	if (index.empty())
-// 		throw ConfigServerException("Error: Empty index!");
-// 	this->_index = splitVal(index);
-// }
-
-// std::vector<std::string>	&ConfigServer::getIndex() {
-// 	return this->_index;
-// }
 
 void	ConfigServer::setErrorPage(std::string& errorPage) {	
 	if (errorPage.empty())
