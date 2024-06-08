@@ -74,19 +74,39 @@ bool HttpResponse::isDirHasIndexFiles() {
 	return false;
 }
 
-std::string	HttpResponse::_findDirectoryName() {
+// std::string	HttpResponse::_findDirectoryName() {
 	// Create a string stream from the path
-    std::istringstream iss(_filePath);
+    // std::istringstream iss(_filePath);
 
-    // Tokenize the path by '/'
-    std::string token;
-    std::string lastDirName;
-    while (std::getline(iss, token, '/')) {
-        if (!token.empty()) {
-            lastDirName = token;
-        }
-    }
-    return lastDirName;
+    // // Tokenize the path by '/'
+    // std::string token;
+    // std::string lastDirName;
+    // while (std::getline(iss, token, '/')) {
+    //     if (!token.empty()) {
+    //         lastDirName = token;
+    //     }
+    // }
+    // return lastDirName;
+	std::string findDirname(const std::string& path, const std::string& root)
+{
+    // Find the position where root ends in the path
+    size_t rootPos = path.find(root);
+    if (rootPos == std::string::npos)
+        return "";
+
+    // Remove root from the path
+    std::string dirname = path.substr(rootPos + root.length());
+
+    // Find the last '/' character in the remaining path
+    size_t pos = dirname.find_last_of('/');
+    if (pos == std::string::npos)
+        return "";
+
+    // Extract the dirname
+    dirname = dirname.substr(0, pos);
+
+    return dirname;
+
 }
 
 void	HttpResponse::_getAutoIndex() {
@@ -100,7 +120,9 @@ void	HttpResponse::_getAutoIndex() {
     	}
 		std::size_t lastSlashPos = path.find_last_of('/');
     	std::string pathff = (lastSlashPos != std::string::npos) ? path.substr(0, lastSlashPos + 1) : "";
-		std::string directory = _findDirectoryName();
+		std::string directory = _location.getLocationName().empty() ? findDirname(_filePath, _root) + "/" : _location.getLocationName() + findDirname(_filePath, _root) + "/";
+		// _findDirectoryName();
+		std::cout << directory << "\n";
 
 		std::ostringstream listeningfile;
 		listeningfile << "<!DOCTYPE html>\n" << "<html lang=\"en\">\n" << "\t<head>\n" << "\t\t<meta charset=\"UTF-8\">\n";
@@ -109,16 +131,20 @@ void	HttpResponse::_getAutoIndex() {
 		struct dirent *ent;
     	while ((ent = readdir(dir)) != NULL)
     	{
-			std::string	d_nm = ent->d_name;
-			if (d_nm == ".." || d_nm == ".")
-			{
-				d_nm += '/';
-			std::cout << d_nm << "\n";
-        	listeningfile << "<a href=\"" <<  d_nm << directory<< "\">" << ent->d_name << "</a><br>";
+			        listeningfile << "<a href=\"" << directory << ent->d_name << "\">" << ent->d_name << "</a><br>";
 
-			}
-			else
-        		listeningfile << "<a href=\"" << directory + '/' << ent->d_name << "\">" << ent->d_name << "</a><br>";
+			// std::string	d_nm = ent->d_name;
+			// if (d_nm == ".." || d_nm == ".")
+			// {
+			// 	d_nm += '/';
+			// std::cout << d_nm << "\n";
+        	// listeningfile << "<a href=\"" <<  d_nm << directory<< "\">" << ent->d_name << "</a><br>";
+
+			// }
+			// else {
+			// 	std::cout << d_nm << "\n";
+        	// 	listeningfile << "<a href=\"" << '/' << ent->d_name << "\">" << ent->d_name << "</a><br>";
+			// }
     	}
 		closedir(dir);
 		listeningfile << "</pre><hr></body></html>";

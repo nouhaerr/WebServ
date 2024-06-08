@@ -32,6 +32,7 @@ std::string	getMimeTypes(std::string flag, std::string extension) {
     mimeTypes[".json"] = "application/json";
     mimeTypes[".mid"] = "audio/midi";
     mimeTypes[".midi"] = "audio/midi";
+    mimeTypes[".mpg"] = "video/mpeg";
     mimeTypes[".mpeg"] = "video/mpeg";
     mimeTypes[".mp4"] = "video/mp4";
     mimeTypes[".mp4v"] = "video/mp4";

@@ -29,7 +29,7 @@ HttpResponse::~HttpResponse(){}
 void	HttpResponse::locateErrorPage(int errCode) {
 	for (std::map<int, std::string>::iterator it = _errorPage.begin(); it != _errorPage.end(); it++) {
 		if (it->first == errCode) {
-			_errorPath = _root + it->second;
+			_errorPath = it->second;
 			_errorPath = deleteRedundantSlash(_errorPath);
 			std::cout << _errorPath << "\n";
 			return ;
@@ -237,44 +237,46 @@ std::string HttpResponse::deleteRedundantSlash(std::string uri)
 std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
 
 	_locations = _serv.getLocation();
+	std::string location;
     for (std::vector<ConfigLocation>::iterator it = _locations.begin(); it != _locations.end(); ++it)
     {
 		std::cout << req.getUri();
 		std::cout << " --> " << it->getLocationName() << "\n";
-        if (req.getUri().find(it->getLocationName()) == 0)
+        size_t pos = req.getUri().find(it->getLocationName());
+        if (pos != std::string::npos && pos == 0)
         {
 			std::cout << "dkhaaaal\n";
-            _location = *it;
-            _root = it->getRoot();
-            _idxFiles = it->getIndex();
-            _autoindex = it->getAutoIndex();
-            _errorPage = it->getErrorPage();
-            _methods = it->getMethods();
-            _uploadPath = it->getUpload();
+			if (req.getUri().size() > it->getLocationName().size()
+				&& it->getLocationName() != "/"
+				&& req.getUri()[it->getLocationName().size()] != '/');
+			else if (it->getLocationName().size() > location.size())
+			{
+            	_location = *it;
+				location = it->getLocationName();
+			}
+		}
+	}
+	if (req.getUri().find(_location.getRoot()) == std::string::npos)
+	{
+            _root = _location.getRoot();
+            _idxFiles = _location.getIndex();
+            _autoindex =_location.getAutoIndex();
+            _errorPage =_location.getErrorPage();
+            _methods = _location.getMethods();
+            _uploadPath = _location.getUpload();
             // std::cout << "inMatch " << _uploadPath << "\n";
 			if (_location.getRedirect() == true)
 				_redirection = _location.getRedirection();
 
-            int idx = req.getUri().find(it->getLocationName());
-            std::string locationName = it->getLocationName();
+            int idx = req.getUri().find(_location.getLocationName());
+            std::string locationName = _location.getLocationName();
             std::string relativePath = (req.getUri().find_first_of(locationName) == 0) ?
                                       req.getUri().substr(locationName.length()) :
                                       req.getUri().substr(0, idx);
             _filePath = _constructPath(relativePath, _root, "");
 
-            // if (isDirectory(_filePath.c_str()))
-            //     _filePath = constructFilePath(relativePath, _root, _index);
-
             if (_filePath[_filePath.length() - 1] == '/')
                 _filePath = _filePath.substr(0, _filePath.length() - 1);
-
-            // if (!_redirect.empty() && (req.getPath().substr(it->getLocationName().length()) == "/" ||
-            //                            req.getPath().substr(it->getLocationName().length()) == "") &&
-            //     req.getMethod() == "GET")
-            // {
-            //     _errCode = 301;
-            //     return ;
-            // }
 
             if (_autoindex)
             {
@@ -282,16 +284,31 @@ std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
                 return _filePath;
             }
 
-            return _filePath;
-        }
-    }
+        return _filePath;
+	}
 	_root = _serv.getRoot();
     _idxFiles = _serv.getIndex();
     _autoindex = _serv.getAutoIndex();
     _errorPage = _serv.getErrorPage();
-    // _methods = _serv.getMethods();
+    _methods.push_back("POST");
+    _methods.push_back("GET");
+    _methods.push_back("DELETE");
+	_autoindex = _serv.getAutoIndex();
     _filePath = _constructPath(req.getUri(), _root, _index);
-
+ 	if (_autoindex)
+    {
+		std::cout << "AUTOINDEX\n";
+		if (req.getUri().find(_root) == std::string::npos)
+		{
+		std::cout << "root" << _root << "\n";
+        _filePath = _constructPath(req.getUri(), _root, "");
+		}
+		return _filePath;
+    }
+    else
+    {
+        _filePath = _constructPath(req.getUri(), _root, _index);
+    }
     // std::cout << _filePath << "\n";
     return _filePath;
 }
