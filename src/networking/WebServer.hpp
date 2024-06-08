@@ -1,7 +1,9 @@
 #ifndef WEBSERVER_HPP
 #define WEBSERVER_HPP
 
-#include "../Macros.hpp"
+#include <vector>
+#include <map>
+#include <string>
 #include <netinet/in.h>
 #include "NetworkClient.hpp"
 #include "../parsing/Config.hpp"

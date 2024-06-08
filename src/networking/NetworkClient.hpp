@@ -4,6 +4,7 @@
 #include <string>
 #include <netinet/in.h>
 #include "../parsing/ConfigServer.hpp"
+
 #include "HttpRequest.hpp"
 
 class HttpRequest;
@@ -49,7 +50,6 @@ public:
     void    setHeaderSent(bool value);
     void    setResponse(std::string response);
     void    setOpenFile(bool value);
-
     HttpRequest& getRequest();
     std::string getResponseHeader();
     std::string getResponseBody();

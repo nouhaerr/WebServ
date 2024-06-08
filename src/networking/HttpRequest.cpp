@@ -78,6 +78,10 @@ void HttpRequest::parseHttpRequest(const std::string& req)
     std::istringstream lineStream(line);
     lineStream >> this->_method >> this->_uri >> this->_httpVersion;
 
+    // std::cout << "Method: " << this->_method << std::endl;
+    // std::cout << "URI: " << this->_uri << std::endl;
+    // std::cout << "HTTP Version: " << this->_httpVersion << std::endl;
+
     _parseMethod();
     std::cout << "KAYDKHOL\n";
     if (this->_errorCode != 501) {

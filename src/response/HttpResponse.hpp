@@ -1,11 +1,11 @@
 #ifndef HTTPRESPONE_HPP
-# define HTTPRESPONSE_HPP
+# define HTTPRESPONE_HPP
 
 #include "../Macros.hpp"
 #include "../parsing/Config.hpp"
 #include "../networking/NetworkClient.hpp"
 #include "../networking/HttpRequest.hpp"
-#include <sys/sendfile.h>
+// #include <sys/sendfile.h>
 
 #define FILE_TYPE 1
 #define FOLDER_TYPE 0
