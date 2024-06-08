@@ -1,11 +1,12 @@
+
 #ifndef NETWORK_CLIENT_HPP
 #define NETWORK_CLIENT_HPP
 
 #include <string>
 #include <netinet/in.h>
+#include <fstream>  // Include this for std::ifstream
 #include "../parsing/ConfigServer.hpp"
-
-#include "HttpRequest.hpp"
+#include "./HttpRequest.hpp"  // Ensure this contains the complete definition of HttpRequest
 
 class HttpRequest;
 class NetworkClient {
@@ -41,33 +42,36 @@ public:
     void setServer(const ConfigServer& server);
     friend bool operator==(const NetworkClient& lhs, const NetworkClient& rhs);
     const ConfigServer& getConfigServer() const;
+    void saveRequestData(size_t nb_bytes) {
+        std::string str_bytes(this->_buffer, nb_bytes);
+        this->_req.setRequestData(str_bytes);
+    };
 
     ConfigServer& getServer();
 
-    void    setRequest(HttpRequest req);
-    void	setResponseHeader(std::string respHeader);
-    void    setResponseBody(std::string body);
-    void    setHeaderSent(bool value);
-    void    setResponse(std::string response);
-    void    setOpenFile(bool value);
+    void setRequest(HttpRequest req);
+    void setResponseHeader(std::string respHeader);
+    void setResponseBody(std::string body);
+    void setHeaderSent(bool value);
+    void setResponse(std::string response);
+    void setOpenFile(bool value);
     HttpRequest& getRequest();
     std::string getResponseHeader();
     std::string getResponseBody();
-    bool        getHeaderSent();
+    bool getHeaderSent();
     std::string getResponse();
-    bool        getOpenFile();
+    bool getOpenFile();
     void openFileForReading();
     bool isFileOpen() const;
     void readFromFile(char* buffer, std::streamsize bufferSize);
     std::streamsize bytesRead() const;
-
-    void    setREQ(std::string& requestString);
-    std::string&    getREQ();
-    HttpRequest		_req;
-    std::ifstream _file;
-    int			bytes_read;
-
+ char _buffer[1024];
 private:
+   
+    std::ifstream _file;
+    int bytes_read;
+   
+    HttpRequest _req;
     int serverSocketId;
     int connectionSocketId;
     ConfigServer server;
@@ -78,10 +82,9 @@ private:
     std::string fullResponse;
     bool headerDispatched;
     bool fileAccessed;
-    bool    _headersSent;
-    bool    _openFile;
+    bool _headersSent;
+    bool _openFile;
     std::string _response;
-    std::string REQ;
 };
 
-#endif
+#endif // NETWORK_CLIENT_HPP

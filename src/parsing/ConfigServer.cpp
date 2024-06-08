@@ -1,3 +1,4 @@
+
 #include "ConfigServer.hpp"
 
 ConfigServer::ConfigServer() : 
@@ -172,3 +173,4 @@ void	ConfigServer::setErrorPage(std::string& errorPage) {
 std::map<int, std::string>	&ConfigServer::getErrorPage() {
 	return this->_errorPage;
 }
+

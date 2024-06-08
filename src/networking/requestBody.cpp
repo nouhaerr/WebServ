@@ -1,3 +1,4 @@
+
 #include "HttpRequest.hpp"
 
 // void	HttpRequest::_matchServer() {
@@ -152,3 +153,4 @@ int	HttpRequest::hexToInt(const std::string& str) {
     std::istringstream(str) >> std::hex >> intValue;
     return intValue;
 }
+

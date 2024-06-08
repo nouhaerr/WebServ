@@ -1,3 +1,4 @@
+
 #include "Config.hpp"
 #include "ParseFile.hpp"
 
@@ -151,3 +152,4 @@ void	Config::parse()
 		exit(1);
 	}
 }
+
