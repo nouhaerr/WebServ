@@ -10,8 +10,6 @@ SRC = src/main.cpp\
 	src/networking/WebServer.cpp \
 	src/networking/sendResponse.cpp\
 	src/networking/HttpRequest.cpp \
-	src/networking/requestBody.cpp \
-	src/networking/HttpRequestParser.cpp\
 	src/response/HttpResponse.cpp\
 	src/response/mimeTypes.cpp\
 	src/response/GET.cpp\

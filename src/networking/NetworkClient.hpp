@@ -1,12 +1,10 @@
+#ifndef NETWORKCLIENT_HPP
+#define NETWORKCLIENT_HPP
 
-#ifndef NETWORK_CLIENT_HPP
-#define NETWORK_CLIENT_HPP
-
-#include <string>
 #include <netinet/in.h>
-#include <fstream>  // Include this for std::ifstream
+#include <cstring>
 #include "../parsing/ConfigServer.hpp"
-#include "./HttpRequest.hpp"  // Ensure this contains the complete definition of HttpRequest
+#include "HttpRequest.hpp"  // Ensure this contains the complete definition of HttpRequest
 
 class HttpRequest;
 class NetworkClient {

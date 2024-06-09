@@ -1,18 +1,16 @@
-
 #ifndef WEBSERVER_HPP
 #define WEBSERVER_HPP
 
 #include <netinet/in.h>
+#include <arpa/inet.h>
+#include <cctype>
+#include <cstring>
 #include "NetworkClient.hpp"
 #include "../parsing/Config.hpp"
 #include "../parsing/ConfigServer.hpp"
 #include "HttpRequest.hpp"
-#include "HttpRequestParser.hpp"
-#include <arpa/inet.h>
-#include <cctype>
-#include <cstring>
-// #include <sys/sendfile.h>
 #include "../response/HttpResponse.hpp"
+// #include <sys/sendfile.h>
 
 class WebServer {
 public:

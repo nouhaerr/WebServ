@@ -74,7 +74,6 @@ class HttpRequest
 		int get_bodyStatus();
 		int get_requestStatus();
 
-		// void is_method(std::string&);
 		void printHeaders();
 		void _getChunkedBody(std::string&);
 		std::string& getRequestData();

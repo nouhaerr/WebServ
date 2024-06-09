@@ -1,5 +1,4 @@
 #include "NetworkClient.hpp"
-#include <cstring>
 
 NetworkClient::NetworkClient()
   : serverSocketId(-1), connectionSocketId(-1),
