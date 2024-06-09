@@ -3,8 +3,8 @@
 HttpResponse::HttpResponse(NetworkClient &client) :
 	_client(client),
 	_serv(client.getConfigServer()),
-	_bodyPost(""),
-    _bd(""),
+	_bodyFileName(""),
+    _postBody(""),
 	_errCode(0),
 	_statusCode(""),
 	_isCgi(false),
@@ -47,7 +47,7 @@ void	HttpResponse::_handleDefaultErrors() {
 		buildResponse(501);
 		return ;
 	}
-	if (_errCode == 400 || _errCode == 414 || _errCode == 413) {
+	if (_errCode == 400 || _errCode == 414) {
 		buildResponse(_errCode);
 		return ;
 	}
@@ -64,10 +64,15 @@ void	HttpResponse::generateResponse(HttpRequest &req) {
 		return;
 	}
 	checkHttpVersion(req);
-	if (_errCode != 0 && _errCode != 201) {
+	if (_errCode != 0) {
 		_handleDefaultErrors();
 		return ;
 	}
+    if (_serv.getMaxBodySize() < req.getBodysize()) {
+        buildResponse(413);
+		return ; /*Content Too Large response status code indicates that
+			// the request entity is larger than limits defined by server*/
+    }
 	if (!_redirection.empty()) {
 		std::string header = createResponseHeader(301, "Default");
     	_client.setResponseHeader(header);
@@ -78,7 +83,7 @@ void	HttpResponse::generateResponse(HttpRequest &req) {
 		return ;
 	}
 	if (req.getMethod() == "POST") {
-        _bodyPost = req.getBody();
+        _bodyFileName = req.get_bodyFileName();
         _reqHeader = req.getHeaderFields();
 		handlePostMethod();
 		return ;

@@ -195,7 +195,7 @@ void	HttpResponse::_isFile() {
 		// 	_isCgi = true;
 		// 	return ;
 		// }
-		std::cout << "the file exist: " << _filePath<< "\n";
+		// std::cout << "the file exist: " << _filePath<< "\n";
 		_contentType = getContentType(_filePath);
 		std::string header = createResponseHeader(200, "Nothing");
 		_client.setResponseHeader(header);

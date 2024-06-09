@@ -13,7 +13,7 @@ void	HttpResponse::_createFile() {
 	std::ofstream file(_uploadPath.c_str());
 
     if (file) {
-        file << _bodyPost;
+        file << _postBody;
         file.close();
 		this->_errCode = 201;
 		buildResponse(201);
@@ -28,7 +28,13 @@ void	HttpResponse::_createFile() {
 }
 
 void	HttpResponse::processPostMethod() {
-	std::cout << _uploadPath << "\n";
+	std::string	file = _generateTempFileName();
+	if (_uploadPath[_uploadPath.size() - 1] != '/')
+	{
+       	_uploadPath += "/";
+    }
+	_uploadPath += file;
+
     std::map<std::string, std::string>::iterator it = _reqHeader.find("Content-Type");
 	if(it != _reqHeader.end())
     {
@@ -40,9 +46,11 @@ void	HttpResponse::processPostMethod() {
 		}
         _uploadPath += contentType;
     }
-	std::ofstream file(_uploadPath.c_str());
-	file << _bd;
-	file.close();
+	// std::cout << _uploadPath << "\n";
+	_createFile();
+	// std::ofstream file(_uploadPath.c_str());
+	// file << _postBody;
+	// file.close();
 }
 
 void	HttpResponse::handlePostMethod(){
@@ -52,19 +60,12 @@ void	HttpResponse::handlePostMethod(){
 	}
 
 	if (_isSupportedUploadPath() && _filePath.find(".py") == std::string::npos && _filePath.find(".php") == std::string::npos) {
-		std::string	file = _generateTempFileName();
-		if (_uploadPath[_uploadPath.size() - 1] != '/')
-    	{
-       		_uploadPath += "/";
-    	}
-		_uploadPath += file;
-		_createFile();
-		std::ifstream bodyfile(_uploadPath.c_str());
+		std::ifstream bodyfile(_bodyFileName.c_str());
 		std::ostringstream filecontent;
 		filecontent << bodyfile.rdbuf();
-		_bd = filecontent.str();
+		_postBody = filecontent.str();
 		bodyfile.close();
-		std::remove(_uploadPath.c_str());
+		std::remove(_bodyFileName.c_str());
 		processPostMethod();
 		return ;
 	}
