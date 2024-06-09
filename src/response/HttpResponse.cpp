@@ -278,7 +278,6 @@ std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
             _errorPage =_location.getErrorPage();
             _methods = _location.getMethods();
             _uploadPath = _location.getUpload();
-            // std::cout << "inMatch " << _uploadPath << "\n";
 			if (_location.getRedirect() == true)
 				_redirection = _location.getRedirection();
 
@@ -307,7 +306,6 @@ std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
     _methods.push_back("POST");
     _methods.push_back("GET");
     _methods.push_back("DELETE");
-	_autoindex = _serv.getAutoIndex();
     _filePath = _constructPath(req.getUri(), _root, _index);
  	if (_autoindex)
     {
