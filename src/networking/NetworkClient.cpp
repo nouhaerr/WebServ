@@ -226,11 +226,11 @@ std::streamsize NetworkClient::bytesRead() const {
     return this->bytes_read;
 }
 
-void    NetworkClient::setREQ(std::string& requestString) {
-    this->REQ = requestString;
-}
+// void    NetworkClient::setREQ(std::string& requestString) {
+//     this->REQ = requestString;
+// }
 
 
-std::string&    NetworkClient::getREQ() {
-    return this->REQ;
-}
+// std::string&    NetworkClient::getREQ() {
+//     return this->REQ;
+// }

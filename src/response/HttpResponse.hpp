@@ -41,8 +41,8 @@ class HttpResponse {
 	private:
 		NetworkClient&	_client;
 		ConfigServer	_serv;
-		std::string		_bodyPost;
-		std::string		_bd;
+		std::string		_bodyFileName;
+		std::string		_postBody;
 		int				_errCode;
 		std::string		_statusCode;
 		bool			_isCgi;
