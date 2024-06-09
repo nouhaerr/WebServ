@@ -62,7 +62,7 @@ void WebServer::sendResponse(HttpRequest &req, NetworkClient &client) {
 	// 	closeClient(client.fetchConnectionSocket());
     //     // delete resp;
     // }
-    // std::cout << client.getResponse() << "\n";
+    std::cout << client.getResponse() << "\n";
     int result = send(client.fetchConnectionSocket(), client.getResponse().c_str(), client.getResponse().length(), 0);
     if (result <= 0) {
         std::cerr << "Error sending response header, result: " << result << std::endl;
@@ -86,7 +86,6 @@ void WebServer::sendResponse(HttpRequest &req, NetworkClient &client) {
                     std::size_t totalBytesSent = 0;
                     std::size_t bytesSent = 0;
                     while (totalBytesSent < bytesToRead) {
-                        std::cout << "RESPONSE HEADER:" << buffer << std::endl;
                         bytesSent = send(client.fetchConnectionSocket(), buffer + totalBytesSent, bytesToRead - totalBytesSent, 0);
                         if (bytesSent <= 0) {
                             std::cerr << "Error sending file data, bytesSent: " << bytesSent << std::endl;

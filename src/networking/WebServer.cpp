@@ -111,14 +111,13 @@ void WebServer::CheckRequestStatus(NetworkClient &client)
 	}
 	if (request.get_requestStatus() == HttpRequest::BODY)
 	{
-		request.is_body();
-           // std::cout << request_data << std::endl;
+		if (request.is_body()) {
             if (request.setBody(request_data))
                 request.set_requestStatus(HttpRequest::REQUEST_READY);
         }
         else if (request.getErrorCode() == 400 || request.getErrorCode() == 501)
             request.set_requestStatus(HttpRequest::REQUEST_READY);
-	
+    }
 }
 
 void WebServer::processClientRequests(int fd) {

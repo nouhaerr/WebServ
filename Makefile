@@ -1,6 +1,6 @@
 CPP = c++
 
-FLAGS = -Wall -Wextra -Werror -fsanitize=address -g3 #-std=c++98
+FLAGS = -Wall -Wextra -Werror -fsanitize=address -g3 -std=c++98
 
 SRC = src/main.cpp\
 	src/parsing/Config.cpp src/parsing/ParseFile.cpp\
