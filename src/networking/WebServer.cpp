@@ -115,7 +115,8 @@ void WebServer::CheckRequestStatus(NetworkClient &client)
             if (request.setBody(request_data))
                 request.set_requestStatus(HttpRequest::REQUEST_READY);
         }
-        request.set_requestStatus(HttpRequest::REQUEST_READY);
+        else if (request.getErrorCode() == 400 || request.getErrorCode() == 501)
+            request.set_requestStatus(HttpRequest::REQUEST_READY);
 	}
 }
 
