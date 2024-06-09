@@ -29,7 +29,7 @@ HttpResponse::~HttpResponse(){}
 void	HttpResponse::locateErrorPage(int errCode) {
 	for (std::map<int, std::string>::iterator it = _errorPage.begin(); it != _errorPage.end(); it++) {
 		if (it->first == errCode) {
-			_errorPath = it->second;
+			_errorPath = it->second + "/" + toString(errCode) + ".html";
 			_errorPath = deleteRedundantSlash(_errorPath);
 			std::cout << _errorPath << "\n";
 			return ;
