@@ -140,21 +140,21 @@ void WebServer::processClientRequests(int fd) {
    // std::cout<< client.getRequest().getRequestData() << std::endl;
     CheckRequestStatus(client);
     if (client.getRequest().get_requestStatus() == HttpRequest::REQUEST_READY) {
-        std::string hostHeader = client.getRequest().getHeader("Host");
-        hostHeader = trimm(hostHeader);
+    //     std::string hostHeader = client.getRequest().getHeader("Host");
+    //     hostHeader = trimm(hostHeader);
 
-        size_t portPos = hostHeader.find(":");
-        int port = 80; // Default to 80 if no port is specified
-        if (portPos != std::string::npos) {
-            port = std::atoi(hostHeader.substr(portPos + 1).c_str());
-            hostHeader = hostHeader.substr(0, portPos);
-        } else {
-            port = client.getServer().getPort();
-        }
+    //     size_t portPos = hostHeader.find(":");
+    //     int port = 80; // Default to 80 if no port is specified
+    //     if (portPos != std::string::npos) {
+    //         port = std::atoi(hostHeader.substr(portPos + 1).c_str());
+    //         hostHeader = hostHeader.substr(0, portPos);
+    //     } else {
+    //         port = client.getServer().getPort();
+    //     }
 
-        const ConfigServer &clientServer = matchServerByName(client.getRequest().getHeader("Host"), port);
-       // std::cout << "Port in processClientRequests: " << clientServer.getPort() << std::endl; // Debugging output
-        client.setServer(clientServer);
+    //     const ConfigServer &clientServer = matchServerByName(client.getRequest().getHeader("Host"), port);
+    //    // std::cout << "Port in processClientRequests: " << clientServer.getPort() << std::endl; // Debugging output
+    //     client.setServer(clientServer);
         FD_SET(fd, &this->writeSet);
     }
 }

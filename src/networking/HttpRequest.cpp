@@ -155,7 +155,6 @@ void HttpRequest::setMethod(const std::string& method)
 	this->_httpMethod = method;
 	if (this->_httpMethod != "POST" && this->_httpMethod !="GET" && this->_httpMethod != "DELETE")
         this->_errorCode = 501; /*Not Implemented method*/
-	// is_method(method);
 }
 
 void HttpRequest::setUri(const std::string& uri) {

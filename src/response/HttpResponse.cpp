@@ -177,7 +177,16 @@ std::string	HttpResponse::createResponseHeader(int errCode, std::string flag) {
 		_errCode = 301;
 	}
     if (flag == "Default") {
-		_headers["Content-Length"] = getContentLength(_errorPath);
+        if (!_errorPath.empty()) {
+            _headers["Content-Length"] = getContentLength(_errorPath);
+        }
+		else {
+			std::stringstream ss;
+            ss << "<center><h1>" << errCode << "</h1></center>";
+            _errorPath = ss.str();
+    		_fileSize = _errorPath.size();
+			_headers["Content-Length"] = toString(_fileSize);
+        }
     	_headers["Content-Type"] = "text/html";
 	}
     else {
