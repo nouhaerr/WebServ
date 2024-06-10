@@ -7,7 +7,8 @@ NetworkClient::NetworkClient()
     headerDispatched(false), fileAccessed(false) ,
     _headersSent(false),
     _openFile(false),
-    _response("") {
+    _response(""),
+    bytesSent(0) {
     std::memset(&clientDetails, 0, sizeof(clientDetails));
 }
 
@@ -20,7 +21,8 @@ NetworkClient::NetworkClient(int socketDescriptor, int serverSocket)
     fileAccessed(false),
     _headersSent(false),
     _openFile(false),
-    _response("") {
+    _response(""),
+    bytesSent(0) {
     std::memset(&clientDetails, 0, sizeof(clientDetails));
 }
 
@@ -33,7 +35,8 @@ NetworkClient::NetworkClient(const NetworkClient& source)
     fileAccessed(source.fileAccessed),
     _headersSent(source._headersSent),
     _openFile(source._openFile),
-    _response(source._response) {
+    _response(source._response),
+    bytesSent(source.bytesSent) {
 }
 
 bool operator==(const NetworkClient& lhs, const NetworkClient& rhs) 
@@ -61,6 +64,7 @@ NetworkClient& NetworkClient::operator=(const NetworkClient& source)
         _headersSent = source._headersSent;
         _openFile = source._openFile;
         _response = source._response;
+        bytesSent = source.bytes_read;
     }
     return *this;
 }
@@ -225,11 +229,10 @@ std::streamsize NetworkClient::bytesRead() const {
     return this->bytes_read;
 }
 
-// void    NetworkClient::setREQ(std::string& requestString) {
-//     this->REQ = requestString;
-// }
+void NetworkClient::setBytesSent(std::size_t bytes) {
+    this->bytesSent = bytes;
+}
 
-
-// std::string&    NetworkClient::getREQ() {
-//     return this->REQ;
-// }
+std::size_t NetworkClient::getBytesSent() const {
+    return this->bytesSent;
+}

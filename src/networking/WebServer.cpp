@@ -235,18 +235,6 @@ void WebServer::closeClient(int clientSocket)
 
 
 
-void WebServer::sendDataToClient(NetworkClient& client) 
-{
-    sendResponse(client.getRequest(), client);
-    // if (!client.isResponsePrepared()) 
-    //     return;
-    // //std::cout << client.getServer().getPort() <<std::endl;
-    // std::string response = client.retrieveResponseContent();
-    // int sentBytes = send(client.fetchConnectionSocket(), response.c_str(), response.size(), 0);
-    // if (sentBytes < 0)
-    //     std::cerr << "Failed to send response." << std::endl;
-    // closeClient(client.fetchConnectionSocket());
-}       
 
 NetworkClient* WebServer::findClientBySocket(int socket) 
 {
@@ -289,4 +277,9 @@ const ConfigServer& WebServer::matchServerByName(const std::string& host, int po
 
 //    std::cerr << "\n******* ❌ ❌ ❌ ❌No matching server found for host: " << host << " on port: " << port << ". Defaulting to first server." << std::endl;
     return (*serverConfigs)[0];
+}
+
+void WebServer::sendDataToClient(NetworkClient& client) 
+{
+    sendResponse(client.getRequest(), client);
 }

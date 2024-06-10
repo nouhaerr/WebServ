@@ -20,7 +20,7 @@ public:
     void run();
     NetworkClient& GetRightClient(int fd);
 
-void CheckRequestStatus(NetworkClient &client);
+    void CheckRequestStatus(NetworkClient &client);
 
 private:
     void setupServerSockets();
@@ -34,6 +34,7 @@ private:
     void readFromClient(int clientSocket, std::string &requestString);
     void    sendResponse(HttpRequest &req, NetworkClient &client);
     int sendResponseBody(NetworkClient &client);
+    void    sendFileData(NetworkClient &client);
 
     fd_set masterSet, readSet, writeSet;
     int highestFd;

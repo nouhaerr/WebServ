@@ -8,6 +8,7 @@ HttpResponse::HttpResponse(NetworkClient &client) :
 	_errCode(0),
 	_statusCode(""),
 	_isCgi(false),
+    _maxBodySize(0),
 	_root(""),
     _uploadPath(""),
 	_index(""),
@@ -19,7 +20,6 @@ HttpResponse::HttpResponse(NetworkClient &client) :
 	_fd(0),
 	_filePath(""),
     _buffer(""),
-    _isfile(false),
 	_contentType(""),
     _reqHeader()
     {}
@@ -188,10 +188,18 @@ std::string	HttpResponse::createResponseHeader(int errCode, std::string flag) {
 			_headers["Content-Length"] = toString(_fileSize);
         }
     	_headers["Content-Type"] = "text/html";
+        if (_errCode == 201) {
+            _headers["Content-Type"] = _contentType;
+        }
 	}
     else {
 		_headers["Content-Length"] = getContentLength(_filePath);
-		_headers["Content-Type"] = _contentType;
+        if (_headers.find("Content-Type") == _headers.end())
+        {
+            _headers["Content-Type"] = getContentType(_filePath);
+        }
+		else
+            _headers["Content-Type"] = _contentType;
 	}
 	_headers["Date"] = generateDate();
 	std::stringstream ss;
@@ -273,6 +281,7 @@ std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
 	if (req.getUri().find(_location.getRoot()) == std::string::npos)
 	{
             _root = _location.getRoot();
+            _maxBodySize = _serv.getMaxBodySize();
             _idxFiles = _location.getIndex();
             _autoindex =_location.getAutoIndex();
             _errorPage =_location.getErrorPage();
@@ -303,6 +312,7 @@ std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
     _idxFiles = _serv.getIndex();
     _autoindex = _serv.getAutoIndex();
     _errorPage = _serv.getErrorPage();
+    _maxBodySize = _serv.getMaxBodySize();
     _methods.push_back("POST");
     _methods.push_back("GET");
     _methods.push_back("DELETE");

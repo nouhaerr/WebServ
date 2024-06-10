@@ -17,6 +17,7 @@ void	HttpResponse::_createFile() {
         file.close();
 		this->_errCode = 201;
 		buildResponse(201);
+		std::cout << _uploadPath << "\n";
 		 /*201 Created success status response code indicates
 		that the request has succeeded and has led to the creation of a resource*/
     } 
@@ -45,6 +46,7 @@ void	HttpResponse::processPostMethod() {
 			return ;
 		}
         _uploadPath += contentType;
+		_contentType = value;
     }
 	// std::cout << _uploadPath << "\n";
 	_createFile();

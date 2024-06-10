@@ -66,7 +66,9 @@ class NetworkClient {
 
 		char _buffer[1024];
 		std::ifstream _file;
-		int bytes_read;
+		std::streamsize bytes_read;
+		void setBytesSent(std::size_t bytes);
+    std::size_t getBytesSent() const;
 
 	private:
 		HttpRequest _req;
@@ -83,6 +85,8 @@ class NetworkClient {
 		bool _headersSent;
 		bool _openFile;
 		std::string _response;
+
+		std::size_t bytesSent;
 };
 
 #endif // NETWORK_CLIENT_HPP

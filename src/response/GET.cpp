@@ -35,7 +35,6 @@ void	HttpResponse::isUrihasSlashInTHeEnd() {
 	if (_filePath[_filePath.size() - 1] != '/')
     {
        _filePath += "/";
-	//    std::cout << "adding slash: "<< _filePath << "\n";
         buildResponse(301);
     }
 }
@@ -197,12 +196,9 @@ void	HttpResponse::_isFile() {
 	}
 }
 
-#include <cerrno>
-
 int	HttpResponse::_checkRequestedType() {
 	struct stat path_stat;
 	if (stat(_filePath.c_str(), &path_stat) != 0) {
-		std::cerr << "Error accessing file: " << strerror(errno) << std::endl;
 		_errCode = 404;
         return ERROR;
     }
@@ -246,12 +242,12 @@ void	HttpResponse::handleGetMethod() {
 }
 
 bool	HttpResponse::_isSupportedMethod(std::string meth) {
-	size_t	len = _methods.size();
+	
+	std::vector<std::string>::iterator	it = _methods.begin();
 
-	for(size_t i = 0; i < len; i++) {
-		if (_methods[i] == meth) {
-			return true ;
-		}
+	for (; it != _methods.end(); ++it) {
+		if (*it == meth)
+			return true;
 	}
     return false;
 }

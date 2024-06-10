@@ -46,6 +46,7 @@ class HttpResponse {
 		int				_errCode;
 		std::string		_statusCode;
 		bool			_isCgi;
+		size_t			_maxBodySize;
 		std::string		_root;
 		std::string		_uploadPath;
 		std::string		_index;
@@ -64,7 +65,6 @@ class HttpResponse {
 		std::string _buffer;
 		off_t		_fileSize;
 		off_t		_offset;
-		bool		_isfile;
 		std::string _contentType;
 		std::map<std::string, std::string> _reqHeader;
 
@@ -96,6 +96,7 @@ class HttpException : public std::exception {
 		int _code;
 };
 
+std::string getContentType(std::string filename);
 std::string	getMimeTypes(std::string flag, std::string extension);
 
 #endif

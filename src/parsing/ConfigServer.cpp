@@ -6,7 +6,7 @@ _port(8080),
 _serverName(""),
 _maxBodySize(100000),
 _autoindex(false),
-_root(""),
+_root("/var/www"),
 _index(std::vector<std::string>()),
 _errorPage(std::map<int , std::string>())
 {}
@@ -143,8 +143,6 @@ std::string	&ConfigServer::getRoot() {
 }
 
 void	ConfigServer::setIndex(std::string &index) {
-	// if (index.empty())
-	// 	throw ConfigServerException("Error: Empty index!");
 	this->_index = splitVal(index);
 }
 
