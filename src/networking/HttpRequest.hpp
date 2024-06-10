@@ -1,49 +1,64 @@
-#ifndef HTTPREQUEST_HPP
-#define HTTPREQUEST_HPP
+#ifndef REQUEST_HPP
+#define REQUEST_HPP
 
 #include "../Macros.hpp"
+#include "../parsing/ConfigServer.hpp"
 
-class HttpRequest {
+class HttpRequest
+{
+	public:
+	enum REQUEST_STATE
+	{
+		HEADERS,
+		BODY,
+		REQUEST_READY	
+	};
+
+	enum BODY_STATE
+	{
+		CHUNKED,
+		CONTENT_LENGTH,
+		NONE,
+	};
+
 	private:
-		std::string _request;
-		std::string _method;
+		std::string _httpMethod;
+		std::string _httpVersion;
 		std::string _uri;
-		std::string	_httpVersion;
 		std::map<std::string, std::string> _headerFields;
-		std::string		_body;
-		bool			isChunked;
-		int				_bodySize;
-		int				_errorCode;
-		// ConfigServer	_confServ;
-		// int				_port;
+		std::string bodyFileName;
+		std::string queryString;
+		REQUEST_STATE request_status;
+		BODY_STATE body_status;
+		std::string requestData;
+		int _errorCode;
+		size_t _bodySize;
+		std::vector<ConfigServer>	_confServ;
+		ConfigServer	_serv;
 
-		bool parsingFinished;
-
-
-		void		_parseMethod();
-		void		_parseURI();
-		void		_getChunkedBody(size_t &bodypos);
-		bool		_isSupportedMethod();
-		std::string	_generateTempFileName();
-		std::string _findUploadPath();
-		void		_createFile(const std::string& name, const std::string& reqBody);
+		void	_parseURI();
 
 	public:
 		HttpRequest();
+		HttpRequest(ConfigServer serverConfig);
 		HttpRequest(const HttpRequest&);
 		HttpRequest& operator=(const HttpRequest&);
 		~HttpRequest();
-		void	parseHttpRequest(const std::string& req);
-		void	printRequestDetails() const;
+		void parseHttpRequest(std::string&);
 
-		//Setters
-		void	setMethod(const std::string& m);
-		void	setUri(const std::string& u);
-		void	setHttpVersion(const std::string& hv);
-		void	setBody(const std::string& b);
-		void	setHeaderField(const std::string& name, const std::string& value);
+		/*setters*/
+		void	setRequest(std::string&);
+		void	setMethod(const std::string& method);
+		void	setUri(const std::string& uri);
+		void	setHttpVersion(const std::string& version);
+		bool	setBody(std::string &body);
+		void	setHeaderField(std::string &headers);
 
-		//Getters
+		void set_bodyStatus(BODY_STATE);
+		void set_requestStatus(REQUEST_STATE);
+		void setRequestData(std::string&);
+
+		/*getters*/
 		std::string	getRequest() const;
 		std::string	getMethod() const;
 		std::string	getUri() const;
@@ -51,17 +66,22 @@ class HttpRequest {
 		std::string	getHeader(const std::string& headerName) const;
 		const std::map<std::string, std::string>& getHeaderFields() const;
 		std::string	getBody() const;
-		bool		getIsChunked() const;
+		size_t&		getBodysize();
 		int			getErrorCode() const;
+		
+		std::string& get_queryString();
+		std::string& get_bodyFileName();
+		int get_bodyStatus();
+		int get_requestStatus();
 
-		static int	hexToInt(const std::string& str);
-		void		parseBody(size_t &bodypos, const std::string &requestString);
-		bool		is_body(long& contentLength);
-		void		getChunkedBody(size_t &bodypos);
+		// void is_method(std::string&);
+		void printHeaders();
+		void _getChunkedBody(std::string&);
+		std::string& getRequestData();
 
-		void setParsingFinished(bool finished);
-    	bool isParsingFinished() const;
-
+		void is_body();
 };
+
+std::string trimHeader(const std::string& str);
 
 #endif

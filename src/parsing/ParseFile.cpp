@@ -18,6 +18,7 @@ void	trim(std::string& line) {
 	pos = line.find_last_not_of(" \t");
 	if (pos != std::string::npos)
 		line.erase(pos + 1);
+	
 }
 
 std::vector<t_tokens>	ParseFile::readFile(const char *fileName)

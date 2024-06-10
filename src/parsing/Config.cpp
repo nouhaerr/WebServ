@@ -1,7 +1,6 @@
 #include "Config.hpp"
 #include "ParseFile.hpp"
 
-
 Config::Config() :
 	_serverCount(0),
 	_fileName(DEFAULT_CONFIG)
@@ -9,7 +8,8 @@ Config::Config() :
 
 Config::Config(const char *fileName) :
 	_serverCount(0),
-	_fileName(fileName)
+	_fileName(fileName),
+	_servers()
 {}
 
 Config::Config(const Config &other) {
@@ -104,9 +104,6 @@ ConfigServer Config::parseServerConfig(std::vector<t_tokens>::iterator& it) {
 		throw ParseServerException("Error: expected '}' in the end of server directive.");
 	return (server);
 }
-std::vector<ConfigServer>	&Config::get_servers() {
-	return this->_servers;
-}
 
 void	Config::parse()
 {
@@ -135,8 +132,10 @@ void	Config::parse()
 			{
 				for (size_t j = i + 1; j < this->_serverCount; j++) 
 				{
-					if (this->_servers[i].getPort() == this->_servers[j].getPort()
-						&& this->_servers[i].getServerName() == this->_servers[j].getServerName())
+					if ((this->_servers[i].getPort() == this->_servers[j].getPort()
+						&& this->_servers[i].getHost() == this->_servers[j].getHost())
+						|| (this->_servers[i].getPort() == this->_servers[j].getPort()
+						&& this->_servers[i].getServerName() == this->_servers[j].getServerName()))
 						throw ParseServerException("Error: Same Server.");
 				}
 			}
