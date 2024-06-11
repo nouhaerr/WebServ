@@ -75,7 +75,25 @@ Sockets are communication endpoints used to send and receive data between two no
 
 ### Request
 
-An HTTP request is a message sent by a client to a server to initiate a specific action. It typically includes information such as the requested resource (URI), HTTP method (GET, POST, etc.), headers, and optionally, a message body. The server processes the request and sends back an HTTP response.
+An HTTP request is a message sent by a client to a server to initiate a specific action. It typically includes information such as the requested resource (URI), HTTP method (GET, POST, etc.), headers, and optionally, a message body. The server processes the request and sends back an HTTP response. The request typically includes information such as:
+
+- **Request Method**: The HTTP method (e.g., GET, POST, PUT, DELETE) indicating the desired action.
+- **Request URI**: The Uniform Resource Identifier specifying the resource being requested.
+- **Request Headers**: Additional metadata sent along with the request, such as user-agent information, cookies, and content type.
+- **Request Body**: Optional data sent along with the request, typically used in POST or PUT requests to submit form data or upload files.
+
+#### Request Headers
+
+   Request headers provide additional information about the request and the client making it. Common request headers include:
+
+   - **User-Agent**: Identifies the client application making the request (e.g., browser type and version).
+   - **Content-Type**: Specifies the format of the data in the request body (e.g., application/json, multipart/form-data).
+   - **Cookie**: Contains any cookies associated with the request.
+   - **Accept**: Specifies the types of content the client can accept in the response.
+
+#### Request Body
+
+   The request body contains data sent from the client to the server, typically in POST or PUT requests. It can include form data, file uploads, or JSON/XML payloads, depending on the content type specified in the request headers. The server processes the request body to perform the desired action, such as storing data in a database or processing a form submission.
 
 ### Response
 
