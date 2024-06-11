@@ -1,9 +1,10 @@
 #include "NetworkClient.hpp"
 
-NetworkClient::NetworkClient()
-  : serverSocketId(-1), connectionSocketId(-1),
-  server(),
-  clientAddressSize(0),
+NetworkClient::NetworkClient() :
+    _respReady(false),
+    serverSocketId(-1), connectionSocketId(-1),
+    server(),
+    clientAddressSize(0),
     headerDispatched(false), fileAccessed(false) ,
     _headersSent(false),
     _openFile(false),
@@ -12,8 +13,9 @@ NetworkClient::NetworkClient()
     std::memset(&clientDetails, 0, sizeof(clientDetails));
 }
 
-NetworkClient::NetworkClient(int socketDescriptor, int serverSocket)
-  : serverSocketId(serverSocket),
+NetworkClient::NetworkClient(int socketDescriptor, int serverSocket) :
+    _respReady(false),
+    serverSocketId(serverSocket),
     connectionSocketId(socketDescriptor),
     server(),
     clientAddressSize(0),
@@ -27,7 +29,8 @@ NetworkClient::NetworkClient(int socketDescriptor, int serverSocket)
 }
 
 NetworkClient::NetworkClient(const NetworkClient& source)
-  : serverSocketId(source.serverSocketId), connectionSocketId(source.connectionSocketId),
+  : _respReady(source._respReady),
+    serverSocketId(source.serverSocketId), connectionSocketId(source.connectionSocketId),
     server(source.server),
     clientAddressSize(source.clientAddressSize), clientDetails(source.clientDetails),
     responseHeader(source.responseHeader), responseBody(source.responseBody),
@@ -36,8 +39,7 @@ NetworkClient::NetworkClient(const NetworkClient& source)
     _headersSent(source._headersSent),
     _openFile(source._openFile),
     _response(source._response),
-    bytesSent(source.bytesSent) {
-}
+    bytesSent(source.bytesSent) {}
 
 bool operator==(const NetworkClient& lhs, const NetworkClient& rhs) 
 {
@@ -51,6 +53,7 @@ NetworkClient& NetworkClient::operator=(const NetworkClient& source)
 {
     if (this != &source) 
     {
+        _respReady = source._respReady;
         serverSocketId = source.serverSocketId;
         connectionSocketId = source.connectionSocketId;
         server = source.server;
@@ -235,4 +238,12 @@ void NetworkClient::setBytesSent(std::size_t bytes) {
 
 std::size_t NetworkClient::getBytesSent() const {
     return this->bytesSent;
+}
+
+bool    NetworkClient::getRespReady(){
+    return this->_respReady;
+}
+
+void    NetworkClient::setRespReady(bool value) {
+    _respReady = value;
 }

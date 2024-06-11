@@ -1,6 +1,7 @@
 #include "Macros.hpp"
 #include "parsing/Config.hpp"
 #include "networking/WebServer.hpp"
+#include <signal.h>
 
 int main(int argc, char* argv[]) 
 {
@@ -14,7 +15,7 @@ int main(int argc, char* argv[])
     try {
 		Config config(conFile);
 		config.parse();
-
+        signal(SIGPIPE, SIG_IGN);
         WebServer server(config);
         server.run();
     }

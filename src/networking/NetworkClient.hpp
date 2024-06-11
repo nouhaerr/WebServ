@@ -48,12 +48,15 @@ class NetworkClient {
 		ConfigServer& getServer();
 
 		void setRequest(HttpRequest req);
+		void setRespReady(bool value);
 		void setResponseHeader(std::string respHeader);
 		void setResponseBody(std::string body);
 		void setHeaderSent(bool value);
 		void setResponse(std::string response);
 		void setOpenFile(bool value);
+
 		HttpRequest& getRequest();
+		bool getRespReady();
 		std::string getResponseHeader();
 		std::string getResponseBody();
 		bool getHeaderSent();
@@ -68,9 +71,10 @@ class NetworkClient {
 		std::ifstream _file;
 		std::streamsize bytes_read;
 		void setBytesSent(std::size_t bytes);
-    std::size_t getBytesSent() const;
+    	std::size_t getBytesSent() const;
 
 	private:
+		bool	_respReady;
 		HttpRequest _req;
 		int serverSocketId;
 		int connectionSocketId;

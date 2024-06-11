@@ -42,6 +42,26 @@ WebServer::~WebServer()
     delete serverConfigs;
 }
 
+void setSocketNonBlocking(int socket_fd) 
+{
+    int flags = fcntl(socket_fd, F_GETFL, 0);
+    if (flags == -1) 
+    {
+        std::cerr << "Error getting socket flags: " << strerror(errno) << std::endl;
+        close(socket_fd);
+        return;
+    }
+
+    flags |= O_NONBLOCK;
+    if (fcntl(socket_fd, F_SETFL, flags) == -1) 
+    {
+        std::cerr << "Error setting socket non-blocking: " << strerror(errno) << std::endl;
+        close(socket_fd);
+        return;
+    }
+    std::cout << "Socket " << socket_fd << " set to non-blocking mode." << std::endl;
+}
+
 void WebServer::setupServerSockets() 
 {
     for (size_t i = 0; i < serverConfigs->size(); ++i) 
@@ -80,6 +100,9 @@ void WebServer::setupServerSockets()
             close(sockfd);
             continue;
         }
+
+        setSocketNonBlocking(sockfd);
+
         FD_SET(sockfd, &this->readSet);
         //you should add the one of write
         FD_SET(sockfd, &this->masterSet);
@@ -137,7 +160,7 @@ void WebServer::processClientRequests(int fd) {
         }
     }
     client.saveRequestData(bytes_received);
-   // std::cout<< client.getRequest().getRequestData() << std::endl;
+   std::cout<< client.getRequest().getRequestData() << std::endl;
     CheckRequestStatus(client);
     if (client.getRequest().get_requestStatus() == HttpRequest::REQUEST_READY) {
     //     std::string hostHeader = client.getRequest().getHeader("Host");
@@ -156,6 +179,7 @@ void WebServer::processClientRequests(int fd) {
     //    // std::cout << "Port in processClientRequests: " << clientServer.getPort() << std::endl; // Debugging output
     //     client.setServer(clientServer);
         FD_SET(fd, &this->writeSet);
+
     }
 }
 
@@ -166,26 +190,35 @@ void WebServer::run() {
     while (true) {
         readcpy = this->readSet;
         writecpy = this->writeSet;
-        if (select(this->highestFd + 1, &readcpy, &writecpy, NULL, NULL) < 0) 
+        signal(SIGPIPE, SIG_IGN);
+        if (select(this->highestFd + 1, &readcpy, &writecpy, NULL, NULL) < 0) {
             std::cerr << "Error in select()." << std::endl;
-
+            // continue ;
+        }
         for (int i = 3; i <= this->highestFd; i++) { 
-            if (FD_ISSET(i, &writecpy)) {
-                NetworkClient &client = GetRightClient(i);
-                //std::cout << "Port in run: " << client.getServer().getPort() << std::endl; // Debugging output
-                // client.updateResponseContent(generateResponse(client.getServer()));
-                sendDataToClient(client);
-            } else if (FD_ISSET(i, &readcpy)) {
-                if (std::find(serverSockets.begin(), serverSockets.end(), i) != serverSockets.end()) {
-                    acceptNewClient(i);                                               
-                } else {
-                    processClientRequests(i);
+            try {
+                if (FD_ISSET(i, &writecpy)) {
+                    NetworkClient &client = GetRightClient(i);
+                    std::cout << "ClientSok: " << i << "\n";
+                    sendDataToClient(client);
                 }
-            }
+                else if (FD_ISSET(i, &readcpy)) {
+                    if (std::find(serverSockets.begin(), serverSockets.end(), i) != serverSockets.end()) {
+                        acceptNewClient(i);                                               
+                    } else {
+                        std::cout << "ClientSok before parse Req: " << i << "\n";
+                        processClientRequests(i);
+                    }
+                }
+            } catch (const RequestError &error)
+		    {
+			    FD_CLR(i, &this->readSet);
+			    FD_SET(i, &this->writeSet);
+			    close(i);
+		    }
         }   
     }
 }
-
 
 const ConfigServer& WebServer::matchServerByFd(int fd) 
 {
@@ -206,6 +239,10 @@ void WebServer::acceptNewClient(int serverSocket) {
         std::cerr << "Failed to accept client." << std::endl;
         return;
     }
+    fcntl(clientSocket, F_SETFL, O_NONBLOCK);
+    // long option_len = 1;
+    // setsockopt(clientSocket, SOL_SOCKET, SO_NOSIGPIPE , &option_len, sizeof(option_len));
+    // setSocketNonBlocking(clientSocket);
     const ConfigServer& associatedServer = matchServerByFd(serverSocket);
     NetworkClient newClient(clientSocket, serverSocket);
     newClient.setServer(associatedServer);
@@ -226,15 +263,11 @@ void WebServer::closeClient(int clientSocket)
         FD_CLR(it->first, &readSet);
         FD_CLR(it->first, &writeSet);
         clients.erase(it);
-        // std::cout << "Client with socket " << clientSocket << " has been closed and removed." << std::endl;
+        std::cout << "Client with socket " << clientSocket << " has been closed and removed." << std::endl;
     } 
     else
         std::cerr << "Attempt to close non-existent client socket." << std::endl;
 }
-
-
-
-
 
 NetworkClient* WebServer::findClientBySocket(int socket) 
 {

@@ -43,7 +43,7 @@ bool HttpResponse::isDirHasIndexFiles() {
 	if (_idxFiles.size() != 0) {
 		for (size_t i = 0; i <_idxFiles.size(); i++) {
 			std::string path = _filePath + _idxFiles[i];
-			std::cout << "haas index\n" << path << "\n";
+			// std::cout << "haas index\n" << path << "\n";
 			path = deleteRedundantSlash(path);
 			std::ifstream file(path.c_str(), std::ios::in | std::ios::binary);
 
@@ -123,7 +123,7 @@ void	HttpResponse::_getAutoIndex() {
     	}
 		std::string directory = _location.getLocationName().empty() ? findDirname(_filePath, _root) + "/" : _location.getLocationName() + findDirname(_filePath, _root) + "/";
 		// _findDirectoryName();
-		std::cout << directory << "\n";
+		// std::cout << directory << "\n";
 
 		std::ostringstream listeningfile;
 		listeningfile << "<!DOCTYPE html>\n" << "<html lang=\"en\">\n" << "\t<head>\n" << "\t\t<meta charset=\"UTF-8\">\n";
@@ -153,6 +153,7 @@ void	HttpResponse::_getAutoIndex() {
 				std::fputs(listeningfile.str().c_str(), tempFile);
 				std::fclose(tempFile);
 				_filePath = tempFileName;
+				_isText = false;
 				_client.setResponseBody(tempFileName);
 			} else
 			{
@@ -210,7 +211,7 @@ int	HttpResponse::_checkRequestedType() {
 }
 
 void	HttpResponse::_isFolder() {
-	std::cout << "foldeeer\n";
+	// std::cout << "foldeeer\n";
 	isUrihasSlashInTHeEnd();
 	if (isDirHasIndexFiles())
 		return;
@@ -226,7 +227,7 @@ void	HttpResponse::handleGetMethod() {
 		return ;
 	}
 	int type = _checkRequestedType();
-	std::cout << "type: "<<type <<std::endl;
+	// std::cout << "type: "<<type <<std::endl;
 	if (type == FILE_TYPE) {
 		_isFile();
 		return;

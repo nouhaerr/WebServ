@@ -5,7 +5,7 @@
 #include "../parsing/Config.hpp"
 #include "../networking/NetworkClient.hpp"
 #include "../networking/HttpRequest.hpp"
-// #include <sys/sendfile.h>
+#include <sys/sendfile.h>
 
 #define FILE_TYPE 1
 #define FOLDER_TYPE 0
@@ -28,15 +28,21 @@ class HttpResponse {
 		std::string	getRequestedResource(HttpRequest &req);
 		std::string generateDate();
 		std::string deleteRedundantSlash(std::string uri);
-
+		bool	isText() const;
 		void	handleGetMethod();
 		void	isUrihasSlashInTHeEnd();
 		bool	isDirHasIndexFiles();
-
+		
+		off_t	getFileSize();
+		
 		void	handlePostMethod();
 		void	processPostMethod();
 
 		void	handleDeleteMethod();
+
+		void	sendText();
+    	void	sendFile();
+    	bool	hasPendingData() const;
 
 	private:
 		NetworkClient&	_client;
@@ -64,9 +70,9 @@ class HttpResponse {
 		std::string _filePath;
 		std::string _buffer;
 		off_t		_fileSize;
-		off_t		_offset;
 		std::string _contentType;
 		std::map<std::string, std::string> _reqHeader;
+		bool	_isText;
 
 		void	_handleDefaultErrors();
 		bool	_isSupportedMethod(std::string meth);

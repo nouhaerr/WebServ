@@ -21,17 +21,22 @@ HttpResponse::HttpResponse(NetworkClient &client) :
 	_filePath(""),
     _buffer(""),
 	_contentType(""),
-    _reqHeader()
+    _reqHeader(), 
+    _isText(false)
     {}
 
 HttpResponse::~HttpResponse(){}
+
+bool	HttpResponse::isText() const{
+	return this->_isText;
+}
 
 void	HttpResponse::locateErrorPage(int errCode) {
 	for (std::map<int, std::string>::iterator it = _errorPage.begin(); it != _errorPage.end(); it++) {
 		if (it->first == errCode) {
 			_errorPath = it->second + "/" + toString(errCode) + ".html";
 			_errorPath = deleteRedundantSlash(_errorPath);
-			std::cout << _errorPath << "\n";
+			// std::cout << _errorPath << "\n";
 			return ;
 		}
 	}
@@ -55,10 +60,10 @@ void	HttpResponse::_handleDefaultErrors() {
 
 void	HttpResponse::generateResponse(HttpRequest &req) {
 	_errCode = req.getErrorCode();
-	std::cout << "errcode result from req:" << _errCode << "\n";
+	// std::cout << "errcode result from req:" << _errCode << "\n";
 	_uri = getRequestedResource(req);
 	_filePath = deleteRedundantSlash(_uri);
-	std::cout << "filePath: "<< _filePath << "\n";
+	// std::cout << "filePath: "<< _filePath << "\n";
 	if (_filePath.empty()) {
 		buildResponse(404);
 		return;
@@ -151,12 +156,16 @@ std::string	HttpResponse::getContentLength(std::string path) {
     if (stat(path.c_str(), &fileStat) == 0) 
     {
 		_fileSize = fileStat.st_size;
-		std::cout << "file exist of size: " << _fileSize << "\n";
+		// std::cout << "file exist of size: " << _fileSize << "\n";
         std::ostringstream oss;
         oss << fileStat.st_size;
         return oss.str();
     }
     return "0";
+}
+
+off_t HttpResponse::getFileSize() {
+    return _fileSize;
 }
 
 std::string HttpResponse::generateDate()
@@ -179,6 +188,7 @@ std::string	HttpResponse::createResponseHeader(int errCode, std::string flag) {
     if (flag == "Default") {
         if (!_errorPath.empty()) {
             _headers["Content-Length"] = getContentLength(_errorPath);
+            _isText = false;
         }
 		else {
 			std::stringstream ss;
@@ -186,6 +196,7 @@ std::string	HttpResponse::createResponseHeader(int errCode, std::string flag) {
             _errorPath = ss.str();
     		_fileSize = _errorPath.size();
 			_headers["Content-Length"] = toString(_fileSize);
+            _isText = true;
         }
     	_headers["Content-Type"] = "text/html";
         if (_errCode == 201) {
@@ -262,12 +273,12 @@ std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
 	std::string location;
     for (std::vector<ConfigLocation>::iterator it = _locations.begin(); it != _locations.end(); ++it)
     {
-		std::cout << req.getUri();
-		std::cout << " --> " << it->getLocationName() << "\n";
+		// std::cout << req.getUri();
+		// std::cout << " --> " << it->getLocationName() << "\n";
         size_t pos = req.getUri().find(it->getLocationName());
         if (pos != std::string::npos && pos == 0)
         {
-			std::cout << "dkhaaaal\n";
+			// std::cout << "dkhaaaal\n";
 			if (req.getUri().size() > it->getLocationName().size()
 				&& it->getLocationName() != "/"
 				&& req.getUri()[it->getLocationName().size()] != '/');
@@ -319,10 +330,10 @@ std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
     _filePath = _constructPath(req.getUri(), _root, _index);
  	if (_autoindex)
     {
-		std::cout << "AUTOINDEX\n";
+		// std::cout << "AUTOINDEX\n";
 		if (req.getUri().find(_root) == std::string::npos)
 		{
-		std::cout << "root" << _root << "\n";
+		// std::cout << "root" << _root << "\n";
         _filePath = _constructPath(req.getUri(), _root, "");
 		}
 		return _filePath;
@@ -334,3 +345,50 @@ std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
     // std::cout << _filePath << "\n";
     return _filePath;
 }
+
+// void HttpResponse::sendFile() {
+//     const size_t CHUNK_SIZE = 8192; // Send in 8KB chunks
+//     ssize_t bytesSent;
+
+// 	fileFd = open(_client.getResponseBody().c_str(), O_RDONLY);
+//     if (fileFd == -1) {
+//         std::cerr << "Error opening file: " << strerror(errno) << std::endl;
+// 		return ;
+// 	}
+//     while (true) {
+//         bytesSent = sendfile(_client.fetchConnectionSocket(), fileFd, &offset, CHUNK_SIZE);
+//         if (bytesSent < 0) {
+//             if (errno == EAGAIN || errno == EWOULDBLOCK) {
+//                 // Socket is not ready for writing, try again later
+//                 break;
+//             } else {
+//                 std::cerr << "Error sending file data: " << strerror(errno) << std::endl;
+//                 close(fileFd);
+//                 fileFd = -1;
+//                 return;
+//             }
+//         } else if (bytesSent == 0) {
+//             // End of file
+//             close(fileFd);
+//             fileFd = -1;
+//             break;
+//         } else {
+//             totalBytesSent += bytesSent;
+//         }
+//     }
+// }
+
+// bool HttpResponse::hasPendingData() const {
+//     return fileFd != -1; // If fileFd is still open, there is pending data
+// }
+
+// void HttpResponse::sendText() {
+//     ssize_t bytesSent = send(_client.fetchConnectionSocket(), _client.getResponseBody().c_str() + totalBytesSent, _client.getResponseBody().size() - totalBytesSent, 0);
+//     if (bytesSent < 0) {
+//         std::cerr << "Error sending text data: " << strerror(errno) << std::endl;
+//         return;
+//     } else {
+//         totalBytesSent += bytesSent;
+//     }
+// }
+
