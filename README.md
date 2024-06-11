@@ -47,7 +47,31 @@ You can configure the server by editing the `config/default.conf` file. Here are
 
 ### Sockets
 
-Sockets are communication endpoints used to send and receive data between two nodes on a network. In the context of our web server, sockets are utilized to establish connections with clients and handle incoming HTTP requests.
+Sockets are communication endpoints used to send and receive data between two nodes on a network. In the context of our web server, sockets are utilized to establish connections with clients and handle incoming HTTP requests
+#### Server-Side Socket Functions
+
+   On the server side, some common socket functions include:
+
+   - **socket()**: Create a new socket.
+   - **bind()**: Bind the socket to a specific address and port.
+   - **listen()**: Put the socket into listening mode, allowing it to accept incoming connections.
+   - **accept()**: Accept an incoming connection, returning a new socket for communication with the client.
+   - **send()**: Send data over the established connection.
+   - **recv()**: Receive data from the connected client.
+
+#### Client-Side Socket Functions
+
+   On the client side, some common socket functions include:
+
+   - **socket()**: Create a new socket.
+   - **connect()**: Initiate a connection to a specific server.
+   - **send()**: Send data to the server.
+   - **recv()**: Receive data from the server.
+   - **close()**: Close the socket when communication is finished.
+
+#### Non-Blocking Sockets
+
+   Non-blocking sockets allow programs to perform other tasks while waiting for data to arrive or be sent over the network. This is achieved by setting the socket to non-blocking mode using the **fcntl()** or **ioctl()** functions. Non-blocking sockets can be useful in scenarios where responsiveness is critical, such as handling multiple client connections concurrently without blocking the server's main thread.
 
 ### Request
 
