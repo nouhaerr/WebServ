@@ -1,19 +1,21 @@
 #include "NetworkClient.hpp"
-#include <cstring>
 
-NetworkClient::NetworkClient()
-  : serverSocketId(-1), connectionSocketId(-1),
-  server(),
-  clientAddressSize(0),
+NetworkClient::NetworkClient() :
+    _respReady(false),
+    serverSocketId(-1), connectionSocketId(-1),
+    server(),
+    clientAddressSize(0),
     headerDispatched(false), fileAccessed(false) ,
     _headersSent(false),
     _openFile(false),
-    _response("") {
+    _response(""),
+    bytesSent(0) {
     std::memset(&clientDetails, 0, sizeof(clientDetails));
 }
 
-NetworkClient::NetworkClient(int socketDescriptor, int serverSocket)
-  : serverSocketId(serverSocket),
+NetworkClient::NetworkClient(int socketDescriptor, int serverSocket) :
+    _respReady(false),
+    serverSocketId(serverSocket),
     connectionSocketId(socketDescriptor),
     server(),
     clientAddressSize(0),
@@ -21,12 +23,14 @@ NetworkClient::NetworkClient(int socketDescriptor, int serverSocket)
     fileAccessed(false),
     _headersSent(false),
     _openFile(false),
-    _response("") {
+    _response(""),
+    bytesSent(0) {
     std::memset(&clientDetails, 0, sizeof(clientDetails));
 }
 
 NetworkClient::NetworkClient(const NetworkClient& source)
-  : serverSocketId(source.serverSocketId), connectionSocketId(source.connectionSocketId),
+  : _respReady(source._respReady),
+    serverSocketId(source.serverSocketId), connectionSocketId(source.connectionSocketId),
     server(source.server),
     clientAddressSize(source.clientAddressSize), clientDetails(source.clientDetails),
     responseHeader(source.responseHeader), responseBody(source.responseBody),
@@ -34,8 +38,8 @@ NetworkClient::NetworkClient(const NetworkClient& source)
     fileAccessed(source.fileAccessed),
     _headersSent(source._headersSent),
     _openFile(source._openFile),
-    _response(source._response) {
-}
+    _response(source._response),
+    bytesSent(source.bytesSent) {}
 
 bool operator==(const NetworkClient& lhs, const NetworkClient& rhs) 
 {
@@ -49,6 +53,7 @@ NetworkClient& NetworkClient::operator=(const NetworkClient& source)
 {
     if (this != &source) 
     {
+        _respReady = source._respReady;
         serverSocketId = source.serverSocketId;
         connectionSocketId = source.connectionSocketId;
         server = source.server;
@@ -62,6 +67,7 @@ NetworkClient& NetworkClient::operator=(const NetworkClient& source)
         _headersSent = source._headersSent;
         _openFile = source._openFile;
         _response = source._response;
+        bytesSent = source.bytes_read;
     }
     return *this;
 }
@@ -226,11 +232,18 @@ std::streamsize NetworkClient::bytesRead() const {
     return this->bytes_read;
 }
 
-// void    NetworkClient::setREQ(std::string& requestString) {
-//     this->REQ = requestString;
-// }
+void NetworkClient::setBytesSent(std::size_t bytes) {
+    this->bytesSent = bytes;
+}
 
+std::size_t NetworkClient::getBytesSent() const {
+    return this->bytesSent;
+}
 
-// std::string&    NetworkClient::getREQ() {
-//     return this->REQ;
-// }
+bool    NetworkClient::getRespReady(){
+    return this->_respReady;
+}
+
+void    NetworkClient::setRespReady(bool value) {
+    _respReady = value;
+}

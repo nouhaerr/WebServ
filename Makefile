@@ -1,6 +1,6 @@
 CPP = c++
 
-FLAGS = -Wall -Wextra -Werror -fsanitize=address -g3 #-std=c++98
+FLAGS = -Wall -Wextra -Werror -std=c++98 #-fsanitize=address -g3 
 
 SRC = src/main.cpp\
 	src/parsing/Config.cpp src/parsing/ParseFile.cpp\
@@ -10,8 +10,6 @@ SRC = src/main.cpp\
 	src/networking/WebServer.cpp \
 	src/networking/sendResponse.cpp\
 	src/networking/HttpRequest.cpp \
-	src/networking/requestBody.cpp \
-	src/networking/HttpRequestParser.cpp\
 	src/response/HttpResponse.cpp\
 	src/response/mimeTypes.cpp\
 	src/response/GET.cpp\
@@ -31,6 +29,7 @@ $(NAME) : $(OBJS)
 	@$(CPP) $(FLAGS) -c $< -o $@
 
 all : $(NAME) $(SRC)
+	./$(NAME)
 
 clean :
 	@rm -rf $(OBJS)

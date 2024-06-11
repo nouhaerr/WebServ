@@ -2,11 +2,9 @@
 
 std::string HttpResponse::_constructPath(const std::string& requestPath, const std::string &root, const std::string &index) {
 	std::string path = requestPath;
-	// std::cout << path << "\n";
     if (path.empty() || path[0] != '/') {
         path = "/" + path;
     }
-	// std::cout << index << "\n";
 	if (!path.empty() && path[path.length() - 1] == '/') {
         path += index;
     }
@@ -34,12 +32,9 @@ std::string getContentType(std::string filename) {
 }
 
 void	HttpResponse::isUrihasSlashInTHeEnd() {
-	//    std::cout << "adding slash: "<< _filePath[_filePath.size() - 1] << "\n";
-	// std::cout << _filePath.size() << "\n";
 	if (_filePath[_filePath.size() - 1] != '/')
     {
        _filePath += "/";
-	//    std::cout << "adding slash: "<< _filePath << "\n";
         buildResponse(301);
     }
 }
@@ -48,7 +43,7 @@ bool HttpResponse::isDirHasIndexFiles() {
 	if (_idxFiles.size() != 0) {
 		for (size_t i = 0; i <_idxFiles.size(); i++) {
 			std::string path = _filePath + _idxFiles[i];
-			std::cout << "haas index\n" << path << "\n";
+			// std::cout << "haas index\n" << path << "\n";
 			path = deleteRedundantSlash(path);
 			std::ifstream file(path.c_str(), std::ios::in | std::ios::binary);
 
@@ -75,19 +70,28 @@ bool HttpResponse::isDirHasIndexFiles() {
 }
 
 // std::string	HttpResponse::_findDirectoryName() {
-	// Create a string stream from the path
-    // std::istringstream iss(_filePath);
+// 	size_t rootPos = _filePath.find(_root);
+//     if (rootPos == std::string::npos)
+//         return "";
 
-    // // Tokenize the path by '/'
-    // std::string token;
-    // std::string lastDirName;
-    // while (std::getline(iss, token, '/')) {
-    //     if (!token.empty()) {
-    //         lastDirName = token;
-    //     }
-    // }
-    // return lastDirName;
-	std::string findDirname(const std::string& path, const std::string& root)
+//     // Remove root from the path
+//     std::string dirname = _filePath.substr(rootPos + _root.length());
+
+// 	//Create a string stream from the path
+//     std::istringstream iss(dirname);
+
+//     // Tokenize the path by '/'
+//     std::string token;
+//     std::string lastDirName;
+//     while (std::getline(iss, token, '/')) {
+//         if (!token.empty()) {
+//             lastDirName = token;
+//         }
+//     }
+//     return lastDirName;
+// }
+
+std::string findDirname(const std::string& path, const std::string& root)
 {
     // Find the position where root ends in the path
     size_t rootPos = path.find(root);
@@ -104,7 +108,7 @@ bool HttpResponse::isDirHasIndexFiles() {
 
     // Extract the dirname
     dirname = dirname.substr(0, pos);
-
+	// std::cout << dirname << "\n";
     return dirname;
 
 }
@@ -114,15 +118,12 @@ void	HttpResponse::_getAutoIndex() {
 		std::string path = _filePath;
     	DIR *dir = opendir(path.c_str());
 
-    	if (dir == NULL)
-    	{
+    	if (dir == NULL) {
         	return;
     	}
-		std::size_t lastSlashPos = path.find_last_of('/');
-    	std::string pathff = (lastSlashPos != std::string::npos) ? path.substr(0, lastSlashPos + 1) : "";
 		std::string directory = _location.getLocationName().empty() ? findDirname(_filePath, _root) + "/" : _location.getLocationName() + findDirname(_filePath, _root) + "/";
 		// _findDirectoryName();
-		std::cout << directory << "\n";
+		// std::cout << directory << "\n";
 
 		std::ostringstream listeningfile;
 		listeningfile << "<!DOCTYPE html>\n" << "<html lang=\"en\">\n" << "\t<head>\n" << "\t\t<meta charset=\"UTF-8\">\n";
@@ -131,20 +132,7 @@ void	HttpResponse::_getAutoIndex() {
 		struct dirent *ent;
     	while ((ent = readdir(dir)) != NULL)
     	{
-			        listeningfile << "<a href=\"" << directory << ent->d_name << "\">" << ent->d_name << "</a><br>";
-
-			// std::string	d_nm = ent->d_name;
-			// if (d_nm == ".." || d_nm == ".")
-			// {
-			// 	d_nm += '/';
-			// std::cout << d_nm << "\n";
-        	// listeningfile << "<a href=\"" <<  d_nm << directory<< "\">" << ent->d_name << "</a><br>";
-
-			// }
-			// else {
-			// 	std::cout << d_nm << "\n";
-        	// 	listeningfile << "<a href=\"" << '/' << ent->d_name << "\">" << ent->d_name << "</a><br>";
-			// }
+			listeningfile << "<a href=\"" << directory << ent->d_name << "\">" << ent->d_name << "</a><br>";
     	}
 		closedir(dir);
 		listeningfile << "</pre><hr></body></html>";
@@ -165,6 +153,7 @@ void	HttpResponse::_getAutoIndex() {
 				std::fputs(listeningfile.str().c_str(), tempFile);
 				std::fclose(tempFile);
 				_filePath = tempFileName;
+				_isText = false;
 				_client.setResponseBody(tempFileName);
 			} else
 			{
@@ -195,12 +184,11 @@ void	HttpResponse::_isFile() {
 		// 	_isCgi = true;
 		// 	return ;
 		// }
-		std::cout << "the file exist: " << _filePath<< "\n";
+		// std::cout << "the file exist: " << _filePath<< "\n";
 		_contentType = getContentType(_filePath);
 		std::string header = createResponseHeader(200, "Nothing");
 		_client.setResponseHeader(header);
 		_client.setResponseBody(_filePath);
-		// _isfile = true;
 		return ;
 	}
 	else {
@@ -209,12 +197,9 @@ void	HttpResponse::_isFile() {
 	}
 }
 
-#include <cerrno>
-
 int	HttpResponse::_checkRequestedType() {
 	struct stat path_stat;
 	if (stat(_filePath.c_str(), &path_stat) != 0) {
-		std::cerr << "Error accessing file: " << strerror(errno) << std::endl;
 		_errCode = 404;
         return ERROR;
     }
@@ -226,7 +211,7 @@ int	HttpResponse::_checkRequestedType() {
 }
 
 void	HttpResponse::_isFolder() {
-	std::cout << "foldeeer\n";
+	// std::cout << "foldeeer\n";
 	isUrihasSlashInTHeEnd();
 	if (isDirHasIndexFiles())
 		return;
@@ -242,7 +227,7 @@ void	HttpResponse::handleGetMethod() {
 		return ;
 	}
 	int type = _checkRequestedType();
-	std::cout << "type: "<<type <<std::endl;
+	// std::cout << "type: "<<type <<std::endl;
 	if (type == FILE_TYPE) {
 		_isFile();
 		return;
@@ -258,12 +243,12 @@ void	HttpResponse::handleGetMethod() {
 }
 
 bool	HttpResponse::_isSupportedMethod(std::string meth) {
-	size_t	len = _methods.size();
+	
+	std::vector<std::string>::iterator	it = _methods.begin();
 
-	for(size_t i = 0; i < len; i++) {
-		if (_methods[i] == meth) {
-			return true ;
-		}
+	for (; it != _methods.end(); ++it) {
+		if (*it == meth)
+			return true;
 	}
     return false;
 }

@@ -74,7 +74,6 @@ class HttpRequest
 		int get_bodyStatus();
 		int get_requestStatus();
 
-		// void is_method(std::string&);
 		void printHeaders();
 		void _getChunkedBody(std::string&);
 		std::string& getRequestData();
@@ -82,6 +81,7 @@ class HttpRequest
 		bool is_body();
 };
 
+int	hexToInt(const std::string& str);
 std::string trimHeader(const std::string& str);
 
 #endif

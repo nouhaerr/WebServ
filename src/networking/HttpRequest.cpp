@@ -1,4 +1,4 @@
-#include "./HttpRequest.hpp"
+#include "HttpRequest.hpp"
 
 HttpRequest::HttpRequest() : 
 	_httpMethod(""),
@@ -126,7 +126,7 @@ std::string Generate_Random_File_Name()
     return tempName;
 }
 
-bool HttpRequest::is_body()
+bool	HttpRequest::is_body()
 {
 	std::map<std::string, std::string>::iterator it_length = this->_headerFields.find("Content-Length");
 	std::map<std::string, std::string>::iterator it_chunk = this->_headerFields.find("Transfer-Encoding");
@@ -143,8 +143,7 @@ bool HttpRequest::is_body()
 		this->_errorCode = 501; //Not implemented
 		return false;
 	}
-	else if (it_length == _headerFields.end()
-		&& it_chunk == _headerFields.end()) {
+	else if (it_length == _headerFields.end() && it_chunk == _headerFields.end()) {
 		this->_errorCode = 400; //Bad Request
 		return false;
 	}
@@ -156,7 +155,6 @@ void HttpRequest::setMethod(const std::string& method)
 	this->_httpMethod = method;
 	if (this->_httpMethod != "POST" && this->_httpMethod !="GET" && this->_httpMethod != "DELETE")
         this->_errorCode = 501; /*Not Implemented method*/
-	// is_method(method);
 }
 
 void HttpRequest::setUri(const std::string& uri) {
@@ -209,34 +207,55 @@ void HttpRequest::setHeaderField(std::string &headers)
 	}
 }
 
+int	hexToInt(const std::string& str) {
+    int intValue;
+
+    std::istringstream(str) >> std::hex >> intValue;
+    return intValue;
+}
+
 void HttpRequest::_getChunkedBody(std::string &body)
 {
-	std::string chunk;
-	std::string CRLF("\r\n");
-	size_t crlf_pos;
-	std::string line;
-	std::fstream bodyDataFile;
+    std::string CRLF("\r\n");
+    std::size_t crlf_pos;
+    std::fstream bodyDataFile;
+    
+    bodyDataFile.open(this->bodyFileName.c_str(), std::ios::app | std::ios::out | std::ios::in | std::ios::binary);
 
-	bodyDataFile.open(this->bodyFileName.c_str(), std::fstream::app | std::fstream::out | std::fstream::in);
-	while (1)
-	{
-		crlf_pos = body.find(CRLF);
-		if (crlf_pos == 0)
-			break;
-		chunk = body.substr(0, crlf_pos);
-		body = body.substr(crlf_pos + 2);
-		if (chunk == "0")
-		{
-			this->request_status = HttpRequest::REQUEST_READY;
-			break;
-		}
+    while (!body.empty())
+    {
+        crlf_pos = body.find(CRLF);
+        if (crlf_pos == std::string::npos)
+        {
+            break; // Wait for more data to arrive
+        }
 
-		else if (isHexadecimal(chunk))
-			continue;
-		this->_bodySize += chunk.size();
-		bodyDataFile << chunk;
-	}
-	bodyDataFile.close();
+        std::string chunkSizeStr = body.substr(0, crlf_pos);
+        body = body.substr(crlf_pos + 2); // Remove chunk size line and CRLF
+
+        // Convert chunk size from hex to decimal
+        std::size_t chunkSize = hexToInt(chunkSizeStr);
+
+        if (chunkSize == 0)
+        {
+            this->request_status = HttpRequest::REQUEST_READY;
+            break;
+        }
+
+        if (body.size() < chunkSize + 2) // Check if we have the whole chunk and trailing CRLF
+        {
+            body = chunkSizeStr + CRLF + body; // Put the size back and wait for more data
+            break;
+        }
+
+        std::string chunk = body.substr(0, chunkSize);
+        body = body.substr(chunkSize + 2); // Remove chunk and trailing CRLF
+
+        this->_bodySize += chunk.size();
+        bodyDataFile.write(chunk.c_str(), chunk.size());
+    }
+
+    bodyDataFile.close();
 }
 
 bool HttpRequest::setBody(std::string &body)
@@ -245,6 +264,9 @@ bool HttpRequest::setBody(std::string &body)
 		this->bodyFileName = "/tmp/" + Generate_Random_File_Name();
 	if (this->body_status == HttpRequest::CHUNKED)
 	{
+			//std::cout << body << std::endl;
+			//std::cout << "************************" << std::endl;
+
 		_getChunkedBody(body);
 		if (this->request_status == HttpRequest::REQUEST_READY)
 			return true;
