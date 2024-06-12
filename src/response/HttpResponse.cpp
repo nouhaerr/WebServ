@@ -22,7 +22,8 @@ HttpResponse::HttpResponse(NetworkClient &client) :
     _buffer(""),
 	_contentType(""),
     _reqHeader(), 
-    _isText(false)
+    _isText(false),
+    _slashSetted(false)
     {}
 
 HttpResponse::~HttpResponse(){}

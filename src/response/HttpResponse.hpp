@@ -37,6 +37,8 @@ class HttpResponse {
 		
 		void	handlePostMethod();
 		void	processPostMethod();
+		bool	isPostDirHasIndexFiles();
+		void	_postRequestFolder();
 
 		void	handleDeleteMethod();
 
@@ -69,6 +71,7 @@ class HttpResponse {
 		std::string _contentType;
 		std::map<std::string, std::string> _reqHeader;
 		bool	_isText;
+		bool	_slashSetted;
 
 		void	_handleDefaultErrors();
 		bool	_isSupportedMethod(std::string meth);

@@ -221,7 +221,11 @@ void HttpRequest::_getChunkedBody(std::string &body)
     std::fstream bodyDataFile;
     
     bodyDataFile.open(this->bodyFileName.c_str(), std::ios::app | std::ios::out | std::ios::in | std::ios::binary);
-
+	if (!bodyDataFile.is_open()) {
+		this->request_status = HttpRequest::REQUEST_READY;
+		this->_errorCode = 500; //internalSeral error
+		return ;
+	}
     while (!body.empty())
     {
         crlf_pos = body.find(CRLF);
@@ -278,6 +282,10 @@ bool HttpRequest::setBody(std::string &body)
 		size_t bytes_left = content_length - (size_t)this->_bodySize;
 		std::fstream bodyDataFile;
 		bodyDataFile.open(this->bodyFileName.c_str(), std::fstream::app | std::fstream::out | std::fstream::in);
+		if (!bodyDataFile.is_open()) {
+			this->_errorCode = 500; //internalSeral error
+			return true;
+		}
 		if (bytes_left > 0 && body.size() <= bytes_left)
 		{
 			bodyDataFile << body;

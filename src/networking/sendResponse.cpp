@@ -46,7 +46,7 @@ void WebServer::sendResponse(HttpRequest &req, NetworkClient &client)
 			else 
 			{
                 // std::cout << "IN ELSE, SockCli: " << client.fetchConnectionSocket() << "\n";
-				std::cerr << "Nothing left to read " << client.getResponseBody() << std::endl;
+				// std::cerr << "Nothing left to read " << client.getResponseBody() << std::endl;
                 closeClient(client.fetchConnectionSocket());
                 return;
             }

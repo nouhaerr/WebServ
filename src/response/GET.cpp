@@ -36,6 +36,7 @@ void	HttpResponse::isUrihasSlashInTHeEnd() {
     {
        _filePath += "/";
         buildResponse(301);
+		_slashSetted = true;
     }
 }
 

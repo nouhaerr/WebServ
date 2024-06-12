@@ -16,6 +16,7 @@ void	HttpResponse::_createFile() {
         file << _postBody;
         file.close();
 		this->_errCode = 201;
+		_headers["Location"] = _uploadPath;
 		buildResponse(201);
 		// std::cout << _uploadPath << "\n";
 		 /*201 Created success status response code indicates
@@ -66,9 +67,59 @@ void	HttpResponse::handlePostMethod(){
 		processPostMethod();
 		return ;
 	}
-	// else {
+	else {
+		int type = _checkRequestedType();
+		if (type == FILE_TYPE) {
+			// _isFile();
+			return;
+		}
+		else if (type == FOLDER_TYPE) {
+			// _postRequestFolder();
+			return ;
+		}
+		else if (type == ERROR){
+			buildResponse(404);
+			return ;
+		}
+	}
+}
 
-	// }
+void	HttpResponse::_postRequestFolder() {
+	isUrihasSlashInTHeEnd();
+	if (_slashSetted == true) {
+		return ;
+	}
+	if (isPostDirHasIndexFiles())
+		return;
+	else {
+		buildResponse(403);
+	}
+}
+
+bool HttpResponse::isPostDirHasIndexFiles() {
+	if (_idxFiles.size() != 0) {
+		for (size_t i = 0; i <_idxFiles.size(); i++) {
+			std::string path = _filePath + _idxFiles[i];
+			// std::cout << "haas index\n" << path << "\n";
+			path = deleteRedundantSlash(path);
+			std::ifstream file(path.c_str(), std::ios::in | std::ios::binary);
+
+            if (file.is_open())
+            {
+                // _errCode = 200;
+                _filePath = path;
+                file.close();
+				// _isFile();
+                return true;
+            }
+			else {
+				buildResponse(404);
+				return true;
+			}
+		}
+		return true;
+	}
+	return false;
 }
 
 std::string	HttpResponse::_generateTempFileName() {
