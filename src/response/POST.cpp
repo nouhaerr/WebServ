@@ -63,7 +63,6 @@ void	HttpResponse::handlePostMethod(){
 		filecontent << bodyfile.rdbuf();
 		_postBody += filecontent.str();
 		bodyfile.close();
-		// std::cout << _bodyFileName << " dyal req\n";
 		processPostMethod();
 		return ;
 	}
@@ -73,7 +72,7 @@ void	HttpResponse::handlePostMethod(){
 }
 
 std::string	HttpResponse::_generateTempFileName() {
-	const char* alphanum = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_-";
+	const char* alphanum = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_-";
     const int charsetSize = sizeof(alphanum) - 1;
 	std::string	tempName;
 
