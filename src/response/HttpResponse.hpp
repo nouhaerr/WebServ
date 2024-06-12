@@ -40,10 +40,6 @@ class HttpResponse {
 
 		void	handleDeleteMethod();
 
-		void	sendText();
-    	void	sendFile();
-    	bool	hasPendingData() const;
-
 	private:
 		NetworkClient&	_client;
 		ConfigServer	_serv;
@@ -85,21 +81,6 @@ class HttpResponse {
 		std::string	_findDirectoryName();
 		std::string	_generateTempFileName();
 		void	_createFile();
-};
-
-class HttpException : public std::exception {
-	public:
-		HttpException(const std::string& message, int code) : message_(message),_code(code)  {}
-
-		virtual const char* what() const throw() {
-			return message_.c_str();
-		}
-		virtual ~HttpException() throw() {}
-
-		int getErrorCode() const { return _code; }
-	private:
-		std::string message_;
-		int _code;
 };
 
 std::string getContentType(std::string filename);

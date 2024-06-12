@@ -15,7 +15,7 @@ int main(int argc, char* argv[])
     try {
 		Config config(conFile);
 		config.parse();
-        signal(SIGPIPE, SIG_IGN);
+        // signal(SIGPIPE, SIG_IGN);
         WebServer server(config);
         server.run();
     }

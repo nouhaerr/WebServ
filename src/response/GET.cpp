@@ -93,13 +93,20 @@ bool HttpResponse::isDirHasIndexFiles() {
 
 std::string findDirname(const std::string& path, const std::string& root)
 {
+	// Ensure root ends with '/'
+    std::string adjustedRoot = root;
+    if (!root.empty() && root[root.length() - 1] != '/')
+    {
+        adjustedRoot += '/';
+    }
+
     // Find the position where root ends in the path
-    size_t rootPos = path.find(root);
+    size_t rootPos = path.find(adjustedRoot);
     if (rootPos == std::string::npos)
         return "";
 
     // Remove root from the path
-    std::string dirname = path.substr(rootPos + root.length());
+    std::string dirname = path.substr(rootPos + adjustedRoot.length());
 
     // Find the last '/' character in the remaining path
     size_t pos = dirname.find_last_of('/');
@@ -108,9 +115,7 @@ std::string findDirname(const std::string& path, const std::string& root)
 
     // Extract the dirname
     dirname = dirname.substr(0, pos);
-	// std::cout << dirname << "\n";
-    return dirname;
-
+    return "/" + dirname;
 }
 
 void	HttpResponse::_getAutoIndex() {
@@ -130,10 +135,34 @@ void	HttpResponse::_getAutoIndex() {
 		listeningfile << "\t\t\t<title>Index of " << directory << "</title>\n";
 		listeningfile << "</head>\n<body bgcolor=\"white\"><h1>Index of " << directory << "</h1><hr><pre>";
 		struct dirent *ent;
-    	while ((ent = readdir(dir)) != NULL)
-    	{
-			listeningfile << "<a href=\"" << directory << ent->d_name << "\">" << ent->d_name << "</a><br>";
-    	}
+
+    	while ((ent = readdir(dir)) != NULL) {
+			if (ent->d_name[0] == '.' && strcmp(ent->d_name, "..") != 0) {
+					continue;
+			}
+
+			// Display the entry with a slash at the beginning if it's a directory
+			if (ent->d_type == DT_DIR && strcmp(ent->d_name, "..") != 0) {
+				listeningfile << "<a href=\"" << directory << ent->d_name << "\">/" << ent->d_name << "</a><br>";
+			} else if (strcmp(ent->d_name, "..") == 0) {
+				listeningfile << "<a href=\"" << directory << ent->d_name << "\">" << ent->d_name << "/</a><br>";
+			}
+			else {
+				listeningfile << "<a href=\"" << directory << ent->d_name << "\">" << ent->d_name << "</a><br>";
+			}
+		}
+
+		// struct dirent *ent;
+    	// while ((ent = readdir(dir)) != NULL)
+    	// {
+		// 	if (ent->d_name[0] == '.' && strcmp(ent->d_name, "..") != 0) {
+        //     	continue;
+        // 	}
+
+       	// 	 // Prepend '/' to the directory name
+        // 	// listeningfile << "<a href=\"" << directory << "/" << ent->d_name << "\">" << ent->d_name << "</a><br>";
+		// 	listeningfile << "<a href=\"" << directory << ent->d_name << "\">" << "/" << ent->d_name << "</a><br>";
+    	// }
 		closedir(dir);
 		listeningfile << "</pre><hr></body></html>";
 		_fileSize = listeningfile.str().size();

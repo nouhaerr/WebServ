@@ -35,7 +35,6 @@ void	HttpResponse::processPostMethod() {
        	_uploadPath += "/";
     }
 	_uploadPath += file;
-
     std::map<std::string, std::string>::iterator it = _reqHeader.find("Content-Type");
 	if(it != _reqHeader.end())
     {
@@ -48,11 +47,8 @@ void	HttpResponse::processPostMethod() {
         _uploadPath += contentType;
 		_contentType = value;
     }
-	// std::cout << _uploadPath << "\n";
+	// std::cout << "dyal resp: " << _uploadPath << "\n";
 	_createFile();
-	// std::ofstream file(_uploadPath.c_str());
-	// file << _postBody;
-	// file.close();
 }
 
 void	HttpResponse::handlePostMethod(){
@@ -65,9 +61,9 @@ void	HttpResponse::handlePostMethod(){
 		std::ifstream bodyfile(_bodyFileName.c_str());
 		std::ostringstream filecontent;
 		filecontent << bodyfile.rdbuf();
-		_postBody = filecontent.str();
+		_postBody += filecontent.str();
 		bodyfile.close();
-		std::remove(_bodyFileName.c_str());
+		// std::cout << _bodyFileName << " dyal req\n";
 		processPostMethod();
 		return ;
 	}
@@ -77,7 +73,7 @@ void	HttpResponse::handlePostMethod(){
 }
 
 std::string	HttpResponse::_generateTempFileName() {
-	const char* alphanum = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_-";
+	const char* alphanum = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_-";
     const int charsetSize = sizeof(alphanum) - 1;
 	std::string	tempName;
 

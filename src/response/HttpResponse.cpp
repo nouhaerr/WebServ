@@ -104,49 +104,49 @@ void	HttpResponse::findStatusCode(int code) {
     switch (code)
     {
         case 0:
-            _statusCode = "200 OK\r\n";
+            _statusCode = "200 OK";
             break;
         case 201:
-            _statusCode = "201 Created\r\n";
+            _statusCode = "201 Created";
             break;
         case 400:
-            _statusCode = "400 Bad Request\r\n";
+            _statusCode = "400 Bad Request";
             break;
         case 301:
-            _statusCode = "301 Moved Permanently\r\n";
+            _statusCode = "301 Moved Permanently";
             break;
         case 302:
-            _statusCode = "302 Moved Temporarily\r\n";
+            _statusCode = "302 Moved Temporarily";
             break;
         case 403:
-            _statusCode = "403 Forbidden\r\n";
+            _statusCode = "403 Forbidden";
             break;
         case 404:
-            _statusCode = "404 Not Found\r\n";
+            _statusCode = "404 Not Found";
             break;
         case 405:
-            _statusCode = "405 Method Not Allowed\r\n";
+            _statusCode = "405 Method Not Allowed";
             break;
         case 413:
-            _statusCode = "413 Payload Too Large\r\n";
+            _statusCode = "413 Payload Too Large";
             break;
 		case 414:
-			_statusCode = "414 URI Too Long\r\n";
+			_statusCode = "414 URI Too Long";
 			break;
         case 415:
-			_statusCode = "415 Unsupported Media Type\r\n";
+			_statusCode = "415 Unsupported Media Type";
             break;
         case 500:
-            _statusCode = "500 Internal Server Error\r\n";
+            _statusCode = "500 Internal Server Error";
             break;
         case 501:
-            _statusCode = "501 Not Implemented\r\n";
+            _statusCode = "501 Not Implemented";
             break;
         case 505:
-            _statusCode = "505 HTTP Version Not Supported\r\n";
+            _statusCode = "505 HTTP Version Not Supported";
             break;
         default:
-            _statusCode = "200 OK\r\n";
+            _statusCode = "200 OK";
             break;
     }
 }
@@ -192,7 +192,13 @@ std::string	HttpResponse::createResponseHeader(int errCode, std::string flag) {
         }
 		else {
 			std::stringstream ss;
-            ss << "<center><h1>" << errCode << "</h1></center>";
+            findStatusCode(errCode);
+            ss << "<html>";
+            ss << "<head><title>" << errCode << "</title></head>";
+            ss << "<body>";
+            ss << "<center><h1>" << _statusCode << "</h1></center>";
+            ss << "<hr><center>Welcome to our Webserv</center>";
+            ss << "</body>" << "</html>";
             _errorPath = ss.str();
     		_fileSize = _errorPath.size();
 			_headers["Content-Length"] = toString(_fileSize);
@@ -201,6 +207,7 @@ std::string	HttpResponse::createResponseHeader(int errCode, std::string flag) {
     	_headers["Content-Type"] = "text/html";
         if (_errCode == 201) {
             _headers["Content-Type"] = _contentType;
+            // _isText = false;
         }
 	}
     else {
@@ -218,8 +225,8 @@ std::string	HttpResponse::createResponseHeader(int errCode, std::string flag) {
 	findStatusCode(errCode);
 	_errCode = errCode;
     if (_errCode == 0)
-        findStatusCode(0);	
-    ss << "HTTP/1.1 " << _statusCode;
+        findStatusCode(0);
+    ss << "HTTP/1.1 " << _statusCode << "\r\n";
     for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); it++)
 	{
 		ss << it->first << ": " << it->second << "\r\n";
@@ -273,8 +280,8 @@ std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
 	std::string location;
     for (std::vector<ConfigLocation>::iterator it = _locations.begin(); it != _locations.end(); ++it)
     {
-		// std::cout << req.getUri();
-		// std::cout << " --> " << it->getLocationName() << "\n";
+		// std::cout << "'" << req.getUri() << "'";
+		// std::cout << " --> " << "'" << it->getLocationName() << "'\n";
         size_t pos = req.getUri().find(it->getLocationName());
         if (pos != std::string::npos && pos == 0)
         {
@@ -309,14 +316,14 @@ std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
             _filePath = _constructPath(relativePath, _root, "");
 
             if (_filePath[_filePath.length() - 1] == '/')
-                _filePath = _filePath.substr(0, _filePath.length() - 1);
+                {_filePath = _filePath.substr(0, _filePath.length() - 1);}
 
             if (_autoindex)
             {
+                // std::cout << "root " << _root << "\n";
                 _filePath = _constructPath(relativePath, _root, "");
                 return _filePath;
             }
-
         return _filePath;
 	}
 	_root = _serv.getRoot();
@@ -345,50 +352,3 @@ std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
     // std::cout << _filePath << "\n";
     return _filePath;
 }
-
-// void HttpResponse::sendFile() {
-//     const size_t CHUNK_SIZE = 8192; // Send in 8KB chunks
-//     ssize_t bytesSent;
-
-// 	fileFd = open(_client.getResponseBody().c_str(), O_RDONLY);
-//     if (fileFd == -1) {
-//         std::cerr << "Error opening file: " << strerror(errno) << std::endl;
-// 		return ;
-// 	}
-//     while (true) {
-//         bytesSent = sendfile(_client.fetchConnectionSocket(), fileFd, &offset, CHUNK_SIZE);
-//         if (bytesSent < 0) {
-//             if (errno == EAGAIN || errno == EWOULDBLOCK) {
-//                 // Socket is not ready for writing, try again later
-//                 break;
-//             } else {
-//                 std::cerr << "Error sending file data: " << strerror(errno) << std::endl;
-//                 close(fileFd);
-//                 fileFd = -1;
-//                 return;
-//             }
-//         } else if (bytesSent == 0) {
-//             // End of file
-//             close(fileFd);
-//             fileFd = -1;
-//             break;
-//         } else {
-//             totalBytesSent += bytesSent;
-//         }
-//     }
-// }
-
-// bool HttpResponse::hasPendingData() const {
-//     return fileFd != -1; // If fileFd is still open, there is pending data
-// }
-
-// void HttpResponse::sendText() {
-//     ssize_t bytesSent = send(_client.fetchConnectionSocket(), _client.getResponseBody().c_str() + totalBytesSent, _client.getResponseBody().size() - totalBytesSent, 0);
-//     if (bytesSent < 0) {
-//         std::cerr << "Error sending text data: " << strerror(errno) << std::endl;
-//         return;
-//     } else {
-//         totalBytesSent += bytesSent;
-//     }
-// }
-
