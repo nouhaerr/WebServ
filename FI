@@ -1,0 +1,88 @@
+GET /uploads/6455454646.mp4 HTTP/1.1
+Host: 127.0.0.1:9002
+Connection: keep-alive
+Cache-Control: max-age=0
+sec-ch-ua: "Brave";v="125", "Chromium";v="125", "Not.A/Brand";v="24"
+sec-ch-ua-mobile: ?0
+sec-ch-ua-platform: "Windows"
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8
+Sec-GPC: 1
+Accept-Language: fr-FR,fr
+Sec-Fetch-Site: same-origin
+Sec-Fetch-Mode: navigate
+Sec-Fetch-User: ?1
+Sec-Fetch-Dest: document
+Referer: http://127.0.0.1:9002/uploads/
+Accept-Encoding: gzip, deflate, br, zstd
+
+
+root: ./src
+HTTP/1.1 200 OK
+Content-Length: 21177235
+Content-Type: video/mp4
+Date: Thu, 13 Jun 2024 19:35:14 GMT
+Server: Webserv/1.0
+
+root: ./src
+root: ./src
+root: ./src
+root: ./src
+root: ./src
+root: ./src
+root: ./src
+root: ./src
+root: ./src
+root: ./src
+root: ./src
+root: ./src
+root: ./src
+root: ./src
+root: ./src
+root: ./src
+root: ./src
+root: ./src
+root: ./src
+root: ./src
+root: ./src
+root: ./src
+root: ./src
+root: ./src
+root: ./src
+root: ./src
+root: ./src
+root: ./src
+root: ./src
+root: ./src
+root: ./src
+root: ./src
+root: ./src
+root: ./src
+root: ./src
+root: ./src
+root: ./src
+root: ./src
+root: ./src
+root: ./src
+root: ./src
+root: ./src
+root: ./src
+GET /uploads/6455454646.mp4 HTTP/1.1
+Host: 127.0.0.1:9002
+Connection: keep-alive
+sec-ch-ua: "Brave";v="125", "Chromium";v="125", "Not.A/Brand";v="24"
+Accept-Encoding: identity;q=1, *;q=0
+sec-ch-ua-mobile: ?0
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
+sec-ch-ua-platform: "Windows"
+Accept: */*
+Sec-GPC: 1
+Accept-Language: fr-FR,fr
+Sec-Fetch-Site: same-origin
+Sec-Fetch-Mode: no-cors
+Sec-Fetch-Dest: video
+Referer: http://127.0.0.1:9002/uploads/6455454646.mp4
+Range: bytes=0-
+
+

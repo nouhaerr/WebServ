@@ -171,7 +171,6 @@ void	HttpResponse::_getAutoIndex() {
 		}
     	else {
 			_errCode = 500;
-			printf("haaadi hhh\n");
 			buildResponse(_errCode);
 			return;
 		}
@@ -230,6 +229,7 @@ void	HttpResponse::_isFolder() {
 void	HttpResponse::isUrihasSlashInTHeEnd() {
 	if (_filePath[_filePath.size() - 1] != '/')
     {
+		std::cout << "kidkhol l hadi?\n";
        _filePath += "/";
         buildResponse(301);
 		_slashSetted = true;
@@ -242,7 +242,6 @@ void	HttpResponse::handleGetMethod() {
 		return ;
 	}
 	int type = _checkRequestedType();
-	// std::cout << "type: "<<type <<std::endl;
 	if (type == FILE_TYPE) {
 		_isFile();
 		return;

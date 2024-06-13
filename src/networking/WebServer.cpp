@@ -191,7 +191,7 @@ void WebServer::run() {
     while (true) {
         readcpy = this->readSet;
         writecpy = this->writeSet;
-        // signal(SIGPIPE, SIG_IGN);
+        signal(SIGPIPE, SIG_IGN);
         if (select(this->highestFd + 1, &readcpy, &writecpy, NULL, NULL) < 0) {
             std::cerr << "Error in select()." << std::endl;
         }
