@@ -9,7 +9,7 @@ void WebServer::sendResponse(HttpRequest &req, NetworkClient &client)
 	{
         client.setResponse(client.getResponseHeader());
         client.setHeaderSent(true);
-        // std::cout << client.getResponse();
+        std::cout << client.getResponse();
     }
 	else 
 	{

@@ -2,6 +2,7 @@
 
 std::string HttpResponse::_constructPath(const std::string& requestPath, const std::string &root, const std::string &index) {
 	std::string path = requestPath;
+
     if (path.empty() || path[0] != '/') {
         path = "/" + path;
     }
@@ -12,8 +13,8 @@ std::string HttpResponse::_constructPath(const std::string& requestPath, const s
     else if (path.find_last_of('.') == std::string::npos) {
         path += "/" + index;
     }
-
     std::string filePath = root + path;
+		// std::cout << root << " + " << path << " =>  " << filePath << "\n";
     return filePath;
 }
 
@@ -31,15 +32,6 @@ std::string getContentType(std::string filename) {
 	return getMimeTypes("", extension);
 }
 
-void	HttpResponse::isUrihasSlashInTHeEnd() {
-	if (_filePath[_filePath.size() - 1] != '/')
-    {
-       _filePath += "/";
-        buildResponse(301);
-		_slashSetted = true;
-    }
-}
-
 bool HttpResponse::isDirHasIndexFiles() {
 	if (_idxFiles.size() != 0) {
 		for (size_t i = 0; i <_idxFiles.size(); i++) {
@@ -54,10 +46,6 @@ bool HttpResponse::isDirHasIndexFiles() {
                 _filePath = path;
                 file.close();
 				_isFile();
-                // _contentType = getContentType(_filePath);
-				// std::string header = createResponseHeader(_errCode, "Nothing");
-				// _client.setResponseHeader(header);
-				// _client.setResponseBody(_filePath);
                 return true;
             }
 			else {
@@ -152,18 +140,6 @@ void	HttpResponse::_getAutoIndex() {
 				listeningfile << "<a href=\"" << directory << ent->d_name << "\">" << ent->d_name << "</a><br>";
 			}
 		}
-
-		// struct dirent *ent;
-    	// while ((ent = readdir(dir)) != NULL)
-    	// {
-		// 	if (ent->d_name[0] == '.' && strcmp(ent->d_name, "..") != 0) {
-        //     	continue;
-        // 	}
-
-       	// 	 // Prepend '/' to the directory name
-        // 	// listeningfile << "<a href=\"" << directory << "/" << ent->d_name << "\">" << ent->d_name << "</a><br>";
-		// 	listeningfile << "<a href=\"" << directory << ent->d_name << "\">" << "/" << ent->d_name << "</a><br>";
-    	// }
 		closedir(dir);
 		listeningfile << "</pre><hr></body></html>";
 		_fileSize = listeningfile.str().size();
@@ -249,6 +225,15 @@ void	HttpResponse::_isFolder() {
 		_getAutoIndex();
 		return ;
 	}
+}
+
+void	HttpResponse::isUrihasSlashInTHeEnd() {
+	if (_filePath[_filePath.size() - 1] != '/')
+    {
+       _filePath += "/";
+        buildResponse(301);
+		_slashSetted = true;
+    }
 }
 
 void	HttpResponse::handleGetMethod() {

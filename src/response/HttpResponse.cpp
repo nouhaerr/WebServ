@@ -62,9 +62,9 @@ void	HttpResponse::_handleDefaultErrors() {
 void	HttpResponse::generateResponse(HttpRequest &req) {
 	_errCode = req.getErrorCode();
 	// std::cout << "errcode result from req:" << _errCode << "\n";
+	// std::cout << "filePath loli: "<< _filePath << "\n";
 	_uri = getRequestedResource(req);
 	_filePath = deleteRedundantSlash(_uri);
-	// std::cout << "filePath: "<< _filePath << "\n";
 	if (_filePath.empty()) {
 		buildResponse(404);
 		return;
@@ -80,8 +80,10 @@ void	HttpResponse::generateResponse(HttpRequest &req) {
 			// the request entity is larger than limits defined by server*/
     }
 	if (!_redirection.empty()) {
+        std::cout << "ENTER\n";
 		std::string header = createResponseHeader(301, "Default");
     	_client.setResponseHeader(header);
+        _client.setResponseBody(_errorPath);
 		return;
 	}
 	if (req.getMethod() == "GET") {
@@ -181,7 +183,7 @@ std::string HttpResponse::generateDate()
 std::string	HttpResponse::createResponseHeader(int errCode, std::string flag) {
 	std::string	respHeader;
 
-	_headers["server"] = "Webserv/1.0";
+	_headers["Server"] = "Webserv/1.0";
 	if (!_redirection.empty()) {
 		_headers["Location"] = _redirection;
 		_errCode = 301;
@@ -192,15 +194,15 @@ std::string	HttpResponse::createResponseHeader(int errCode, std::string flag) {
             _isText = false;
         }
 		else {
-			std::stringstream ss;
+			std::stringstream sse;
             findStatusCode(errCode);
-            ss << "<html>";
-            ss << "<head><title>" << errCode << "</title></head>";
-            ss << "<body>";
-            ss << "<center><h1>" << _statusCode << "</h1></center>";
-            ss << "<hr><center>Welcome to our Webserv</center>";
-            ss << "</body>" << "</html>";
-            _errorPath = ss.str();
+            sse << "<html>";
+            sse << "<head><title>" << errCode << "</title></head>";
+            sse << "<body>";
+            sse << "<center><h1>" << _statusCode << "</h1></center>";
+            sse << "<hr><center>Welcome to our Webserv</center>";
+            sse << "</body>" << "</html>";
+            _errorPath = sse.str();
     		_fileSize = _errorPath.size();
 			_headers["Content-Length"] = toString(_fileSize);
             _isText = true;
@@ -275,8 +277,18 @@ std::string HttpResponse::deleteRedundantSlash(std::string uri)
     return newUri;
 }
 
-std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
+bool isDirectory(const char* path) {
+    struct stat fileInfo;
+    
+    if (stat(path, &fileInfo) != 0) {
+        return false;
+    }
+    
+    return S_ISDIR(fileInfo.st_mode);
+}
 
+std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
+    std::cout << "ma fhamtch\n";
 	_locations = _serv.getLocation();
 	std::string location;
     for (std::vector<ConfigLocation>::iterator it = _locations.begin(); it != _locations.end(); ++it)
@@ -316,6 +328,19 @@ std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
                                       req.getUri().substr(0, idx);
             _filePath = _constructPath(relativePath, _root, "");
 
+            std::cout << "rootLOCA: " << _root << "\n";
+            // std::cout << "fff " << _filePath << "\n";
+            if (isDirectory(_filePath.c_str())  && _isSupportedMethod("GET")) {
+                size_t urisize = _client.getRequest().getUri().size();
+                if ((_root[_root.size() - 1]) != '/' && _client.getRequest().getUri()[urisize - 1] != '/')
+                {
+                    std::string hostt = _serv.getHost() + ":" + toString(_serv.getPort());
+                    std::string dirdir = _location.getLocationName().empty() ? findDirname(_filePath, _root) + "/" : _location.getLocationName() + findDirname(_filePath, _root) + "/";
+                    // std::cout << _filePath << " lastdir: " << dirdir<< "\n";
+                    _redirection = "http://" + hostt + dirdir;
+                    return _filePath;
+                }
+            }
             if (_filePath[_filePath.length() - 1] == '/')
                 {_filePath = _filePath.substr(0, _filePath.length() - 1);}
 
@@ -335,21 +360,27 @@ std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
     _methods.push_back("POST");
     _methods.push_back("GET");
     _methods.push_back("DELETE");
-    _filePath = _constructPath(req.getUri(), _root, _index);
+    _filePath = _constructPath(req.getUri(), _root, "");
+    std::cout << "root: " << _root << "\n";
+    if (isDirectory(_filePath.c_str()) && _isSupportedMethod("GET")) {
+        size_t urisize = _client.getRequest().getUri().size();
+        if ((_root[_root.size() - 1]) != '/' && _client.getRequest().getUri()[urisize - 1] != '/')
+        {
+            std::string hostt = _serv.getHost() + ":" + toString(_serv.getPort());
+            std::string dirdir = _location.getLocationName().empty() ? findDirname(_filePath, _root) + "/" : _location.getLocationName() + findDirname(_filePath, _root) + "/";
+            // std::cout << _filePath << " lastdir: " << dirdir<< "\n";
+            _redirection = "http://" + hostt + dirdir;
+            return _filePath;
+        }
+    }
  	if (_autoindex)
     {
-		// std::cout << "AUTOINDEX\n";
 		if (req.getUri().find(_root) == std::string::npos)
 		{
-		// std::cout << "root" << _root << "\n";
-        _filePath = _constructPath(req.getUri(), _root, "");
+            _filePath = _constructPath(req.getUri(), _root, "");
 		}
 		return _filePath;
     }
-    else
-    {
-        _filePath = _constructPath(req.getUri(), _root, _index);
-    }
-    // std::cout << _filePath << "\n";
+    // std::cout << "3 " <<_filePath << "\n";
     return _filePath;
 }
