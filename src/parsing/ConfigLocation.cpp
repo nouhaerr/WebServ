@@ -2,7 +2,7 @@
 
 ConfigLocation::ConfigLocation() :
 	_locationName(""),
-	_root("/var/www"),
+	_root(""),
 	_index(),
 	_methods(),
 	_maxBodySize(100000),
