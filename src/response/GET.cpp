@@ -217,23 +217,13 @@ int	HttpResponse::_checkRequestedType() {
 
 void	HttpResponse::_isFolder() {
 	// std::cout << "foldeeer\n";
-	isUrihasSlashInTHeEnd();
+	// isUrihasSlashInTHeEnd();
 	if (isDirHasIndexFiles())
 		return;
 	else {
 		_getAutoIndex();
 		return ;
 	}
-}
-
-void	HttpResponse::isUrihasSlashInTHeEnd() {
-	if (_filePath[_filePath.size() - 1] != '/')
-    {
-		std::cout << "kidkhol l hadi?\n";
-       _filePath += "/";
-        buildResponse(301);
-		_slashSetted = true;
-    }
 }
 
 void	HttpResponse::handleGetMethod() {

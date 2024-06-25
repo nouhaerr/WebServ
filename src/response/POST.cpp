@@ -9,14 +9,17 @@ bool	HttpResponse::_isSupportedUploadPath() {
     return 1;
 }
 
-void	HttpResponse::_createFile() {
+void	HttpResponse::_createFile(std::string &filename) {
 	std::ofstream file(_uploadPath.c_str());
 
     if (file) {
         file << _postBody;
         file.close();
 		this->_errCode = 201;
-		_headers["Location"] = _uploadPath;
+		std::string hostt = _serv.getHost() + ":" + toString(_serv.getPort());
+		std::string dirdir = findDirname(_uploadPath, _root) + "/";
+		// std::cout << "dir " << dirdir << "\n";
+		_headers["Location"] = "http://" + hostt + dirdir + filename;
 		buildResponse(201);
 		// std::cout << _uploadPath << "\n";
 		 /*201 Created success status response code indicates
@@ -30,12 +33,11 @@ void	HttpResponse::_createFile() {
 }
 
 void	HttpResponse::processPostMethod() {
-	std::string	file = _generateTempFileName();
+	std::string	filename = _generateTempFileName();
 	if (_uploadPath[_uploadPath.size() - 1] != '/')
 	{
        	_uploadPath += "/";
     }
-	_uploadPath += file;
     std::map<std::string, std::string>::iterator it = _reqHeader.find("Content-Type");
 	if(it != _reqHeader.end())
     {
@@ -45,11 +47,12 @@ void	HttpResponse::processPostMethod() {
 			buildResponse(415);
 			return ;
 		}
-        _uploadPath += contentType;
+		filename += contentType;
 		_contentType = value;
     }
 	// std::cout << "dyal resp: " << _uploadPath << "\n";
-	_createFile();
+    _uploadPath += filename;
+	_createFile(filename);
 }
 
 void	HttpResponse::handlePostMethod(){
@@ -57,7 +60,6 @@ void	HttpResponse::handlePostMethod(){
 		buildResponse(405);
 		return ;
 	}
-
 	if (_isSupportedUploadPath() && _filePath.find(".py") == std::string::npos && _filePath.find(".php") == std::string::npos) {
 		std::ifstream bodyfile(_bodyFileName.c_str());
 		std::ostringstream filecontent;
@@ -70,11 +72,12 @@ void	HttpResponse::handlePostMethod(){
 	else {
 		int type = _checkRequestedType();
 		if (type == FILE_TYPE) {
-			// _isFile();
+			_postRequestFile();
 			return;
 		}
 		else if (type == FOLDER_TYPE) {
-			// _postRequestFolder();
+			// std::cout << "okkkkk\n";
+			_postRequestFolder();
 			return ;
 		}
 		else if (type == ERROR){
@@ -82,6 +85,34 @@ void	HttpResponse::handlePostMethod(){
 			return ;
 		}
 	}
+}
+
+void	HttpResponse::_postRequestFile() {
+	// if (_location.)
+}
+
+void	HttpResponse::isUrihasSlashInTHeEnd() {
+	size_t urisize = _client.getRequest().getUri().size();
+	if ((_root[_root.size() - 1]) != '/' && _client.getRequest().getUri()[urisize - 1] != '/')
+	{
+		std::string hostt = _serv.getHost() + ":" + toString(_serv.getPort());
+        std::string dirdir = _location.getLocationName().empty() ? findDirname(_filePath, _root) + "/" : _location.getLocationName() + findDirname(_filePath, _root) + "/";
+        // std::cout << _filePath << " lastdir: " << dirdir<< "\n";
+       _redirection = "http://" + hostt + dirdir;
+	   std::string header = createResponseHeader(301, "Default");
+    	_client.setResponseHeader(header);
+        _client.setResponseBody(_errorPath);
+		_slashSetted = true;
+		return ;
+	}
+
+	// if (_filePath[_filePath.size() - 1] != '/')
+    // {
+	// 	std::cout << "kidkhol l hadi?\n";
+    //    _filePath += "/";
+    //     buildResponse(301);
+	// 	_slashSetted = true;
+    // }
 }
 
 void	HttpResponse::_postRequestFolder() {

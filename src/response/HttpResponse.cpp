@@ -327,7 +327,7 @@ std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
             _filePath = _constructPath(relativePath, _root, "");
 
             // std::cout << "fff " << _filePath << "\n";
-            if (isDirectory(_filePath.c_str())  && _isSupportedMethod("GET")) {
+            if (isDirectory(_filePath.c_str()) && req.getMethod() == "GET" && _isSupportedMethod("GET")) {
                 size_t urisize = _client.getRequest().getUri().size();
                 if ((_root[_root.size() - 1]) != '/' && _client.getRequest().getUri()[urisize - 1] != '/')
                 {
@@ -359,7 +359,7 @@ std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
     _methods.push_back("GET");
     _methods.push_back("DELETE");
     _filePath = _constructPath(req.getUri(), _root, "");
-    if (isDirectory(_filePath.c_str()) && _isSupportedMethod("GET")) {
+    if (isDirectory(_filePath.c_str()) && req.getMethod() == "GET" && _isSupportedMethod("GET")) {
         size_t urisize = _client.getRequest().getUri().size();
         if ((_root[_root.size() - 1]) != '/' && _client.getRequest().getUri()[urisize - 1] != '/')
         {

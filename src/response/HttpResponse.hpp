@@ -39,6 +39,7 @@ class HttpResponse {
 		void	processPostMethod();
 		bool	isPostDirHasIndexFiles();
 		void	_postRequestFolder();
+		void	_postRequestFile();
 
 		void	handleDeleteMethod();
 
@@ -81,9 +82,9 @@ class HttpResponse {
 		void	_isFile();
 		void	_isFolder();
 		void	_getAutoIndex();
-		std::string	_findDirectoryName();
+		// std::string	_findDirectoryName();
 		std::string	_generateTempFileName();
-		void	_createFile();
+		void	_createFile(std::string &filename);
 };
 
 std::string getContentType(std::string filename);

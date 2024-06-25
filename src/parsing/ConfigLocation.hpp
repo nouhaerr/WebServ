@@ -28,6 +28,9 @@ class ConfigLocation {
 		void	setErrorPage(std::string& errorPage);
 		void	setRedirect(bool redirect);
 		void	setRedirection(std::string& redirection);
+		void	setFastCgiPass(std::string& fastCgiPass);
+		void	setInclude(std::string& include);
+		void	setFastCgiParam(std::string& fastCgiParam);
 
 		// Getters
 		std::string& 				getLocationName();
@@ -41,7 +44,10 @@ class ConfigLocation {
 		bool&						getRedirect();
 		int&						getRedirectCode();
 		std::string&				getRedirection();
-
+		std::string&				getFastCgiPass();
+		std::string&				getInclude();
+		std::string&				getFastcgiParam();
+		bool&						getSuppCgi();
 
 		class	ConfigLocationException: public std::exception{
 			std::string message;
@@ -66,6 +72,10 @@ class ConfigLocation {
 		bool						_redirect;
 		std::string					_redirection;
 		int							_redirectCode;
+		std::string					_fastcgi_pass;
+		std::string					_include;
+		std::string					_fastcgi_param;
+		bool						_supportCgi;
 };
 
 #endif
