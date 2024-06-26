@@ -11,7 +11,11 @@ ConfigLocation::ConfigLocation() :
 	_errorPage(),
 	_redirect(false),
 	_redirection(""),
-	_redirectCode(0)
+	_redirectCode(0),
+	_fastcgi_pass(""),
+	_include(""),
+	_fastcgi_param(""),
+	_supportCgi(false)
 {}
 
 ConfigLocation::ConfigLocation(const ConfigLocation &src) {
@@ -31,6 +35,10 @@ ConfigLocation& ConfigLocation::operator=(const ConfigLocation &src) {
 		this->_redirect = src._redirect;
 		this->_redirection = src._redirection;
 		this->_redirectCode = src._redirectCode;
+		this->_fastcgi_pass = src._fastcgi_pass;
+		this->_include = src._include;
+		this->_fastcgi_param = src._fastcgi_param;
+		this->_supportCgi = src._supportCgi;
 	}
 	return *this;
 }
@@ -152,9 +160,24 @@ void	ConfigLocation::setRedirect(bool redirect) {
 	this->_redirect = redirect;
 }
 
+void	ConfigLocation::setFastCgiPass(std::string& fastCgiPass) {
+	if (fastCgiPass.empty() )
+	this->_fastcgi_pass = fastCgiPass;
+	this->_supportCgi = true;
+}
+
+void	ConfigLocation::setInclude(std::string& include) {
+	this->_include = include;
+}
+
+void	ConfigLocation::setFastCgiParam(std::string& fastCgiParam) {
+	this->_fastcgi_param = fastCgiParam;
+}
+
 bool&	ConfigLocation::getRedirect() {
 	return this->_redirect;
 }
+
 
 void	ConfigLocation::setRedirection(std::string& redirection) {
 	std::vector<std::string> args = splitArgs(redirection);
@@ -177,4 +200,20 @@ std::string&	ConfigLocation::getRedirection() {
 
 int&	ConfigLocation::getRedirectCode() {
 	return (this->_redirectCode);
+}
+
+std::string&	ConfigLocation::getFastCgiPass() {
+	return this->_fastcgi_pass;
+}
+
+std::string&	ConfigLocation::getInclude() {
+	return this->_include;
+}
+
+std::string&	ConfigLocation::getFastcgiParam() {
+	return this->_fastcgi_param;
+}
+
+bool&	ConfigLocation::getSuppCgi() {
+	return this->_supportCgi;
 }

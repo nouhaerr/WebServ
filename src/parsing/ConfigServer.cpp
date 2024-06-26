@@ -23,11 +23,6 @@ ConfigServer&	ConfigServer::operator=(const ConfigServer &src) {
 		this->_serverName = src._serverName;
 		this->_maxBodySize = src._maxBodySize;
 		this->_location = src._location;
-		// if (!_location.empty())
-		// 	_location.clear();
-        // for (size_t i = 0; i < src._location.size(); ++i) {
-        //     _location.push_back(src._location[i]);
-        // }
 		this->_autoindex = src._autoindex;
 		this->_root = src._root;
 		this->_index = src._index;

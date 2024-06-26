@@ -59,7 +59,7 @@ void setSocketNonBlocking(int socket_fd)
         close(socket_fd);
         return;
     }
-    std::cout << "Socket " << socket_fd << " set to non-blocking mode." << std::endl;
+    // std::cout << "Socket " << socket_fd << " set to non-blocking mode." << std::endl;
 }
 
 void WebServer::setupServerSockets() 
@@ -159,10 +159,11 @@ void WebServer::processClientRequests(int fd) {
             return;
         }
     }
-    client.saveRequestData(bytes_received);
-   std::cout<< client.getRequest().getRequestData() << std::endl;
+	client.saveRequestData(bytes_received);
+	std::cout<< client.getRequest().getRequestData() << std::endl;
     CheckRequestStatus(client);
     if (client.getRequest().get_requestStatus() == HttpRequest::REQUEST_READY) {
+        // std::cout << "size of body " << client.getRequest().getBodysize();
     //     std::string hostHeader = client.getRequest().getHeader("Host");
     //     hostHeader = trimm(hostHeader);
 
@@ -193,29 +194,26 @@ void WebServer::run() {
         signal(SIGPIPE, SIG_IGN);
         if (select(this->highestFd + 1, &readcpy, &writecpy, NULL, NULL) < 0) {
             std::cerr << "Error in select()." << std::endl;
-            // continue ;
         }
         for (int i = 3; i <= this->highestFd; i++) { 
-            try {
+            // try {
                 if (FD_ISSET(i, &writecpy)) {
                     NetworkClient &client = GetRightClient(i);
-                    std::cout << "ClientSok: " << i << "\n";
                     sendDataToClient(client);
                 }
                 else if (FD_ISSET(i, &readcpy)) {
                     if (std::find(serverSockets.begin(), serverSockets.end(), i) != serverSockets.end()) {
                         acceptNewClient(i);                                               
                     } else {
-                        std::cout << "ClientSok before parse Req: " << i << "\n";
                         processClientRequests(i);
                     }
                 }
-            } catch (const RequestError &error)
-		    {
-			    FD_CLR(i, &this->readSet);
-			    FD_SET(i, &this->writeSet);
-			    close(i);
-		    }
+            // } catch (const RequestError &error)
+		    // {
+			//     FD_CLR(i, &this->readSet);
+			//     FD_SET(i, &this->writeSet);
+			//     close(i);
+		    // }
         }   
     }
 }

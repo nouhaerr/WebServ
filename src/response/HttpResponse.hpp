@@ -5,7 +5,6 @@
 #include "../parsing/Config.hpp"
 #include "../networking/NetworkClient.hpp"
 #include "../networking/HttpRequest.hpp"
-#include <sys/sendfile.h>
 
 #define FILE_TYPE 1
 #define FOLDER_TYPE 0
@@ -37,12 +36,12 @@ class HttpResponse {
 		
 		void	handlePostMethod();
 		void	processPostMethod();
+		bool	isPostDirHasIndexFiles();
+		void	_postRequestFolder();
+		void	_postRequestFile();
 
 		void	handleDeleteMethod();
-
-		void	sendText();
-    	void	sendFile();
-    	bool	hasPendingData() const;
+		bool checkFilePermission(const std::string& filePath);
 
 	private:
 		NetworkClient&	_client;
@@ -73,6 +72,7 @@ class HttpResponse {
 		std::string _contentType;
 		std::map<std::string, std::string> _reqHeader;
 		bool	_isText;
+		bool	_slashSetted;
 
 		void	_handleDefaultErrors();
 		bool	_isSupportedMethod(std::string meth);
@@ -82,27 +82,13 @@ class HttpResponse {
 		void	_isFile();
 		void	_isFolder();
 		void	_getAutoIndex();
-		std::string	_findDirectoryName();
+		// std::string	_findDirectoryName();
 		std::string	_generateTempFileName();
-		void	_createFile();
-};
-
-class HttpException : public std::exception {
-	public:
-		HttpException(const std::string& message, int code) : message_(message),_code(code)  {}
-
-		virtual const char* what() const throw() {
-			return message_.c_str();
-		}
-		virtual ~HttpException() throw() {}
-
-		int getErrorCode() const { return _code; }
-	private:
-		std::string message_;
-		int _code;
+		void	_createFile(std::string &filename);
 };
 
 std::string getContentType(std::string filename);
 std::string	getMimeTypes(std::string flag, std::string extension);
+std::string findDirname(const std::string& path, const std::string& root);
 
 #endif

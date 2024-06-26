@@ -174,6 +174,15 @@ ConfigLocation	ConfigServer::parseLocation(std::vector<t_tokens> &tok, std::vect
 			loc.setRedirection(it->_value);
 			red++;
 		}
+		else if (it->_type == "fastcgi_pass") {
+			loc.setFastCgiPass(it->_value);
+		}
+		else if (it->_type == "include") {
+			loc.setInclude(it->_value);
+		}
+		else if (it->_type == "fastcgi_param") {
+			loc.setFastCgiParam(it->_value);
+		}
 		else if (it->_type.empty()){
 			it++;
 			continue;
