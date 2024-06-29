@@ -61,10 +61,10 @@ class HttpRequest
 		/*getters*/
 		std::string	getRequest() const;
 		std::string	getMethod() const;
-		std::string	getUri() const;
+		std::string	&getUri() ;
 		std::string	getHttpVersion() const;
 		std::string	getHeader(const std::string& headerName) const;
-		const std::map<std::string, std::string>& getHeaderFields() const;
+		 std::map<std::string, std::string>& getHeaderFields();
 		std::string	getBody() const;
 		size_t&		getBodysize();
 		int			getErrorCode() const;
@@ -74,14 +74,14 @@ class HttpRequest
 		int get_bodyStatus();
 		int get_requestStatus();
 
-		// void is_method(std::string&);
 		void printHeaders();
 		void _getChunkedBody(std::string&);
 		std::string& getRequestData();
 
-		void is_body();
+		bool is_body();
 };
 
+int	hexToInt(const std::string& str);
 std::string trimHeader(const std::string& str);
 
 #endif

@@ -1,18 +1,30 @@
-
 #ifndef WEBSERVER_HPP
 #define WEBSERVER_HPP
 
 #include <netinet/in.h>
+#include <arpa/inet.h>
+#include <cctype>
+#include <cstring>
 #include "NetworkClient.hpp"
 #include "../parsing/Config.hpp"
 #include "../parsing/ConfigServer.hpp"
 #include "HttpRequest.hpp"
-#include "HttpRequestParser.hpp"
-#include <arpa/inet.h>
-#include <cctype>
-#include <cstring>
-// #include <sys/sendfile.h>
 #include "../response/HttpResponse.hpp"
+// #include <sys/sendfile.h>
+
+// static unsigned long long   varst;
+
+class RequestError {
+	private:
+		int _error_number;
+
+	public:
+		RequestError(int error_number) : _error_number(error_number) {
+		}
+		int getErrorNumber() const  {
+			return (this->_error_number);
+		}
+};
 
 class WebServer {
 public:
@@ -22,7 +34,9 @@ public:
     void run();
     NetworkClient& GetRightClient(int fd);
 
-void CheckRequestStatus(NetworkClient &client);
+    void CheckRequestStatus(NetworkClient &client);
+    void sendVideoInChunks(NetworkClient& client, const std::string& filePath);
+    std::streamsize   varRead;
 
 private:
     void setupServerSockets();
@@ -36,6 +50,8 @@ private:
     void readFromClient(int clientSocket, std::string &requestString);
     void    sendResponse(HttpRequest &req, NetworkClient &client);
     int sendResponseBody(NetworkClient &client);
+
+
 
     fd_set masterSet, readSet, writeSet;
     int highestFd;

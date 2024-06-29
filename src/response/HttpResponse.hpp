@@ -5,7 +5,7 @@
 #include "../parsing/Config.hpp"
 #include "../networking/NetworkClient.hpp"
 #include "../networking/HttpRequest.hpp"
-// #include <sys/sendfile.h>
+#include "../CGI/CGI.hpp"
 
 #define FILE_TYPE 1
 #define FOLDER_TYPE 0
@@ -19,6 +19,7 @@ class HttpResponse {
 		~HttpResponse();
 
 		void	generateResponse(HttpRequest &req);
+		std::string Get_File_Name_From_URI();
 		void	buildResponse(int errCode);
 		void	locateErrorPage(int errCode);
 		void	checkHttpVersion(HttpRequest &req);
@@ -28,24 +29,32 @@ class HttpResponse {
 		std::string	getRequestedResource(HttpRequest &req);
 		std::string generateDate();
 		std::string deleteRedundantSlash(std::string uri);
-
+		bool	isText() const;
 		void	handleGetMethod();
 		void	isUrihasSlashInTHeEnd();
 		bool	isDirHasIndexFiles();
-
+		
+		off_t	getFileSize();
+		
 		void	handlePostMethod();
 		void	processPostMethod();
+		bool	isPostDirHasIndexFiles();
+		void	_postRequestFolder();
+		void	_postRequestFile();
 
 		void	handleDeleteMethod();
+		bool checkFilePermission(const std::string& filePath);
 
 	private:
 		NetworkClient&	_client;
 		ConfigServer	_serv;
+		std::string		cookies;
 		std::string		_bodyFileName;
 		std::string		_postBody;
 		int				_errCode;
 		std::string		_statusCode;
 		bool			_isCgi;
+		size_t			_maxBodySize;
 		std::string		_root;
 		std::string		_uploadPath;
 		std::string		_index;
@@ -63,10 +72,10 @@ class HttpResponse {
 		std::string _filePath;
 		std::string _buffer;
 		off_t		_fileSize;
-		off_t		_offset;
-		bool		_isfile;
 		std::string _contentType;
 		std::map<std::string, std::string> _reqHeader;
+		bool	_isText;
+		bool	_slashSetted;
 
 		void	_handleDefaultErrors();
 		bool	_isSupportedMethod(std::string meth);
@@ -76,26 +85,13 @@ class HttpResponse {
 		void	_isFile();
 		void	_isFolder();
 		void	_getAutoIndex();
-		std::string	_findDirectoryName();
+		// std::string	_findDirectoryName();
 		std::string	_generateTempFileName();
-		void	_createFile();
+		void	_createFile(std::string &filename);
 };
 
-class HttpException : public std::exception {
-	public:
-		HttpException(const std::string& message, int code) : message_(message),_code(code)  {}
-
-		virtual const char* what() const throw() {
-			return message_.c_str();
-		}
-		virtual ~HttpException() throw() {}
-
-		int getErrorCode() const { return _code; }
-	private:
-		std::string message_;
-		int _code;
-};
-
+std::string getContentType(std::string filename);
 std::string	getMimeTypes(std::string flag, std::string extension);
+std::string findDirname(const std::string& path, const std::string& root);
 
 #endif

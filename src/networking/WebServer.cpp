@@ -41,8 +41,6 @@ WebServer::~WebServer()
         close(it->second.fetchConnectionSocket());
     delete serverConfigs;
 }
-#include <fcntl.h>
-
 
 void setSocketNonBlocking(int socket_fd) 
 {
@@ -136,14 +134,13 @@ void WebServer::CheckRequestStatus(NetworkClient &client)
 	}
 	if (request.get_requestStatus() == HttpRequest::BODY)
 	{
-		request.is_body();
-           // std::cout << request_data << std::endl;
+		if (request.is_body()) {
             if (request.setBody(request_data))
                 request.set_requestStatus(HttpRequest::REQUEST_READY);
         }
         else if (request.getErrorCode() == 400 || request.getErrorCode() == 501)
             request.set_requestStatus(HttpRequest::REQUEST_READY);
-	
+    }
 }
 
 void WebServer::processClientRequests(int fd) {
@@ -154,18 +151,7 @@ void WebServer::processClientRequests(int fd) {
 
     bzero(buffer, client_buffer_size);
     bytes_received = read(client.fetchConnectionSocket(), buffer, client_buffer_size - 1);
-    if (bytes_received <= 0) 
-    {
-         if (errno == EAGAIN || errno == EWOULDBLOCK) 
-        {
-            std::cerr << "Non-blocking read would block on socket " << fd << std::endl;
-        } 
-        else 
-        {
-            std::cerr << "Error reading from socket " << fd << ": " << strerror(errno) << std::endl;
-        }
-        return;
-    
+    if (bytes_received <= 0) {
         if (bytes_received == 0) {
             close(fd);
             closeClient(fd);
@@ -173,30 +159,28 @@ void WebServer::processClientRequests(int fd) {
             return;
         }
     }
-    client.saveRequestData(bytes_received);
-
-    // std::cout << "Received " << bytes_received << " bytes from socket " << fd << std::endl;
-
-
-   std::cout<< client.getRequest().getRequestData() << std::endl;
+	client.saveRequestData(bytes_received);
+	//std::cout<< client.getRequest().getRequestData() << std::endl;
     CheckRequestStatus(client);
     if (client.getRequest().get_requestStatus() == HttpRequest::REQUEST_READY) {
-        std::string hostHeader = client.getRequest().getHeader("Host");
-        hostHeader = trimm(hostHeader);
+        // std::cout << "size of body " << client.getRequest().getBodysize();
+    //     std::string hostHeader = client.getRequest().getHeader("Host");
+    //     hostHeader = trimm(hostHeader);
 
-        size_t portPos = hostHeader.find(":");
-        int port = 80; // Default to 80 if no port is specified
-        if (portPos != std::string::npos) {
-            port = std::atoi(hostHeader.substr(portPos + 1).c_str());
-            hostHeader = hostHeader.substr(0, portPos);
-        } else {
-            port = client.getServer().getPort();
-        }
+    //     size_t portPos = hostHeader.find(":");
+    //     int port = 80; // Default to 80 if no port is specified
+    //     if (portPos != std::string::npos) {
+    //         port = std::atoi(hostHeader.substr(portPos + 1).c_str());
+    //         hostHeader = hostHeader.substr(0, portPos);
+    //     } else {
+    //         port = client.getServer().getPort();
+    //     }
 
-        const ConfigServer &clientServer = matchServerByName(client.getRequest().getHeader("Host"), port);
-       // std::cout << "Port in processClientRequests: " << clientServer.getPort() << std::endl; // Debugging output
-        client.setServer(clientServer);
+    //     const ConfigServer &clientServer = matchServerByName(client.getRequest().getHeader("Host"), port);
+    //    // std::cout << "Port in processClientRequests: " << clientServer.getPort() << std::endl; // Debugging output
+    //     client.setServer(clientServer);
         FD_SET(fd, &this->writeSet);
+
     }
 }
 
@@ -204,31 +188,35 @@ void WebServer::processClientRequests(int fd) {
 void WebServer::run() {
     fd_set readcpy;
     fd_set writecpy;
-    signal(SIGPIPE, SIG_IGN);
-
     while (true) {
         readcpy = this->readSet;
         writecpy = this->writeSet;
-        if (select(this->highestFd + 1, &readcpy, &writecpy, NULL, NULL) < 0) 
+        signal(SIGPIPE, SIG_IGN);
+        if (select(this->highestFd + 1, &readcpy, &writecpy, NULL, NULL) < 0) {
             std::cerr << "Error in select()." << std::endl;
-
+        }
         for (int i = 3; i <= this->highestFd; i++) { 
-            if (FD_ISSET(i, &writecpy)) {
-                NetworkClient &client = GetRightClient(i);
-                //std::cout << "Port in run: " << client.getServer().getPort() << std::endl; // Debugging output
-                // client.updateResponseContent(generateResponse(client.getServer()));
-                sendDataToClient(client);
-            } else if (FD_ISSET(i, &readcpy)) {
-                if (std::find(serverSockets.begin(), serverSockets.end(), i) != serverSockets.end()) {
-                    acceptNewClient(i);                                               
-                } else {
-                    processClientRequests(i);
+            // try {
+                if (FD_ISSET(i, &writecpy)) {
+                    NetworkClient &client = GetRightClient(i);
+                    sendDataToClient(client);
                 }
-            }
+                else if (FD_ISSET(i, &readcpy)) {
+                    if (std::find(serverSockets.begin(), serverSockets.end(), i) != serverSockets.end()) {
+                        acceptNewClient(i);                                               
+                    } else {
+                        processClientRequests(i);
+                    }
+                }
+            // } catch (const RequestError &error)
+		    // {
+			//     FD_CLR(i, &this->readSet);
+			//     FD_SET(i, &this->writeSet);
+			//     close(i);
+		    // }
         }   
     }
 }
-
 
 const ConfigServer& WebServer::matchServerByFd(int fd) 
 {
@@ -241,8 +229,7 @@ const ConfigServer& WebServer::matchServerByFd(int fd)
     return (*serverConfigs)[0];
 }
 
-void WebServer::acceptNewClient(int serverSocket) 
-{
+void WebServer::acceptNewClient(int serverSocket) {
     sockaddr_in clientAddr;
     socklen_t clientAddrSize = sizeof(clientAddr);
     int clientSocket = accept(serverSocket, (struct sockaddr *)&clientAddr, &clientAddrSize);
@@ -250,6 +237,10 @@ void WebServer::acceptNewClient(int serverSocket)
         std::cerr << "Failed to accept client." << std::endl;
         return;
     }
+    fcntl(clientSocket, F_SETFL, O_NONBLOCK);
+    // long option_len = 1;
+    // setsockopt(clientSocket, SOL_SOCKET, SO_NOSIGPIPE , &option_len, sizeof(option_len));
+    // setSocketNonBlocking(clientSocket);
     const ConfigServer& associatedServer = matchServerByFd(serverSocket);
     NetworkClient newClient(clientSocket, serverSocket);
     newClient.setServer(associatedServer);
@@ -270,27 +261,11 @@ void WebServer::closeClient(int clientSocket)
         FD_CLR(it->first, &readSet);
         FD_CLR(it->first, &writeSet);
         clients.erase(it);
-        // std::cout << "Client with socket " << clientSocket << " has been closed and removed." << std::endl;
+        std::cout << "Client with socket " << clientSocket << " has been closed and removed." << std::endl;
     } 
     else
         std::cerr << "Attempt to close non-existent client socket." << std::endl;
 }
-
-
-
-
-void WebServer::sendDataToClient(NetworkClient& client) 
-{
-    sendResponse(client.getRequest(), client);
-    // if (!client.isResponsePrepared()) 
-    //     return;
-    // //std::cout << client.getServer().getPort() <<std::endl;
-    // std::string response = client.retrieveResponseContent();
-    // int sentBytes = send(client.fetchConnectionSocket(), response.c_str(), response.size(), 0);
-    // if (sentBytes < 0)
-    //     std::cerr << "Failed to send response." << std::endl;
-    // closeClient(client.fetchConnectionSocket());
-}       
 
 NetworkClient* WebServer::findClientBySocket(int socket) 
 {
@@ -326,11 +301,16 @@ const ConfigServer& WebServer::matchServerByName(const std::string& host, int po
         }
         else if (it->getHost() == hostName && static_cast<size_t>(port) == it->getPort())
         {
-           std::cout << "\n******* ✅ ✅ ✅ ✅Matched server: " << it->getServerName() << " with host: " << it->getHost() << " on port: " << it->getPort() << std::endl;
+        //    std::cout << "\n******* ✅ ✅ ✅ ✅Matched server: " << it->getServerName() << " with host: " << it->getHost() << " on port: " << it->getPort() << std::endl;
             return *it;
         }
     }
 
-   std::cerr << "\n******* ❌ ❌ ❌ ❌No matching server found for host: " << host << " on port: " << port << ". Defaulting to first server." << std::endl;
+//    std::cerr << "\n******* ❌ ❌ ❌ ❌No matching server found for host: " << host << " on port: " << port << ". Defaulting to first server." << std::endl;
     return (*serverConfigs)[0];
+}
+
+void WebServer::sendDataToClient(NetworkClient& client) 
+{
+    sendResponse(client.getRequest(), client);
 }
