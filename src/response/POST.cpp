@@ -76,7 +76,7 @@ void	HttpResponse::handlePostMethod(){
 			return;
 		}
 		else if (type == FOLDER_TYPE) {
-			// std::cout << "okkkkk\n";
+			// std::cout << "is folder\n";
 			_postRequestFolder();
 			return ;
 		}
@@ -88,7 +88,40 @@ void	HttpResponse::handlePostMethod(){
 }
 
 void	HttpResponse::_postRequestFile() {
-	// if (_location.)
+	// 	if (extension == ".php" || extension == ".py")
+			// {
+			// //	std::cout<< "CGI FOUND !" << std::endl;
+			// 	size_t pos;
+			// 	CGI cgi(_client);
+			// 		cgi.set_environmentVariables(file_name);
+			// 		cgi.run();
+			// 		if (cgi.status_code != 200)
+			// 		{  
+			// 			std::cout << "ERROCODE CGI " << std::endl;
+			// 			buildResponse(cgi.status_code);
+			// 			return;
+			// 		}
+			// 	std::string cgi_headers = extractHeaders(_client.getResponse());
+			// 	pos = cgi_headers.find("Set-Cookie");
+			// 	if (pos != std::string::npos)
+			// 	{
+			// 		cgi_headers = cgi_headers.substr(pos);
+			// 		pos = cgi_headers.find("\r\n");
+			// 		this->cookies = cgi_headers.substr(0, pos); 
+			// 	}
+			// 	std::string response_cgi = _client.getResponse();
+			// 					//std::cout << _client.getResponse() << std::endl;
+
+			// 	std::string c_t = findContentType(response_cgi);
+			// 	_client.setResponseBody(extractBody(_client.getResponse()));
+			// 	//std::cout << _client.getResponseBody() << std::endl;
+			// 	std::stringstream ss;
+			// 	ss << _client.getResponseBody().length();
+			// 	std::string body_length = ss.str();
+			// 	_client.setResponseHeader(createResponseHeader(200, c_t));
+			// 	_isText = true;
+			// 	return;
+			// }
 }
 
 void	HttpResponse::isUrihasSlashInTHeEnd() {
@@ -137,10 +170,10 @@ bool HttpResponse::isPostDirHasIndexFiles() {
 
             if (file.is_open())
             {
-                // _errCode = 200;
+                 _errCode = 200;
                 _filePath = path;
                 file.close();
-				// _isFile();
+				_postRequestFile();
                 return true;
             }
 			else {

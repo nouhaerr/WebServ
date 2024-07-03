@@ -15,6 +15,7 @@ SRC = src/main.cpp\
 	src/response/GET.cpp\
 	src/response/POST.cpp\
 	src/response/DELETE.cpp\
+	src/CGI/CGI.cpp
 
 OBJS = $(SRC:.cpp=.o)
 

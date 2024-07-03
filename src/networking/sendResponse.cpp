@@ -61,7 +61,7 @@ void WebServer::sendResponse(HttpRequest &req, NetworkClient &client)
 	{
         client.setResponse(client.getResponseHeader());
         client.setHeaderSent(true);
-        std::cout << client.getResponse();
+       std::cout << client.getResponse();
     }
 	else 
 	{
@@ -70,6 +70,7 @@ void WebServer::sendResponse(HttpRequest &req, NetworkClient &client)
             char buffer[1024];
             if (resp.isText() == true) {
                 std::cout << "text\n";
+               // std::cout << client.getResponseBody() << std::endl;
                 ssize_t bytesSent = send(client.fetchConnectionSocket(), client.getResponseBody().c_str(), client.getResponseBody().length(), 0);
 				if (bytesSent < 0 || bytesSent == (int)client.getResponseBody().length()) {
                     std::remove(req.get_bodyFileName().c_str());

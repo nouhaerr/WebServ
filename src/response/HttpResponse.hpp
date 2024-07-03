@@ -5,6 +5,7 @@
 #include "../parsing/Config.hpp"
 #include "../networking/NetworkClient.hpp"
 #include "../networking/HttpRequest.hpp"
+#include "../CGI/CGI.hpp"
 
 #define FILE_TYPE 1
 #define FOLDER_TYPE 0
@@ -18,6 +19,7 @@ class HttpResponse {
 		~HttpResponse();
 
 		void	generateResponse(HttpRequest &req);
+		std::string Get_File_Name_From_URI();
 		void	buildResponse(int errCode);
 		void	locateErrorPage(int errCode);
 		void	checkHttpVersion(HttpRequest &req);
@@ -46,6 +48,7 @@ class HttpResponse {
 	private:
 		NetworkClient&	_client;
 		ConfigServer	_serv;
+		std::string		cookies;
 		std::string		_bodyFileName;
 		std::string		_postBody;
 		int				_errCode;

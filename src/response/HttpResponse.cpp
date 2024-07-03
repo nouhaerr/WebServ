@@ -327,11 +327,11 @@ std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
             _filePath = _constructPath(relativePath, _root, "");
 
             // std::cout << "fff " << _filePath << "\n";
-            if (isDirectory(_filePath.c_str()) && req.getMethod() == "GET" && _isSupportedMethod("GET")) {
+            if (isDirectory(_filePath.c_str()) && req.getMethod() == "GET" && _isSupportedMethod("GET") && _location.getRedirect() == false) {
                 size_t urisize = _client.getRequest().getUri().size();
                 if ((_root[_root.size() - 1]) != '/' && _client.getRequest().getUri()[urisize - 1] != '/')
                 {
-                    std::cout << "ma fhamtch1\n";
+                    // std::cout << "ma fhamtch1\n";
                     std::string hostt = _serv.getHost() + ":" + toString(_serv.getPort());
                     std::string dirdir = _location.getLocationName().empty() ? findDirname(_filePath, _root) + "/" : _location.getLocationName() + findDirname(_filePath, _root) + "/";
                     // std::cout << _filePath << " lastdir: " << dirdir<< "\n";
@@ -363,7 +363,7 @@ std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
         size_t urisize = _client.getRequest().getUri().size();
         if ((_root[_root.size() - 1]) != '/' && _client.getRequest().getUri()[urisize - 1] != '/')
         {
-            std::cout << "ma fhamtch2\n";
+            // std::cout << "ma fhamtch2\n";
             std::string hostt = _serv.getHost() + ":" + toString(_serv.getPort());
             std::string dirdir = _location.getLocationName().empty() ? findDirname(_filePath, _root) + "/" : _location.getLocationName() + findDirname(_filePath, _root) + "/";
             // std::cout << _filePath << " lastdir: " << dirdir<< "\n";

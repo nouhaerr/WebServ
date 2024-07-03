@@ -61,10 +61,10 @@ class HttpRequest
 		/*getters*/
 		std::string	getRequest() const;
 		std::string	getMethod() const;
-		std::string	getUri() const;
+		std::string	&getUri() ;
 		std::string	getHttpVersion() const;
 		std::string	getHeader(const std::string& headerName) const;
-		const std::map<std::string, std::string>& getHeaderFields() const;
+		 std::map<std::string, std::string>& getHeaderFields();
 		std::string	getBody() const;
 		size_t&		getBodysize();
 		int			getErrorCode() const;

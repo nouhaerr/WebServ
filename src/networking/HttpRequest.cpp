@@ -373,7 +373,7 @@ std::string HttpRequest::getHttpVersion() const {
 	return this->_httpVersion;
 }
 
-std::string	HttpRequest::getUri() const {
+std::string	&HttpRequest::getUri()  {
 	return this->_uri;
 }
 
@@ -385,7 +385,7 @@ std::string HttpRequest::getHeader(const std::string& headerName) const
     return "";
 }
 
-const std::map<std::string, std::string>& HttpRequest::getHeaderFields() const { 
+ std::map<std::string, std::string>& HttpRequest::getHeaderFields() { 
     return this->_headerFields; 
 }
 
