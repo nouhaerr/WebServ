@@ -148,7 +148,7 @@ void	Config::parse()
 		// for (std::vector<t_tokens>::iterator it =_tokens.begin(); it != this->_tokens.end(); ++it) 
 		// 	std::cout << "type: " << it->_type << ", Value: " << it->_value << std::endl;
 	} catch(const std::exception &e) {
-		std::cout << e.what() << std::endl;
+		std::cout << "config failed " <<e.what() << std::endl;
 		exit(1);
 	}
 }

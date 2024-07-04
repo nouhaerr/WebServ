@@ -15,7 +15,12 @@ NetworkClient& WebServer::GetRightClient(int fd)
 {
     std::map<int, NetworkClient>::iterator it = this->clients.find(fd);
     if (it != this->clients.end())
+    {
+        std::cout << "6" << std::endl;
+     			std::cout << "((()))" <<it->second.getRequest().getUri() << std::endl;
         return it->second;
+    }
+        
     else
         throw std::runtime_error("BUG: Potential Server error");
 }
@@ -72,7 +77,7 @@ void WebServer::setupServerSockets()
             std::cerr << "Error opening socket for server " << (*serverConfigs)[i].getServerName() << ": " << strerror(errno) << std::endl;
             continue;
         }
-
+                //  OUMAIMA CHARKI <3  BADR EDDINE 
         int optval = 1;
         if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) < 0) 
         {

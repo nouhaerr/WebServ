@@ -22,6 +22,7 @@ class HttpRequest
 	};
 
 	private:
+
 		std::string _httpMethod;
 		std::string _httpVersion;
 		std::string _uri;
@@ -47,7 +48,9 @@ class HttpRequest
 		void parseHttpRequest(std::string&);
 
 		/*setters*/
-		void	setRequest(std::string&);
+		void	set_Request(std::string&);
+		void set_queryString();
+		void set_headers(std::string &headers);
 		void	setMethod(const std::string& method);
 		void	setUri(const std::string& uri);
 		void	setHttpVersion(const std::string& version);

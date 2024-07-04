@@ -159,15 +159,20 @@ void HttpRequest::setMethod(const std::string& method)
 
 void HttpRequest::setUri(const std::string& uri) {
 	this->_uri = uri;
+		//std::cout << " RR : "<< this->_uri << std::endl;
+
 }
 
 void HttpRequest::setHttpVersion(const std::string &version) {
 	this->_httpVersion = version;
 }
 
-void HttpRequest::setRequest(std::string &request_line)
+void HttpRequest::set_Request(std::string &request_line)
 {
+	
 	std::vector<std::string> request = split(request_line, ' ');
+	// for (size_t i = 0 ; i < request.size(); i++ )
+	// 	std::cout << " RR : "<< request[i] << std::endl;
 	setMethod(request[0]);
 	setUri(request[1]);
 	setHttpVersion(request[2]);
@@ -299,6 +304,7 @@ bool HttpRequest::setBody(std::string &body)
 	return false;
 }
 
+
 void HttpRequest::setRequestData(std::string &data)
 {
 	this->requestData += data;
@@ -319,6 +325,43 @@ void HttpRequest::_parseURI() {
         this->_errorCode = 414; // 414 URI Too Long
 }
 
+void HttpRequest::set_queryString()
+{
+	size_t pos;
+
+	pos = this->_uri.find("?");
+	if (pos != std::string::npos)
+		this->queryString = this->_uri.substr(pos + 1);
+	else
+		this->queryString = "";
+}
+
+void HttpRequest::set_headers(std::string &headers)
+{
+	std::string CRLF("\r\n");
+	size_t crlf_pos, delim_pos;
+	;
+	std::string key, value;
+	std::string header_line;
+
+	while (headers.find(CRLF) != std::string::npos)
+	{
+		crlf_pos = headers.find(CRLF);
+		header_line = headers.substr(0, crlf_pos);
+		headers = headers.substr(crlf_pos + 2);
+		if (header_line.empty())
+			break;
+		delim_pos = header_line.find(":");
+		if (delim_pos != std::string::npos)
+		{
+			key = header_line.substr(0, delim_pos);
+			value = header_line.substr(delim_pos + 1);
+			trim_front(value);
+			this->_headerFields.insert(std::pair<std::string, std::string>(key, value));
+		}
+	}
+}
+
 void HttpRequest::parseHttpRequest(std::string &read_request)
 {
 	std::string CRLF("\r\n");
@@ -332,24 +375,12 @@ void HttpRequest::parseHttpRequest(std::string &read_request)
 	{
 		request_line = read_request.substr(0, pos);
 		headers_lines = read_request.substr(pos + 2);
-		std::vector<std::string> request = split(request_line, ' ');
-		setMethod(request[0]);
-		if (this->_errorCode != 501) {
-			setUri(request[1]);
-			setHttpVersion(request[2]);
-			_parseURI();
-			if (this->_errorCode != 400 && this->_errorCode != 414) {
-				// setRequest(request_line);
-				setHeaderField(headers_lines);
-				read_request = headers_lines;
-				if (this->_httpMethod == "POST")
-					this->request_status = HttpRequest::BODY;
-				else
-					this->request_status = HttpRequest::REQUEST_READY;
-			}
-			else
-				this->request_status = HttpRequest::REQUEST_READY;
-		}
+		set_Request(request_line);
+		set_queryString();
+		set_headers(headers_lines);
+		read_request = headers_lines;
+		if (this->_httpMethod == "POST")
+			this->request_status = HttpRequest::BODY;
 		else
 			this->request_status = HttpRequest::REQUEST_READY;
 	}
@@ -365,9 +396,14 @@ void HttpRequest::set_requestStatus(REQUEST_STATE status)
 	this->request_status = status;
 }
 
+// std::string HttpRequest::getMethod() const {
+// 	return this->_httpMethod;
+// }
 std::string HttpRequest::getMethod() const {
-	return this->_httpMethod;
+    std::cout << "HttpRequest method: " << _httpMethod << std::endl;  // Journal pour vérifier la méthode de la requête
+    return this->_httpMethod;
 }
+
 
 std::string HttpRequest::getHttpVersion() const {
 	return this->_httpVersion;

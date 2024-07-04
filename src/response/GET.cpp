@@ -258,13 +258,18 @@ std::string findContentType(std::string response)
     return contentType;
 }
 
-void	HttpResponse::_isFile() {
+void	HttpResponse::_isFile() 
+{
     // Handle file
 	std::string script_name = Get_File_Name_From_URI();
+	std::string filePath = _client.getRequest().getUri();
+    // std::cout << "URI**********1:"<<filePath<< std::endl;
+	// std::cout << script_name << "NAAAAAAMEEE" << std::endl;
     std::ifstream file(_filePath.c_str(), std::ios::in | std::ios::binary);
-	if (file) {
+	if (file) 
+	{
 		std::string extension = _filePath.substr(_filePath.find_last_of('.'));
-						//std::cout << extension << "FILE EXT" << std::endl;
+		//std::cout << extension << "FILE EXT" << std::endl;
 
 			if (extension == ".php" || extension == ".py")
 			{
@@ -275,7 +280,7 @@ void	HttpResponse::_isFile() {
 					cgi.executeScript();
 					if (cgi.responseStatus != 200)
 					{  
-						std::cout << "ERROCODE CGI " << std::endl;
+						std::cout << "ERROCODE CGI " << cgi.responseStatus << std::endl;
 						buildResponse(cgi.responseStatus);
 						return;
 					}
@@ -359,13 +364,27 @@ void	HttpResponse::handleGetMethod() {
 	}
 }
 
-bool	HttpResponse::_isSupportedMethod(std::string meth) {
+// bool	HttpResponse::_isSupportedMethod(std::string meth) {
 	
-	std::vector<std::string>::iterator	it = _methods.begin();
+// 	std::vector<std::string>::iterator	it = _methods.begin();
 
-	for (; it != _methods.end(); ++it) {
-		if (*it == meth)
-			return true;
-	}
+// 	for (; it != _methods.end(); ++it) {
+// 		if (*it == meth)
+// 			return true;
+// 	}
+//     return false;
+// }
+
+
+bool HttpResponse::_isSupportedMethod(const std::string method) 
+{
+    std::vector<std::string>::iterator it = _methods.begin();
+    for (; it != _methods.end(); ++it) {
+        if (*it == method) {
+            std::cout << "Method " << method << " is supported" << std::endl;  // Journal pour méthode supportée
+            return true;
+        }
+    }
+    std::cout << "Method " << method << " is not supported" << std::endl;  // Journal pour méthode non supportée
     return false;
 }

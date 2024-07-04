@@ -25,7 +25,7 @@ class CGI
 	~CGI();
 
 	/*setters*/
-	void configureEnvironment(std::string& script_name);
+	void configureEnvironment(const std::string& script_name);
 	void initializeEnvData(const std::vector<std::string>& envs);
 
 	/*getters*/
