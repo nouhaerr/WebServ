@@ -37,13 +37,20 @@ std::vector<t_tokens>	ParseFile::readFile(const char *fileName)
 		if (start != std::string::npos)
 			line = line.erase(0, start);
 		if (line[0] == '#') {
-			// std::cout << line << "\n";
 			continue ;
 		}
 		else if (line.find_first_of('#') != std::string::npos)
 			throw ParseFile::ParseFileException("Error: Unexpected token.");
         if (!line.empty()) {
 			tok = ParseFile::setToken(line);
+			if (tok._type == "server" && line.find('{') == std::string::npos) {
+				tokenVect.push_back(tok);
+				getline(file, line);
+				if (line.find('{') == std::string::npos) {
+					throw ParseFile::ParseFileException("Error: expected '{' after server directive.");
+				}
+				tok = ParseFile::setToken(line);
+			}
             tokenVect.push_back(tok);
         }
 	}
@@ -66,6 +73,7 @@ t_tokens ParseFile::setToken(std::string& line)
 		std::size_t	pos = token._value.find(';');
 		if (pos != std::string::npos)
 			token._value = token._value.erase(pos, 1);
+
 		pos = token._value.find('{');
 		if (pos != std::string::npos) {
 			token._value = token._value.erase(pos, 1);

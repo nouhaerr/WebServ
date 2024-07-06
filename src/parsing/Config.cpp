@@ -44,7 +44,6 @@ ConfigServer Config::parseServerConfig(std::vector<t_tokens>::iterator& it) {
 			server.setLocation(this->_tokens ,it);
 			loc++;
 			it++;
-			// std::cout << "after location block:" <<it->_type << "\n";
 			continue;
 		}
 		else if (it->_type == "listen") {
@@ -79,8 +78,10 @@ ConfigServer Config::parseServerConfig(std::vector<t_tokens>::iterator& it) {
 			it++;
 			continue;
 		}
-		else
+		else {
+			throw ParseServerException("Error: Unexpected parametre.");
 			break;
+		}
 		it++;
 	}
 	if (lis != 1)

@@ -34,6 +34,15 @@ bool isValidIPAddress(const std::string& ip) {
 	return true;
 }
 
+bool	isAllSpacesOrTabs(const std::string& str) {
+    for (std::string::size_type i = 0; i < str.length(); ++i) {
+        if (str[i] != ' ' && str[i] != '\t') {
+            return false;
+        }
+    }
+    return true;
+}
+
 std::vector<std::string>	splitVal(std::string& str) {
 	std::vector<std::string>	vals;
 	size_t						pos = 0;
@@ -165,13 +174,23 @@ ConfigLocation	ConfigServer::parseLocation(std::vector<t_tokens> &tok, std::vect
 			loc.setRedirection(it->_value);
 			red++;
 		}
+		else if (it->_type == "fastcgi_pass") {
+			loc.setFastCgiPass(it->_value);
+		}
+		else if (it->_type == "include") {
+			loc.setInclude(it->_value);
+		}
+		else if (it->_type == "fastcgi_param") {
+			loc.setFastCgiParam(it->_value);
+		}
 		else if (it->_type.empty()){
 			it++;
 			continue;
 		}
-		else
+		else {
+			throw ConfigServerException("Error: Unexpected parametre in location block.");
 			break; //error invalid type
-		// std::cout << "loccc: " << it->_type << "\n";
+		}
 		it++;
     }
 	if (rt != 1 || ind > 1)

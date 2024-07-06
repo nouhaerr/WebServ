@@ -11,7 +11,11 @@ ConfigLocation::ConfigLocation() :
 	_errorPage(),
 	_redirect(false),
 	_redirection(""),
-	_redirectCode(0)
+	_redirectCode(0),
+	_fastcgi_pass(""),
+	_include(""),
+	_fastcgi_param(""),
+	_supportCgi(false)
 {}
 
 ConfigLocation::ConfigLocation(const ConfigLocation &src) {
@@ -31,6 +35,10 @@ ConfigLocation& ConfigLocation::operator=(const ConfigLocation &src) {
 		this->_redirect = src._redirect;
 		this->_redirection = src._redirection;
 		this->_redirectCode = src._redirectCode;
+		this->_fastcgi_pass = src._fastcgi_pass;
+		this->_include = src._include;
+		this->_fastcgi_param = src._fastcgi_param;
+		this->_supportCgi = src._supportCgi;
 	}
 	return *this;
 }
@@ -39,7 +47,7 @@ ConfigLocation::~ConfigLocation() {}
 
 void	ConfigLocation::setLocationName(std::string& locationName) {
 	if (locationName.empty() || locationName.find_first_of(" \t") != std::string::npos)
-		throw ConfigLocationException("Error: Empty location name.");
+		throw ConfigLocationException("Error: Wrong location name.");
 	this->_locationName = locationName;
 }
 
@@ -58,8 +66,6 @@ std::string& ConfigLocation::getRoot() {
 }
 
 void	ConfigLocation::setIndex(std::string& index) {
-	// if (index.empty())
-	// 	throw ConfigLocationException("Error: Empty index!");
 	this->_index = splitVal(index);
 }
 
@@ -71,6 +77,12 @@ void	ConfigLocation::setMethods(std::string& methods) {
 	if (methods.empty())
 		throw ConfigLocationException("Error: Empty methods!");
 	this->_methods = splitVal(methods);
+	std::vector<std::string>::iterator it = _methods.begin();
+	for (; it != _methods.end(); ++it) {
+		if (*it != "POST" && *it != "GET" && *it != "DELETE"
+			&& *it != "HEAD" && *it != "PUT")
+			throw ConfigLocationException("Error: Unexpected value for methods!");
+	}
 }
 
 std::vector<std::string>& ConfigLocation::getMethods() {
@@ -98,7 +110,7 @@ size_t&	ConfigLocation::getMaxBodySize() {
 
 void	ConfigLocation::setAutoIndex(std::string& autoindex) {	
 	if (autoindex != "ON" && autoindex != "OFF")
-		throw ConfigLocationException("Error: Wrong Autoindex!");
+		throw ConfigLocationException("Error: Unexpected value for Autoindex!");
 	if (autoindex == "ON")
 		this->_autoindex = true;
 	else
@@ -110,6 +122,10 @@ bool&	ConfigLocation::getAutoIndex() {
 }
 
 void	ConfigLocation::setUpload(std::string& upload) {	
+	if (isAllSpacesOrTabs(upload)) {
+		this->_upload = "";
+		return ;
+	}
 	if (upload.find_first_of(" \t") != std::string::npos)
 		throw ConfigLocationException("Error: Wrong Upload!");
 	this->_upload = upload;
@@ -144,9 +160,24 @@ void	ConfigLocation::setRedirect(bool redirect) {
 	this->_redirect = redirect;
 }
 
+void	ConfigLocation::setFastCgiPass(std::string& fastCgiPass) {
+	if (fastCgiPass.empty() )
+	this->_fastcgi_pass = fastCgiPass;
+	this->_supportCgi = true;
+}
+
+void	ConfigLocation::setInclude(std::string& include) {
+	this->_include = include;
+}
+
+void	ConfigLocation::setFastCgiParam(std::string& fastCgiParam) {
+	this->_fastcgi_param = fastCgiParam;
+}
+
 bool&	ConfigLocation::getRedirect() {
 	return this->_redirect;
 }
+
 
 void	ConfigLocation::setRedirection(std::string& redirection) {
 	std::vector<std::string> args = splitArgs(redirection);
@@ -169,4 +200,20 @@ std::string&	ConfigLocation::getRedirection() {
 
 int&	ConfigLocation::getRedirectCode() {
 	return (this->_redirectCode);
+}
+
+std::string&	ConfigLocation::getFastCgiPass() {
+	return this->_fastcgi_pass;
+}
+
+std::string&	ConfigLocation::getInclude() {
+	return this->_include;
+}
+
+std::string&	ConfigLocation::getFastcgiParam() {
+	return this->_fastcgi_param;
+}
+
+bool&	ConfigLocation::getSuppCgi() {
+	return this->_supportCgi;
 }

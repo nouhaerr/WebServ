@@ -1,20 +1,30 @@
 #ifndef WEBSERVER_HPP
 #define WEBSERVER_HPP
 
-#include <vector>
-#include <map>
-#include <string>
 #include <netinet/in.h>
+#include <arpa/inet.h>
+#include <cctype>
+#include <cstring>
 #include "NetworkClient.hpp"
 #include "../parsing/Config.hpp"
 #include "../parsing/ConfigServer.hpp"
 #include "HttpRequest.hpp"
-#include "HttpRequestParser.hpp"
-#include <arpa/inet.h>
-#include <cctype>
-#include <cstring>
-#include <sys/sendfile.h>
 #include "../response/HttpResponse.hpp"
+// #include <sys/sendfile.h>
+
+// static unsigned long long   varst;
+
+class RequestError {
+	private:
+		int _error_number;
+
+	public:
+		RequestError(int error_number) : _error_number(error_number) {
+		}
+		int getErrorNumber() const  {
+			return (this->_error_number);
+		}
+};
 
 class WebServer {
 public:
@@ -22,29 +32,34 @@ public:
     ~WebServer();
 
     void run();
-    NetworkClient& GetRightClient(int fd); 
+    NetworkClient& GetRightClient(int fd);
+
+    void CheckRequestStatus(NetworkClient &client);
+    void sendVideoInChunks(NetworkClient& client, const std::string& filePath);
+    std::streamsize   varRead;
 
 private:
     void setupServerSockets();
     void acceptNewClient(int serverSocket);
     void closeClient(int clientSocket);
-   void processClientRequests(int clientSocket);
+    void processClientRequests(int clientSocket);
     void sendDataToClient(NetworkClient& client);
     NetworkClient* findClientBySocket(int socket);
     const ConfigServer& matchServerByFd(int fd);
-    // const ConfigServer& matchServerByName(const std::string& host);
     const ConfigServer& matchServerByName(const std::string& host, int port);
-    // std::string generateResponse(const ConfigServer& server);
-
-    void sendResponse(HttpRequest &req, NetworkClient &client);
+    void readFromClient(int clientSocket, std::string &requestString);
+    void    sendResponse(HttpRequest &req, NetworkClient &client);
     int sendResponseBody(NetworkClient &client);
+
+
 
     fd_set masterSet, readSet, writeSet;
     int highestFd;
     std::vector<int> serverSockets;
-    std::map<int, NetworkClient> clients;  // Changer std::vector en std::map
-    // std::vector<ConfigServer> serverConfigs;
-    std::vector<ConfigServer> *serverConfigs;
+    std::map<int, NetworkClient> clients;
+    std::vector<ConfigServer>* serverConfigs;
+    std::map<int, std::string> clientRequests; // Stockage des requêtes par client
+    int currentClientIndex;
 };
+#endif
 
-#endif // WEBSERVER_HPP
