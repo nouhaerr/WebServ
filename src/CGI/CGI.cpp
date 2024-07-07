@@ -251,7 +251,7 @@ void CGI::executeScript() {
     pid_t processId;
     int pipeIn[2] = {-1, -1}, pipeOut[2] = {-1, -1};
 
-    std::cout << client.getRequest().getUri() << "\n";
+    // std::cout << client.getRequest().getUri() << "\n";
     std::string scriptPath = "./src" + client.getRequest().getUri();
     char* scriptArgument = new char[scriptPath.size() + 1];
     std::strcpy(scriptArgument, scriptPath.c_str());

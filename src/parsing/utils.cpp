@@ -210,5 +210,7 @@ ConfigLocation	ConfigServer::parseLocation(std::vector<t_tokens> &tok, std::vect
 
 	if (it->_type != "}")
 		throw ConfigServerException("Error: expected '}' in the end of location directive.");
+	if (it->_value == "}")
+		throw ConfigServerException("Error: Unexpected token");
 	return (loc);
 }
