@@ -191,7 +191,6 @@ void	ConfigLocation::setInterpreter(std::string& interpreter) {
 		throw ConfigLocationException("Error: Invalid interpreter!");
 	for (size_t pos = 0; pos < val.size(); pos++) {
 		std::string	extension;
-		std::cout << val[pos] << "\n";
 		if (val[pos] == "php" || val[pos] == "py") {
 			extension = val[pos++];
 		}

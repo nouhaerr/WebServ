@@ -282,7 +282,6 @@ void	HttpResponse::_isFile()
 				return;
 			}
 			std::string cgi_headers = extractHeaders(_client.getResponse());
-			std::cout << "Headers CGI: " << cgi_headers << "\n";
 			pos = cgi_headers.find("Set-Cookie");
 				if (pos != std::string::npos)
 				{
@@ -295,7 +294,7 @@ void	HttpResponse::_isFile()
 
 				std::string c_t = findContentType(response_cgi);
 				_client.setResponseBody(extractBody(_client.getResponse()));
-				std::cout << _client.getResponseBody() << std::endl;
+				// std::cout << _client.getResponseBody() << std::endl;
 				std::stringstream ss;
 				ss << _client.getResponseBody().length();
 				std::string body_length = ss.str();
@@ -308,7 +307,7 @@ void	HttpResponse::_isFile()
 		std::string header = createResponseHeader(200, "Nothing");
 		_client.setResponseHeader(header);
 		_client.setResponseBody(_filePath);
-						// std::cout << _client.getResponseBody() << std::endl;
+		// std::cout << _client.getResponseBody() << std::endl;
 
 		return ;
 	}

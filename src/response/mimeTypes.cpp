@@ -9,6 +9,7 @@ std::string	getMimeTypes(std::string flag, std::string extension) {
     mimeTypes[".abw"] = "application/x-abiword";
     mimeTypes[".arc"] = "application/octet-stream";
     mimeTypes[".avi"] = "video/x-msvideo";
+    mimeTypes[".avif"] = "image/avif";
     mimeTypes[".azw"] = "application/vnd.amazon.ebook";
     mimeTypes[".bin"] = "application/octet-stream";
     mimeTypes[".bmp	"] = "image/bmp";

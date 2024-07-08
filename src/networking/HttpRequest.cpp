@@ -283,7 +283,7 @@ bool HttpRequest::setBody(std::string &body)
 		std::fstream bodyDataFile;
 		bodyDataFile.open(this->bodyFileName.c_str(), std::fstream::app | std::fstream::out | std::fstream::in);
 		if (!bodyDataFile.is_open()) {
-			this->_errorCode = 500; //internalSeral error
+			this->_errorCode = 500; //internalServer error
 			return true;
 		}
 		if (bytes_left > 0 && body.size() <= bytes_left)

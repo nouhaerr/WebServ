@@ -14,13 +14,9 @@ std::string trimm(const std::string& str)
 NetworkClient& WebServer::GetRightClient(int fd) 
 {
     std::map<int, NetworkClient>::iterator it = this->clients.find(fd);
-    if (it != this->clients.end())
-    {
-        // std::cout << "6" << std::endl;
-     	// 		std::cout << "((()))" <<it->second.getRequest().getUri() << std::endl;
+    if (it != this->clients.end()) {
         return it->second;
     }
-        
     else
         throw std::runtime_error("BUG: Potential Server error");
 }
@@ -165,7 +161,7 @@ void WebServer::processClientRequests(int fd) {
         }
     }
 	client.saveRequestData(bytes_received);
-	//std::cout<< client.getRequest().getRequestData() << std::endl;
+	std::cout<< client.getRequest().getRequestData() << std::endl;
     CheckRequestStatus(client);
     if (client.getRequest().get_requestStatus() == HttpRequest::REQUEST_READY) {
         // std::cout << "size of body " << client.getRequest().getBodysize();

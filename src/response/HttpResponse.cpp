@@ -219,6 +219,7 @@ std::string	HttpResponse::createResponseHeader(int errCode, std::string flag) {
 		_headers["Content-Length"] = getContentLength(_filePath);
         if (_headers.find("Content-Type") == _headers.end())
         {
+            std::cout << "kidkhol hna\n";
             _headers["Content-Type"] = getContentType(_filePath);
         }
 		else
