@@ -197,8 +197,6 @@ ConfigLocation	ConfigServer::parseLocation(std::vector<t_tokens> &tok, std::vect
 		throw ConfigServerException("Error: Should have one autoindex parametre.");
 	else if (up > 1)
 		throw ConfigServerException("Error: Must have one uplod parametre.(Duplicate)");
-	else if (err > 1)
-		throw ConfigServerException("Error: Must set one error_page parametre.(Duplicate)");
 	else if (red > 1)
 		throw ConfigServerException("Error: Must have one return parametre.(Duplicate)");
 

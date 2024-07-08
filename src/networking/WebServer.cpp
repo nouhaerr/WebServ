@@ -161,7 +161,7 @@ void WebServer::processClientRequests(int fd) {
         }
     }
 	client.saveRequestData(bytes_received);
-	std::cout<< client.getRequest().getRequestData() << std::endl;
+	// std::cout<< client.getRequest().getRequestData() << std::endl;
     CheckRequestStatus(client);
     if (client.getRequest().get_requestStatus() == HttpRequest::REQUEST_READY) {
         // std::cout << "size of body " << client.getRequest().getBodysize();
