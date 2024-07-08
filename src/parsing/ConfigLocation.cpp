@@ -12,9 +12,7 @@ ConfigLocation::ConfigLocation() :
 	_redirect(false),
 	_redirection(""),
 	_redirectCode(0),
-	_fastcgi_pass(""),
-	_include(""),
-	_fastcgi_param(""),
+	_interpreter(),
 	_supportCgi(false)
 {}
 
@@ -35,9 +33,6 @@ ConfigLocation& ConfigLocation::operator=(const ConfigLocation &src) {
 		this->_redirect = src._redirect;
 		this->_redirection = src._redirection;
 		this->_redirectCode = src._redirectCode;
-		this->_fastcgi_pass = src._fastcgi_pass;
-		this->_include = src._include;
-		this->_fastcgi_param = src._fastcgi_param;
 		this->_supportCgi = src._supportCgi;
 	}
 	return *this;
@@ -160,24 +155,9 @@ void	ConfigLocation::setRedirect(bool redirect) {
 	this->_redirect = redirect;
 }
 
-void	ConfigLocation::setFastCgiPass(std::string& fastCgiPass) {
-	if (fastCgiPass.empty() )
-	this->_fastcgi_pass = fastCgiPass;
-	this->_supportCgi = true;
-}
-
-void	ConfigLocation::setInclude(std::string& include) {
-	this->_include = include;
-}
-
-void	ConfigLocation::setFastCgiParam(std::string& fastCgiParam) {
-	this->_fastcgi_param = fastCgiParam;
-}
-
 bool&	ConfigLocation::getRedirect() {
 	return this->_redirect;
 }
-
 
 void	ConfigLocation::setRedirection(std::string& redirection) {
 	std::vector<std::string> args = splitArgs(redirection);
@@ -202,16 +182,30 @@ int&	ConfigLocation::getRedirectCode() {
 	return (this->_redirectCode);
 }
 
-std::string&	ConfigLocation::getFastCgiPass() {
-	return this->_fastcgi_pass;
+void	ConfigLocation::setInterpreter(std::string& interpreter) {
+	std::vector<std::string> val;
+	std::map<std::string , std::string>	interpreters;
+
+	val = splitVal(interpreter);
+	if (val.size() % 2 != 0)
+		throw ConfigLocationException("Error: Invalid interpreter!");
+	for (size_t pos = 0; pos < val.size(); pos++) {
+		std::string	extension;
+		std::cout << val[pos] << "\n";
+		if (val[pos] == "php" || val[pos] == "py") {
+			extension = val[pos++];
+		}
+		else
+			throw ConfigLocationException("Error: Invalid extension format-type!");
+		std::string	interpret = val[pos];
+		interpreters[extension] = interpret;
+	}
+	this->_interpreter = interpreters;
+	this->_supportCgi = true;
 }
 
-std::string&	ConfigLocation::getInclude() {
-	return this->_include;
-}
-
-std::string&	ConfigLocation::getFastcgiParam() {
-	return this->_fastcgi_param;
+std::map<std::string, std::string>&	ConfigLocation::getInterpreter() {
+	return this->_interpreter;
 }
 
 bool&	ConfigLocation::getSuppCgi() {

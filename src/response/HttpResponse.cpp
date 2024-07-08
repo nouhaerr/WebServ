@@ -321,6 +321,8 @@ std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
             _uploadPath = _location.getUpload();
 			if (_location.getRedirect() == true)
 				_redirection = _location.getRedirection();
+            if (_location.getSuppCgi() == true)
+                _interpreter = _location.getInterpreter();
 
             int idx = req.getUri().find(_location.getLocationName());
             std::string locationName = _location.getLocationName();
@@ -382,6 +384,5 @@ std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
 		}
 		return _filePath;
     }
-    // std::cout << "3 " <<_filePath << "\n";
     return _filePath;
 }

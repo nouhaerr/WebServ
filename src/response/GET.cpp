@@ -264,30 +264,26 @@ void	HttpResponse::_isFile()
     // Handle file
 	std::string script_name = Get_File_Name_From_URI();
 	std::string filePath = _client.getRequest().getUri();
-    // std::cout << "URI**********1:"<<filePath<< std::endl;
-	// std::cout << script_name << "NAAAAAAMEEE" << std::endl;
     std::ifstream file(_filePath.c_str(), std::ios::in | std::ios::binary);
 	if (file) 
 	{
 		std::string extension = _filePath.substr(_filePath.find_last_of('.'));
-		//std::cout << extension << "FILE EXT" << std::endl;
 
-			if (extension == ".php" || extension == ".py")
-			{
-			//	std::cout<< "CGI FOUND !" << std::endl;
-				size_t pos;
-				CGI cgi(_client, _filePath);
-					cgi.configureEnvironment(script_name);
-					cgi.executeScript();
-					if (cgi.responseStatus != 200)
-					{  
-						std::cout << "ERROCODE CGI " << cgi.responseStatus << std::endl;
-						buildResponse(cgi.responseStatus);
-						return;
-					}
-				std::string cgi_headers = extractHeaders(_client.getResponse());
-				std::cout << "Headers CGI: " << cgi_headers << "\n";
-				pos = cgi_headers.find("Set-Cookie");
+		if (extension == ".php" || extension == ".py")
+		{
+			size_t pos;
+			CGI cgi(_client, _filePath);
+			cgi.configureEnvironment(script_name);
+			cgi.executeScript();
+			if (cgi.responseStatus != 200)
+			{  
+				std::cout << "ERROCODE CGI " << cgi.responseStatus << std::endl;
+				buildResponse(cgi.responseStatus);
+				return;
+			}
+			std::string cgi_headers = extractHeaders(_client.getResponse());
+			std::cout << "Headers CGI: " << cgi_headers << "\n";
+			pos = cgi_headers.find("Set-Cookie");
 				if (pos != std::string::npos)
 				{
 					cgi_headers = cgi_headers.substr(pos);

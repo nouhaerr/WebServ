@@ -28,26 +28,22 @@ class ConfigLocation {
 		void	setErrorPage(std::string& errorPage);
 		void	setRedirect(bool redirect);
 		void	setRedirection(std::string& redirection);
-		void	setFastCgiPass(std::string& fastCgiPass);
-		void	setInclude(std::string& include);
-		void	setFastCgiParam(std::string& fastCgiParam);
+		void	setInterpreter(std::string& interpreter);
 
 		// Getters
-		std::string& 				getLocationName();
-		std::string& 				getRoot();
-		std::vector<std::string>&	getIndex();
-		std::vector<std::string>&	getMethods();
-		size_t&						getMaxBodySize();
-		bool&						getAutoIndex();
-		std::string&				getUpload();
-		std::map<int, std::string>&	getErrorPage();
-		bool&						getRedirect();
-		int&						getRedirectCode();
-		std::string&				getRedirection();
-		std::string&				getFastCgiPass();
-		std::string&				getInclude();
-		std::string&				getFastcgiParam();
-		bool&						getSuppCgi();
+		std::string& 							getLocationName();
+		std::string& 							getRoot();
+		std::vector<std::string>&				getIndex();
+		std::vector<std::string>&				getMethods();
+		size_t&									getMaxBodySize();
+		bool&									getAutoIndex();
+		std::string&							getUpload();
+		std::map<int, std::string>&				getErrorPage();
+		bool&									getRedirect();
+		int&									getRedirectCode();
+		std::string&							getRedirection();
+		std::map<std::string, std::string>&		getInterpreter();
+		bool&									getSuppCgi();
 
 		class	ConfigLocationException: public std::exception{
 			std::string message;
@@ -61,21 +57,19 @@ class ConfigLocation {
 		};
 
 	private:
-		std::string					_locationName;
-		std::string					_root;
-		std::vector<std::string>	_index;
-		std::vector<std::string>	_methods;
-		size_t						_maxBodySize;
-		bool						_autoindex;
-		std::string					_upload;
-		std::map<int, std::string>	_errorPage;
-		bool						_redirect;
-		std::string					_redirection;
-		int							_redirectCode;
-		std::string					_fastcgi_pass;
-		std::string					_include;
-		std::string					_fastcgi_param;
-		bool						_supportCgi;
+		std::string							_locationName;
+		std::string							_root;
+		std::vector<std::string>			_index;
+		std::vector<std::string>			_methods;
+		size_t								_maxBodySize;
+		bool								_autoindex;
+		std::string							_upload;
+		std::map<int, std::string>			_errorPage;
+		bool								_redirect;
+		std::string							_redirection;
+		int									_redirectCode;
+		std::map<std::string, std::string>	_interpreter;
+		bool								_supportCgi;
 };
 
 #endif

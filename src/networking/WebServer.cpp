@@ -200,8 +200,7 @@ void WebServer::run() {
         if (select(this->highestFd + 1, &readcpy, &writecpy, NULL, NULL) < 0) {
             std::cerr << "Error in select()." << std::endl;
         }
-        for (int i = 3; i <= this->highestFd; i++) { 
-            // try {
+        for (int i = 3; i <= this->highestFd; i++) {
                 if (FD_ISSET(i, &writecpy)) {
                     NetworkClient &client = GetRightClient(i);
                     sendDataToClient(client);
@@ -213,12 +212,6 @@ void WebServer::run() {
                         processClientRequests(i);
                     }
                 }
-            // } catch (const RequestError &error)
-		    // {
-			//     FD_CLR(i, &this->readSet);
-			//     FD_SET(i, &this->writeSet);
-			//     close(i);
-		    // }
         }   
     }
 }

@@ -1,0 +1,119 @@
+std::string Response::Get_File_Name_From_URI()
+{
+    size_t lastSlashPos = client.getRequest().get_uri().find_last_of('/');
+
+    if (lastSlashPos != std::string::npos)
+    {
+        return client.getRequest().get_uri().substr(lastSlashPos + 1);
+    }
+
+    const char *cstr = client.getRequest().get_uri().c_str();
+    const char *fileName = std::strrchr(cstr, '/');
+
+    if (fileName)
+    {
+        return fileName + 1;
+    }
+
+    return client.getRequest().get_uri();
+}
+
+std::string Response::Get_File_Extension(std::string File_Name)
+{
+    std::string::size_type pos_dot = File_Name.rfind('.');
+    if (pos_dot != std::string::npos && pos_dot != File_Name.length() - 1)
+    {
+        return File_Name.substr(pos_dot + 1);
+    }
+    return ""; // Pas d'extension ou extension vide
+}
+
+std::string extractBody(std::string httpResponse)
+{
+    size_t bodyStart = httpResponse.find("\r\n\r\n");
+    if (bodyStart == std::string::npos)
+    {
+        return "";
+    }
+    std::string body = httpResponse.substr(bodyStart + 4); // Skip the double newline
+    return body;
+}
+
+std::string extractHeaders(std::string httpResponse)
+{
+    size_t end_headers = httpResponse.find("\r\n\r\n");
+    if (end_headers == std::string::npos)
+        return "";
+    else
+        return httpResponse.substr(0, end_headers);
+}
+
+std::string findContentType(std::string response)
+{
+    std::istringstream responseStream(response);
+    std::string line;
+    std::string contentType;
+
+    while (std::getline(responseStream, line))
+    {
+        // Recherche du champ "Content-Type" (insensible à la casse)
+        if (strncasecmp(line.c_str(), "Content-Type:", 12) == 0)
+        {
+            size_t pos = line.find(':');
+            if (pos != std::string::npos)
+            {
+                contentType = line.substr(pos + 1);
+
+                // Supprime les espaces autour de la valeur du champ
+                size_t firstNonSpace = contentType.find_first_not_of(" \t");
+                size_t lastNonSpace = contentType.find_last_not_of(" \t");
+                if (firstNonSpace != std::string::npos && lastNonSpace != std::string::npos)
+                {
+                    contentType = contentType.substr(firstNonSpace, lastNonSpace - firstNonSpace + 1);
+
+                    // Chercher la position du premier point-virgule
+                    size_t semicolonPos = contentType.find(';');
+                    if (semicolonPos != std::string::npos)
+                    {
+                        // Extraire la sous-chaîne avant le point-virgule
+                        contentType = contentType.substr(0, semicolonPos);
+                    }
+                }
+                break;
+            }
+        }
+    }
+    return contentType;
+}
+
+
+if (File_Extension == "php" || File_Extension == "py")
+    {
+        size_t pos;
+        CGI cgi(client);
+            std::cout << "fileName: " << File_Name << "\n";
+            cgi.set_environmentVariables(File_Name);
+            cgi.run();
+            if (cgi.status_code != 200)
+            {  
+                //std::cout << cgi.status_code << std::endl;
+                Build_HTTP_Response(cgi.status_code);
+                return;
+            }
+        std::string cgi_headers = extractHeaders(client.getResponse());
+        pos = cgi_headers.find("Set-Cookie");
+        if (pos != std::string::npos)
+        {
+            cgi_headers = cgi_headers.substr(pos);
+            pos = cgi_headers.find("\r\n");
+            this->cookies = cgi_headers.substr(0, pos);
+        }
+        std::string response_cgi = client.getResponse();
+        std::string c_t = findContentType(response_cgi);
+        client.setBODY(extractBody(client.getResponse()));
+        std::stringstream ss;
+        ss << client.getBODY().length();
+        std::string body_length = ss.str();
+        client.setHEADER(Build_HTTP_Response_Header(200, c_t, body_length));
+        return;
+    }

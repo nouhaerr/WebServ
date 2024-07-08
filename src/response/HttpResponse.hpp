@@ -76,6 +76,7 @@ class HttpResponse {
 		std::map<std::string, std::string> _reqHeader;
 		bool	_isText;
 		bool	_slashSetted;
+		std::map<std::string, std::string>	_interpreter;
 
 		void	_handleDefaultErrors();
 		bool	_isSupportedMethod(std::string meth);
