@@ -212,6 +212,8 @@ std::string	HttpResponse::createResponseHeader(int errCode, std::string flag) {
     	_headers["Content-Type"] = "text/html";
         if (_errCode == 201) {
             _headers["Content-Type"] = _contentType;
+            _errorPath = "";
+			_headers["Content-Length"] = "0";
             // _isText = false;
         }
 	}
@@ -249,6 +251,7 @@ void	HttpResponse::buildResponse(int errCode) {
     std::string header = createResponseHeader(_errCode, "Default");
 
     _client.setResponseHeader(header);
+    std::cout << _errorPath << "\n";
     _client.setResponseBody(_errorPath);
 }
 

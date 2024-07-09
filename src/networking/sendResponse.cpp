@@ -61,7 +61,7 @@ void WebServer::sendResponse(HttpRequest &req, NetworkClient &client)
 	{
         client.setResponse(client.getResponseHeader());
         client.setHeaderSent(true);
-      //  std::cout << client.getResponse();
+       std::cout << client.getResponse();
     }
 	else 
 	{
@@ -103,6 +103,10 @@ void WebServer::sendResponse(HttpRequest &req, NetworkClient &client)
                 closeClient(client.fetchConnectionSocket());
                 return;
             }
+        }
+        else {
+            closeClient(client.fetchConnectionSocket());
+            return;
         }
     }
 
