@@ -91,8 +91,8 @@ void CGI::configureEnvironment(const std::string& file_name) {
     std::map<std::string, std::string> &headers = this->client.getRequest().getHeaderFields();
     HttpRequest &request = this->client.getRequest();
 
-    std::cout << "filePath: " << _filePath << "\n"; 
-    std::cout << "FILE NAME " << file_name << std::endl;
+    // std::cout << "filePath: " << _filePath << "\n"; 
+    // std::cout << "FILE NAME " << file_name << std::endl;
 
     envs.push_back("CONTENT_TYPE=" + headers["Content-Type"]);
     envs.push_back("REDIRECT_STATUS=200");

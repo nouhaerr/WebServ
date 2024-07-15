@@ -150,7 +150,7 @@ void	HttpResponse::_postRequestFile() {
         cgi.executeScript();
 
         if (cgi.responseStatus != 200) {
-            std::cout << "ERROCODE CGI " << cgi.responseStatus << std::endl;
+            std::cout << "ERROR CODE CGI " << cgi.responseStatus << std::endl;
             buildResponse(cgi.responseStatus);
             return;
         }
@@ -170,6 +170,7 @@ void	HttpResponse::_postRequestFile() {
         std::stringstream ss;
         ss << _client.getResponseBody().length();
         std::string body_length = ss.str();
+        _headers["Content-Length"] = body_length;
         _client.setResponseHeader(createResponseHeader(200, "Nothing"));
         _isText = true;
     }

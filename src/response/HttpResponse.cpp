@@ -220,14 +220,16 @@ std::string	HttpResponse::createResponseHeader(int errCode, std::string flag) {
         }
 	}
     else {
-		_headers["Content-Length"] = getContentLength(_filePath);
+        if (_headers.find("Content-Length") == _headers.end()) {
+		    _headers["Content-Length"] = getContentLength(_filePath);
+        }
         // if (_headers.find("Content-Type") == _headers.end())
         // {
         //     std::cout << "kidkhol hna\n";
         //     _headers["Content-Type"] = getContentType(_filePath);
         // }
 		// else
-            _headers["Content-Type"] = _contentType;
+        _headers["Content-Type"] = _contentType;
 	}
     if (!_cookie.empty()) {
         _headers["Set-Cookie"] = "";
