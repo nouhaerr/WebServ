@@ -164,13 +164,13 @@ void	HttpResponse::_postRequestFile() {
         }
 
         std::string response_cgi = _client.getResponse();
-        std::string c_t = findContentTypePOST(response_cgi);
+        _contentType = findContentTypePOST(response_cgi);
         _client.setResponseBody(extractBodyPOST(_client.getResponse()));
 
         std::stringstream ss;
         ss << _client.getResponseBody().length();
         std::string body_length = ss.str();
-        _client.setResponseHeader(createResponseHeader(200, c_t));
+        _client.setResponseHeader(createResponseHeader(200, "Nothing"));
         _isText = true;
     }
     else {

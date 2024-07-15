@@ -23,7 +23,8 @@ HttpResponse::HttpResponse(NetworkClient &client) :
 	_contentType(""),
     _reqHeader(), 
     _isText(false),
-    _slashSetted(false)
+    _slashSetted(false),
+    _cookie("")
     {}
 
 HttpResponse::~HttpResponse(){}
@@ -61,10 +62,12 @@ void	HttpResponse::_handleDefaultErrors() {
 
 void	HttpResponse::generateResponse(HttpRequest &req) {
 	_errCode = req.getErrorCode();
+    _cookie = req.getCookie();
 	// std::cout << "errcode result from req:" << _errCode << "\n";
 	// std::cout << "filePath loli: "<< _filePath << "\n";
 	_uri = getRequestedResource(req);
 	_filePath = deleteRedundantSlash(_uri);
+    _reqHeader = req.getHeaderFields();
 	if (_filePath.empty()) {
 		buildResponse(404);
 		return;
@@ -91,7 +94,6 @@ void	HttpResponse::generateResponse(HttpRequest &req) {
 	}
 	if (req.getMethod() == "POST") {
         _bodyFileName = req.get_bodyFileName();
-        _reqHeader = req.getHeaderFields();
 		handlePostMethod();
 		return ;
 	}
@@ -219,14 +221,17 @@ std::string	HttpResponse::createResponseHeader(int errCode, std::string flag) {
 	}
     else {
 		_headers["Content-Length"] = getContentLength(_filePath);
-        if (_headers.find("Content-Type") == _headers.end())
-        {
-            std::cout << "kidkhol hna\n";
-            _headers["Content-Type"] = getContentType(_filePath);
-        }
-		else
+        // if (_headers.find("Content-Type") == _headers.end())
+        // {
+        //     std::cout << "kidkhol hna\n";
+        //     _headers["Content-Type"] = getContentType(_filePath);
+        // }
+		// else
             _headers["Content-Type"] = _contentType;
 	}
+    if (!_cookie.empty()) {
+        _headers["Set-Cookie"] = "";
+    }
 	_headers["Date"] = generateDate();
 	std::stringstream ss;
 

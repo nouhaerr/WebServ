@@ -9,7 +9,8 @@ HttpRequest::HttpRequest() :
 	request_status(HEADERS),
 	body_status(NONE),
 	_errorCode(0),
-	_bodySize(0) {}
+	_bodySize(0),
+	_cookie("") {}
 
 HttpRequest::HttpRequest(const HttpRequest &httprequest) :
 	_httpMethod(httprequest._httpMethod),
@@ -19,7 +20,8 @@ HttpRequest::HttpRequest(const HttpRequest &httprequest) :
 	bodyFileName(httprequest.bodyFileName),
 	queryString(httprequest.queryString),
 	_errorCode(httprequest._errorCode),
-	_bodySize(httprequest._bodySize) {}
+	_bodySize(httprequest._bodySize),
+	_cookie(httprequest._cookie) {}
 
 
 HttpRequest &HttpRequest::operator=(const HttpRequest &httprequest)
@@ -34,6 +36,7 @@ HttpRequest &HttpRequest::operator=(const HttpRequest &httprequest)
 		this->queryString = httprequest.queryString;
 		this->_errorCode = httprequest._errorCode;
 		this->_bodySize = httprequest._bodySize;
+		this->_cookie = httprequest._cookie;
 	}
 	return (*this);
 }
@@ -202,6 +205,9 @@ void HttpRequest::setHeaderField(std::string &headers)
 			key = header_line.substr(0, delim_pos);
 			value = header_line.substr(delim_pos + 1);
 			trim_front(value);
+			if (key == "Cookie") {
+				_cookie = value;
+			}
 			this->_headerFields.insert(std::pair<std::string, std::string>(key, value));
 		}
 	}
@@ -409,6 +415,11 @@ std::string &HttpRequest::get_queryString() {
 std::string &HttpRequest::getRequestData()
 {
 	return (this->requestData);
+}
+
+std::string &HttpRequest::getCookie()
+{
+	return (this->_cookie);
 }
 
 int HttpRequest::get_bodyStatus()
