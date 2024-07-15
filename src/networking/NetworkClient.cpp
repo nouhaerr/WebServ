@@ -206,6 +206,11 @@ void NetworkClient::setResponse(std::string response) {
     this->_respSize = response.size();
 }
 
+void NetworkClient::set_Response(std::string response, size_t RespSize) {
+    this->_response = response;
+    this->_respSize = RespSize;
+}
+
 void    NetworkClient::setOpenFile(bool value) {
     this->_openFile = value;
 }

@@ -274,21 +274,22 @@ void	HttpResponse::_isFile()
 		{
 			size_t pos;
 			CGI cgi(_client, _filePath);
-			cgi.configureEnvironment(script_name);
-			cgi.executeScript();
-			if (cgi.responseStatus != 200)
+			cgi.set_environmentVariables(script_name);
+			cgi.RUN();
+			if (cgi.status_code != 200)
 			{  
-				std::cout << "ERROR CODE CGI " << cgi.responseStatus << std::endl;
-				buildResponse(cgi.responseStatus);
+				// std::cout << "ERROCODE CGI " << cgi.status_code << std::endl;
+				buildResponse(cgi.status_code);
 				return;
 			}
 			std::string cgi_headers = extractHeaders(_client.getResponse());
+			//std::cout << "Headers CGI: " << cgi_headers << "\n";
 			pos = cgi_headers.find("Set-Cookie");
 			if (pos != std::string::npos)
 			{
 				cgi_headers = cgi_headers.substr(pos);
 				pos = cgi_headers.find("\r\n");
-				this->cookies = cgi_headers.substr(0, pos); 
+				this->cookies = cgi_headers.substr(0, pos);
 			}
 			std::string response_cgi = _client.getResponse();
 			_contentType = findContentType(response_cgi);

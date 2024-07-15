@@ -53,6 +53,7 @@ class NetworkClient {
 		void setHeaderSent(bool value);
 		void setResponse(std::string response);
 		void setOpenFile(bool value);
+		void set_Response(std::string response, size_t RespSize);
 
 		HttpRequest& getRequest();
 		std::string getResponseHeader();
