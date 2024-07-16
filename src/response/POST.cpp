@@ -138,11 +138,6 @@ void HttpResponse::handlePostMethod() {
 
 void	HttpResponse::_postRequestFile() {
     if (_filePath.find(".py") != std::string::npos || _filePath.find(".php") != std::string::npos) {
-        // std::ifstream bodyfile(_bodyFileName.c_str());
-        // std::ostringstream filecontent;
-        // filecontent << bodyfile.rdbuf();
-        // _postBody += filecontent.str();
-        // bodyfile.close();
 
         CGI cgi(_client, _filePath);
         std::string script_name = Get_File_Name_From_URI();

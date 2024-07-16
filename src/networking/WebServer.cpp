@@ -163,9 +163,12 @@ void WebServer::processClientRequests(int fd) {
         }
     }
 	client.saveRequestData(bytes_received);
-	std::cout<< client.getRequest().getRequestData() << std::endl;
+	// std::cout<< client.getRequest().getRequestData() << std::endl;
     CheckRequestStatus(client);
     if (client.getRequest().get_requestStatus() == HttpRequest::REQUEST_READY) {
+        std::cout << "Meth: " << client.getRequest().getMethod() <<  "\n";
+    client.getRequest().printHeaders();
+    std::cout << "\n";
         // std::cout << "size of body " << client.getRequest().getBodysize();
     //     std::string hostHeader = client.getRequest().getHeader("Host");
     //     hostHeader = trimm(hostHeader);
