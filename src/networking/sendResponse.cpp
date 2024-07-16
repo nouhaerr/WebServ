@@ -61,11 +61,11 @@ void WebServer::sendResponse(HttpRequest &req, NetworkClient &client)
 	{
         client.setResponse(client.getResponseHeader());
         client.setHeaderSent(true);
-       std::cout << client.getResponse();
+        std::cout << client.getResponse();
     }
 	else 
 	{
-        if (!client.getResponseBody().empty()) 
+        if (!client.getResponseBody().empty())
 		{
             char buffer[1024];
             if (resp.isText() == true) {
@@ -110,11 +110,8 @@ void WebServer::sendResponse(HttpRequest &req, NetworkClient &client)
         }
     }
 
-    // std::cout << "Outside SockCl: " << client.fetchConnectionSocket() << "\n";
     ssize_t bytesSent = send(client.fetchConnectionSocket(), client.getResponse().c_str(), client.getResponse().length(), 0);
-    // std::cout << "BytesSent: " << bytesSent << "\n";
     if (bytesSent <= 0) {
-        // std::remove(req.get_bodyFileName().c_str());
         closeClient(client.fetchConnectionSocket());
     }
 }

@@ -1,4 +1,4 @@
-#!/Users/user/Desktop/php-cgi
+#!/usr/bin/php-cgi
 <?php
 $cookie_name = "user";
 $cookie_value = "John Doe";

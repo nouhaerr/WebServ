@@ -200,6 +200,7 @@ std::string	HttpResponse::createResponseHeader(int errCode, std::string flag) {
 		else {
 			std::stringstream sse;
             findStatusCode(errCode);
+            sse << "<!DOCTYPE html>";
             sse << "<html>";
             sse << "<head><title>" << errCode << "</title></head>";
             sse << "<body>";
@@ -349,7 +350,7 @@ std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
                 {
                     // std::cout << "ma fhamtch1\n";
                     std::string hostt = _serv.getHost() + ":" + toString(_serv.getPort());
-                    std::string dirdir = _location.getLocationName().empty() ? findDirname(_filePath, _root) + "/" : _location.getLocationName() + findDirname(_filePath, _root) + "/";
+                    std::string dirdir = _location.getLocationName().empty() ? findDirName(_filePath, _root) + "/" : _location.getLocationName() + findDirName(_filePath, _root) + "/";
                     // std::cout << _filePath << " lastdir: " << dirdir<< "\n";
                     _redirection = "http://" + hostt + dirdir;
                     return _filePath;
@@ -381,7 +382,7 @@ std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
         {
             // std::cout << "ma fhamtch2\n";
             std::string hostt = _serv.getHost() + ":" + toString(_serv.getPort());
-            std::string dirdir = _location.getLocationName().empty() ? findDirname(_filePath, _root) + "/" : _location.getLocationName() + findDirname(_filePath, _root) + "/";
+            std::string dirdir = _location.getLocationName().empty() ? findDirName(_filePath, _root) + "/" : _location.getLocationName() + findDirName(_filePath, _root) + "/";
             // std::cout << _filePath << " lastdir: " << dirdir<< "\n";
             _redirection = "http://" + hostt + dirdir;
             return _filePath;

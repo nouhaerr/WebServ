@@ -219,7 +219,6 @@ bool    NetworkClient::getOpenFile() {
     return this->_openFile;
 }
 
-
 void NetworkClient::openFileForReading() {
     _file.open(getResponseBody().c_str(), std::ios::in | std::ios::binary);
     setOpenFile(_file.is_open());

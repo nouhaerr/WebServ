@@ -3,7 +3,7 @@
 bool	HttpResponse::_isSupportedUploadPath() {
     // Find upload path logic
 	if (_uploadPath.empty()) {
-		buildResponse(405);
+		// buildResponse(404);
 		return 0;
 	}
     return 1;
@@ -17,7 +17,7 @@ void	HttpResponse::_createFile(std::string &filename) {
         file.close();
 		this->_errCode = 201;
 		std::string hostt = _serv.getHost() + ":" + toString(_serv.getPort());
-		std::string dirdir = findDirname(_uploadPath, _root) + "/";
+		std::string dirdir = findDirName(_uploadPath, _root) + "/";
 		// std::cout << "dir " << dirdir << "\n";
 		_headers["Location"] = "http://" + hostt + dirdir + filename;
 		buildResponse(201);
@@ -184,7 +184,7 @@ void	HttpResponse::isUrihasSlashInTHeEnd() {
 	if ((_root[_root.size() - 1]) != '/' && _client.getRequest().getUri()[urisize - 1] != '/')
 	{
 		std::string hostt = _serv.getHost() + ":" + toString(_serv.getPort());
-        std::string dirdir = _location.getLocationName().empty() ? findDirname(_filePath, _root) + "/" : _location.getLocationName() + findDirname(_filePath, _root) + "/";
+        std::string dirdir = _location.getLocationName().empty() ? findDirName(_filePath, _root) + "/" : _location.getLocationName() + findDirName(_filePath, _root) + "/";
         // std::cout << _filePath << " lastdir: " << dirdir<< "\n";
        _redirection = "http://" + hostt + dirdir;
 	   std::string header = createResponseHeader(301, "Default");

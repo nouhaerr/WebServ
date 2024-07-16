@@ -1,4 +1,4 @@
-#!/Users/user/Desktop/php-cgi
+#!/usr/bin/php-cgi
 <?php
 if (isset($_POST["sub"])) {
     if (isset($_POST["name"])) {
@@ -11,6 +11,7 @@ if (isset($_POST["sub"])) {
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>

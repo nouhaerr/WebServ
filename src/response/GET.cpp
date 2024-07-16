@@ -14,7 +14,6 @@ std::string HttpResponse::_constructPath(const std::string& requestPath, const s
         path += "/" + index;
     }
     std::string filePath = root + path;
-		// std::cout << root << " + " << path << " =>  " << filePath << "\n";
     return filePath;
 }
 
@@ -80,7 +79,7 @@ bool HttpResponse::isDirHasIndexFiles() {
 //     return lastDirName;
 // }
 
-std::string findDirname(const std::string& path, const std::string& root)
+std::string findDirName(const std::string& path, const std::string& root)
 {
 	// Ensure root ends with '/'
     std::string adjustedRoot = root;
@@ -115,7 +114,7 @@ void	HttpResponse::_getAutoIndex() {
     	if (dir == NULL) {
         	return;
     	}
-		std::string directory = _location.getLocationName().empty() ? findDirname(_filePath, _root) + "/" : _location.getLocationName() + findDirname(_filePath, _root) + "/";
+		std::string directory = _location.getLocationName().empty() ? findDirName(_filePath, _root) + "/" : _location.getLocationName() + findDirName(_filePath, _root) + "/";
 		// _findDirectoryName();
 		// std::cout << directory << "\n";
 

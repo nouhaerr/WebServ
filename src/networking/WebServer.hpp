@@ -10,9 +10,7 @@
 #include "../parsing/ConfigServer.hpp"
 #include "HttpRequest.hpp"
 #include "../response/HttpResponse.hpp"
-// #include <sys/sendfile.h>
 
-// static unsigned long long   varst;
 
 class RequestError {
 	private:
@@ -27,39 +25,34 @@ class RequestError {
 };
 
 class WebServer {
-public:
-    WebServer(const Config& config);
-    ~WebServer();
+	public:
+	    WebServer(const Config& config);
+	    ~WebServer();
 
-    void run();
-    NetworkClient& GetRightClient(int fd);
+	    void			run();
+	    NetworkClient&	GetRightClient(int fd);
+	    void			CheckRequestStatus(NetworkClient &client);
 
-    void CheckRequestStatus(NetworkClient &client);
-    void sendVideoInChunks(NetworkClient& client, const std::string& filePath);
-    std::streamsize   varRead;
-
-private:
-    void setupServerSockets();
-    void acceptNewClient(int serverSocket);
-    void closeClient(int clientSocket);
-    void processClientRequests(int clientSocket);
-    void sendDataToClient(NetworkClient& client);
-    NetworkClient* findClientBySocket(int socket);
-    const ConfigServer& matchServerByFd(int fd);
-    const ConfigServer& matchServerByName(const std::string& host, int port);
-    void readFromClient(int clientSocket, std::string &requestString);
-    void    sendResponse(HttpRequest &req, NetworkClient &client);
-    int sendResponseBody(NetworkClient &client);
+	private:
+		void setupServerSockets();
+		void acceptNewClient(int serverSocket);
+		void closeClient(int clientSocket);
+		void processClientRequests(int clientSocket);
+		void sendDataToClient(NetworkClient& client);
+		NetworkClient* findClientBySocket(int socket);
+		const ConfigServer& matchServerByFd(int fd);
+		const ConfigServer& matchServerByName(const std::string& host, int port);
+		void	sendResponse(HttpRequest &req, NetworkClient &client);
+		void	addSocketFd(int fd);
 
 
-
-    fd_set masterSet, readSet, writeSet;
-    int highestFd;
-    std::vector<int> serverSockets;
-    std::map<int, NetworkClient> clients;
-    std::vector<ConfigServer>* serverConfigs;
-    std::map<int, std::string> clientRequests; // Stockage des requêtes par client
-    int currentClientIndex;
+		fd_set masterSet, readSet, writeSet;
+		int					highestFd;
+		std::vector<int>	serverSockets;
+		std::map<int, NetworkClient>	clients;
+		std::vector<ConfigServer>*		serverConfigs;
+		std::map<int, std::string>		clientRequests; // Stockage des requêtes par client
+		int currentClientIndex;
 };
 #endif
 

@@ -108,10 +108,10 @@ std::vector<std::string>	splitArgs(std::string val) {
 size_t	parseMaxBodySize(char &unit, std::string& bodySize, size_t sizeEnd) {
 	size_t size;
 	if (std::isdigit(unit)) {
-		size = std::strtoll(bodySize.c_str(), NULL, 10);
+		size = std::strtol(bodySize.c_str(), NULL, 10);
 		unit = ' ';
 	} else
-		size = std::strtoll(bodySize.substr(0, sizeEnd).c_str(), NULL, 10);
+		size = std::strtol(bodySize.substr(0, sizeEnd).c_str(), NULL, 10);
 
 	switch (unit) {
 		case 'k':

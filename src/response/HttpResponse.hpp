@@ -94,6 +94,6 @@ class HttpResponse {
 
 std::string getContentType(std::string filename);
 std::string	getMimeTypes(std::string flag, std::string extension);
-std::string findDirname(const std::string& path, const std::string& root);
+std::string findDirName(const std::string& path, const std::string& root);
 
 #endif
