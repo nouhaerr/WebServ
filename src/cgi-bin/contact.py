@@ -6,6 +6,7 @@ import sys
 
 def handle_error():
     print("Content-type: text/html\r\n\r\n")
+    print("<!DOCTYPE html>")
     print("<html>")
     print("<head>")
     print("<title>Error</title>")
@@ -38,6 +39,7 @@ try:
     subject = form.getvalue('subject', 'N/A')
     message = form.getvalue('message', 'N/A')
 
+    print("<!DOCTYPE html>")
     print("<html>")
     print("<head>")
     print("<title>Form Result</title>")

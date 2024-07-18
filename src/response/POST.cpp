@@ -155,13 +155,11 @@ void	HttpResponse::_postRequestFile() {
         if (pos != std::string::npos) {
             cgi_headers = cgi_headers.substr(pos);
             pos = cgi_headers.find("\r\n");
-            this->cookies = cgi_headers.substr(0, pos); 
+            this->_cookie = cgi_headers.substr(0, pos); // Stocker le cookie extrait
         }
-
         std::string response_cgi = _client.getResponse();
         _contentType = findContentTypePOST(response_cgi);
         _client.setResponseBody(extractBodyPOST(_client.getResponse()));
-
         std::stringstream ss;
         ss << _client.getResponseBody().length();
         std::string body_length = ss.str();

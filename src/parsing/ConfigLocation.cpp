@@ -5,7 +5,7 @@ ConfigLocation::ConfigLocation() :
 	_root(""),
 	_index(),
 	_methods(),
-	_maxBodySize(100000),
+	_maxBodySize(1000000),
 	_autoindex(false),
 	_upload(""),
 	_errorPage(),

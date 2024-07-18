@@ -10,10 +10,11 @@ std::string HttpResponse::_constructPath(const std::string& requestPath, const s
         path += index;
     }
     // Check if there is no extension by finding the last dot in the string
-    else if (path.find_last_of('.') == std::string::npos) {
+    std::string filePath = root + path;
+    if (isDirectory(filePath.c_str())) {
         path += "/" + index;
     }
-    std::string filePath = root + path;
+	std::cout << path << "\n"; 
     return filePath;
 }
 
@@ -284,12 +285,11 @@ void	HttpResponse::_isFile()
 			std::string cgi_headers = extractHeaders(_client.getResponse());
 			//std::cout << "Headers CGI: " << cgi_headers << "\n";
 			pos = cgi_headers.find("Set-Cookie");
-			if (pos != std::string::npos)
-			{
-				cgi_headers = cgi_headers.substr(pos);
-				pos = cgi_headers.find("\r\n");
-				this->cookies = cgi_headers.substr(0, pos);
-			}
+            if (pos != std::string::npos) {
+                cgi_headers = cgi_headers.substr(pos);
+                pos = cgi_headers.find("\r\n");
+                this->_cookie = cgi_headers.substr(0, pos);
+            }
 			std::string response_cgi = _client.getResponse();
 			_contentType = findContentType(response_cgi);
 			_client.setResponseBody(extractBody(_client.getResponse()));

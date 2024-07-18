@@ -113,6 +113,9 @@ void	HttpResponse::findStatusCode(int code) {
         case 201:
             _statusCode = "201 Created";
             break;
+        case 204:
+            _statusCode = "204 No Content";
+            break;
         case 400:
             _statusCode = "400 Bad Request";
             break;
@@ -145,6 +148,9 @@ void	HttpResponse::findStatusCode(int code) {
             break;
         case 501:
             _statusCode = "501 Not Implemented";
+            break;
+        case 502:
+            _statusCode = "502 Bad Gateway";
             break;
         case 504:
             _statusCode = "504 Gateway Timeout";
@@ -210,6 +216,7 @@ std::string	HttpResponse::createResponseHeader(int errCode, std::string flag) {
             _errorPath = sse.str();
     		_fileSize = _errorPath.size();
 			_headers["Content-Length"] = toString(_fileSize);
+            std::cout << "dkhaaaaaal\n";
             _isText = true;
         }
     	_headers["Content-Type"] = "text/html";
@@ -233,7 +240,7 @@ std::string	HttpResponse::createResponseHeader(int errCode, std::string flag) {
         _headers["Content-Type"] = _contentType;
 	}
     if (!_cookie.empty()) {
-        _headers["Set-Cookie"] = "";
+        _headers["Set-Cookie"] = _cookie;
     }
 	_headers["Date"] = generateDate();
 	std::stringstream ss;
@@ -259,7 +266,7 @@ void	HttpResponse::buildResponse(int errCode) {
     std::string header = createResponseHeader(_errCode, "Default");
 
     _client.setResponseHeader(header);
-    std::cout << _errorPath << "\n";
+    // std::cout << _errorPath << "\n";
     _client.setResponseBody(_errorPath);
 }
 
@@ -326,6 +333,7 @@ std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
 	{
             _root = _location.getRoot();
             _maxBodySize = _serv.getMaxBodySize();
+            std::cout << "maxBodySIze in location: " << _location.getMaxBodySize() << "\n";
             _idxFiles = _location.getIndex();
             _autoindex =_location.getAutoIndex();
             _errorPage =_location.getErrorPage();
