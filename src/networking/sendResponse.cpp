@@ -57,7 +57,7 @@ void WebServer::sendResponse(HttpRequest &req, NetworkClient &client)
     HttpResponse resp(client);
     resp.generateResponse(req);
 
-    if (!client.getHeaderSent()) 
+    if (!client.getHeaderSent())
 	{
         client.setResponse(client.getResponseHeader());
         client.setHeaderSent(true);
@@ -69,15 +69,16 @@ void WebServer::sendResponse(HttpRequest &req, NetworkClient &client)
 		{
             char buffer[1024];
             if (resp.isText() == true) {
-                //std::cout << "ewew"<<client.getResponseBody() << std::endl;
+                std::cout << "ewew"<< client.getResponseBody() << std::endl;
                 ssize_t bytesSent = send(client.fetchConnectionSocket(), client.getResponseBody().c_str(), client.getResponseBody().length(), 0);
-				if (bytesSent < 0 || bytesSent == (int)client.getResponseBody().length()) {
+				std::cout << bytesSent << "\n";
+                if (bytesSent < 0 || bytesSent == (int)client.getResponseBody().length()) {
                     std::cout << "salina\n";
                     std::remove(req.get_bodyFileName().c_str());
 					closeClient(client.fetchConnectionSocket());
 				}
-				return;
-            } 
+				return ;
+            }
             else if (!client.getOpenFile())
 			{
                 // client._file.open(client.getResponseBody().c_str(), std::ios::in | std::ios::binary);

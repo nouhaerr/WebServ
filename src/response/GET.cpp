@@ -3,18 +3,23 @@
 std::string HttpResponse::_constructPath(const std::string& requestPath, const std::string &root, const std::string &index) {
 	std::string path = requestPath;
 
+	std::cout << path << "\n";
     if (path.empty() || path[0] != '/') {
         path = "/" + path;
     }
 	if (!path.empty() && path[path.length() - 1] == '/') {
         path += index;
     }
-    // Check if there is no extension by finding the last dot in the string
-    std::string filePath = root + path;
-    if (isDirectory(filePath.c_str())) {
+	// Check if there is no extension by finding the last dot in the string
+    else if (path.find_last_of('.') == std::string::npos && isDirectory((root + path).c_str())) {
+		std::cout << "makaynach noqta\n";
         path += "/" + index;
     }
-	std::cout << path << "\n"; 
+    std::string filePath = root + path;
+	std::cout << "flakhar: " << path << "\n";
+    // if (isDirectory(filePath.c_str())) {
+    //     path += "/" + index;
+    // }
     return filePath;
 }
 

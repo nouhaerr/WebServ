@@ -98,6 +98,7 @@ void	HttpResponse::generateResponse(HttpRequest &req) {
 		return ;
 	}
 	if (req.getMethod() == "DELETE") {
+        std::cout << "PROCESS DELETE \n";
 		handleDeleteMethod(); //where u put the Delete method
 		return ;
 	}
@@ -216,7 +217,7 @@ std::string	HttpResponse::createResponseHeader(int errCode, std::string flag) {
             _errorPath = sse.str();
     		_fileSize = _errorPath.size();
 			_headers["Content-Length"] = toString(_fileSize);
-            std::cout << "dkhaaaaaal\n";
+            // std::cout << "dkhaaaaaal\n";
             _isText = true;
         }
     	_headers["Content-Type"] = "text/html";
@@ -225,6 +226,9 @@ std::string	HttpResponse::createResponseHeader(int errCode, std::string flag) {
             _errorPath = "";
 			_headers["Content-Length"] = "0";
             // _isText = false;
+        } else if (_errCode == 204) {
+            _errorPath = "";
+			_headers["Content-Length"] = "0";
         }
 	}
     else {

@@ -35,11 +35,14 @@ void HttpResponse::handleDeleteMethod()
 
     if (checkFilePermission(filePath)) 
     {
-        if (unlink(filePath.c_str()) == 0) 
+        if (unlink(filePath.c_str()) == 0) {
+            _errCode = 204;
             buildResponse(204);
+            return ;
+        }
         else 
             buildResponse(403);
-    } 
+    }
     else
         buildResponse(403);
 }
