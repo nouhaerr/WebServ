@@ -3,7 +3,7 @@
 std::string HttpResponse::_constructPath(const std::string& requestPath, const std::string &root, const std::string &index) {
 	std::string path = requestPath;
 
-	std::cout << path << "\n";
+	// std::cout << path << "\n";
     if (path.empty() || path[0] != '/') {
         path = "/" + path;
     }
@@ -16,7 +16,7 @@ std::string HttpResponse::_constructPath(const std::string& requestPath, const s
         path += "/" + index;
     }
     std::string filePath = root + path;
-	std::cout << "flakhar: " << path << "\n";
+	// std::cout << "Construct: " << filePath << "\n";
     // if (isDirectory(filePath.c_str())) {
     //     path += "/" + index;
     // }
@@ -293,8 +293,9 @@ void	HttpResponse::_isFile()
             if (pos != std::string::npos) {
                 cgi_headers = cgi_headers.substr(pos);
                 pos = cgi_headers.find("\r\n");
-                this->_cookie = cgi_headers.substr(0, pos);
+                this->_respCookie = cgi_headers.substr(0, pos);
             }
+			this->_respCookie = this->_respCookie.substr(12);
 			std::string response_cgi = _client.getResponse();
 			_contentType = findContentType(response_cgi);
 			_client.setResponseBody(extractBody(_client.getResponse()));

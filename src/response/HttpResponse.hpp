@@ -78,6 +78,7 @@ class HttpResponse {
 		bool	_slashSetted;
 		std::map<std::string, std::string>	_interpreter;
 		std::string	_cookie;
+		std::string _respCookie;
 
 		void	_handleDefaultErrors();
 		bool	_isSupportedMethod(std::string meth);

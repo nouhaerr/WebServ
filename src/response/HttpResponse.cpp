@@ -24,7 +24,8 @@ HttpResponse::HttpResponse(NetworkClient &client) :
     _reqHeader(), 
     _isText(false),
     _slashSetted(false),
-    _cookie("")
+    _cookie(""),
+	_respCookie("")
     {}
 
 HttpResponse::~HttpResponse(){}
@@ -60,14 +61,49 @@ void	HttpResponse::_handleDefaultErrors() {
 	}
 }
 
+std::string	resolvePath(std::string& uri) {
+	char resolved_path[PATH_MAX];
+
+    // realpath resolves the absolute path and canonicalizes it
+    if (realpath(uri.c_str(), resolved_path) == NULL) {
+         std::cerr << "Error resolving path: " << uri << " - " << strerror(errno) << std::endl;
+        return "";
+    }
+	std::cout << "resolvedPath: " << resolved_path << "\n";
+    return std::string(resolved_path);
+}
+
+bool isPathValid(const std::string &resolvedPath, std::string &rootDirectory) {
+   std::string resolvedRoot = resolvePath(rootDirectory);
+
+    if (resolvedRoot.empty()) {
+        std::cerr << "Error resolving root directory: " << rootDirectory << std::endl;
+        return false;
+    }
+
+    // Ensure the resolved path starts with the resolved root path
+    return resolvedPath.find(resolvedRoot) == 0;
+}
+
+
 void	HttpResponse::generateResponse(HttpRequest &req) {
 	_errCode = req.getErrorCode();
     _cookie = req.getCookie();
+    _reqHeader = req.getHeaderFields();
 	// std::cout << "errcode result from req:" << _errCode << "\n";
-	// std::cout << "filePath loli: "<< _filePath << "\n";
 	_uri = getRequestedResource(req);
 	_filePath = deleteRedundantSlash(_uri);
-    _reqHeader = req.getHeaderFields();
+	std::cout << "filePath: "<< _filePath << "\n";
+	std::string path = resolvePath(_filePath);
+	if (!path.empty())
+	{
+		std::cout << "root: "<< _root << "\n";
+		if (!isPathValid(path, _root)) {
+			buildResponse(403);
+			return;
+		}
+		// _filePath = path;
+	}
 	if (_filePath.empty()) {
 		buildResponse(404);
 		return;
@@ -244,7 +280,7 @@ std::string	HttpResponse::createResponseHeader(int errCode, std::string flag) {
         _headers["Content-Type"] = _contentType;
 	}
     if (!_cookie.empty()) {
-        _headers["Set-Cookie"] = _cookie;
+        _headers["Set-Cookie"] = _respCookie;
     }
 	_headers["Date"] = generateDate();
 	std::stringstream ss;
