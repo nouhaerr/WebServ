@@ -274,9 +274,6 @@ bool HttpRequest::setBody(std::string &body)
 		this->bodyFileName = "/tmp/" + Generate_Random_File_Name();
 	if (this->body_status == HttpRequest::CHUNKED)
 	{
-			//std::cout << body << std::endl;
-			//std::cout << "************************" << std::endl;
-
 		_getChunkedBody(body);
 		if (this->request_status == HttpRequest::REQUEST_READY)
 			return true;
@@ -286,10 +283,14 @@ bool HttpRequest::setBody(std::string &body)
 		std::map<std::string, std::string>::iterator it_chunk = this->_headerFields.find("Content-Length");
 		size_t content_length = atoi(it_chunk->second.c_str());
 		size_t bytes_left = content_length - (size_t)this->_bodySize;
+		if (content_length < body.size()) {
+			this->_errorCode = 400;
+			return true;
+		}
 		std::fstream bodyDataFile;
 		bodyDataFile.open(this->bodyFileName.c_str(), std::fstream::app | std::fstream::out | std::fstream::in);
 		if (!bodyDataFile.is_open()) {
-			this->_errorCode = 500; //internalServer error
+			this->_errorCode = 500; //internal Server error
 			return true;
 		}
 		if (bytes_left > 0 && body.size() <= bytes_left)
