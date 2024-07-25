@@ -282,7 +282,7 @@ bool HttpRequest::setBody(std::string &body)
 	{
 		std::map<std::string, std::string>::iterator it_chunk = this->_headerFields.find("Content-Length");
 		size_t content_length = atoi(it_chunk->second.c_str());
-		if (content_length < body.size() || content_length < 0) {
+		if (content_length < body.size()) {
 			this->_errorCode = 400;
 			return true;
 		}
@@ -292,26 +292,28 @@ bool HttpRequest::setBody(std::string &body)
 			this->_errorCode = 500; //internal Server error
 			return true;
 		}
+		std::cout << "bodySize: " << this->_bodySize << "\n";
 		size_t bytes_left = content_length - body.size();
-		// if (bytes_left > 0 && body.size() <= bytes_left)
-		// {
-		// 	bodyDataFile << body;
-		// 	this->_bodySize += body.size();
-		// 	body = "";
-		// }
-    	std::cout << "Content-Length: " << content_length << "\n";
-    	std::cout << "Bytes left: " << bytes_left << "\n";
-	
     	size_t write_size = std::min(body.size(), content_length); // Determine how much to write
-    	std::cout << "Write: " << write_size << "\n";
+		if (bytes_left > 0 && body.size() <= bytes_left)
+		{
+			bodyDataFile << body;
+			// this->_bodySize = 0;
+			this->_bodySize += body.size();
+			body = "";
+		}
+    	// std::cout << "Content-Length: " << content_length << "\n";
+    	// std::cout << "Bytes left: " << bytes_left << "\n";
 	
-    	bodyDataFile.write(body.c_str(), write_size); // Write up to write_size bytes
-    	this->_bodySize += write_size;
+    	// std::cout << "Write: " << write_size << "\n";
+	
+    	// bodyDataFile.write(body.c_str(), write_size); // Write up to write_size bytes
+    	// this->_bodySize += write_size;
 	
     	bodyDataFile.close();
-		// bodyDataFile.close();
+		// bodyDataFile.close();  || this->_bodySize == write_size
 		std::cout << "qraya salat\n";
-		if (this->_bodySize == content_length || this->_bodySize == write_size)
+		if (this->_bodySize == content_length)
 			return true;
 	}
 	return false;
