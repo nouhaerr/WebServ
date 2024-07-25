@@ -294,7 +294,7 @@ bool HttpRequest::setBody(std::string &body)
 		}
 		std::cout << "bodySize: " << this->_bodySize << "\n";
 		size_t bytes_left = content_length - body.size();
-    	size_t write_size = std::min(body.size(), content_length); // Determine how much to write
+    	// size_t write_size = std::min(body.size(), content_length); // Determine how much to write
 		if (bytes_left > 0 && body.size() <= bytes_left)
 		{
 			bodyDataFile << body;
