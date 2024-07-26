@@ -94,16 +94,16 @@ void	HttpResponse::generateResponse(HttpRequest &req) {
 	_uri = getRequestedResource(req);
 	_filePath = deleteRedundantSlash(_uri);
 	std::cout << "filePath: "<< _filePath << "\n";
-	std::string path = resolvePath(_filePath);
-	if (!path.empty())
-	{
-		std::cout << "root: "<< _root << "\n";
-		if (!isPathValid(path, _root)) {
-			buildResponse(403);
-			return;
-		}
-		// _filePath = path;
-	}
+	// std::string path = resolvePath(_filePath);
+	// if (!path.empty())
+	// {
+	// 	std::cout << "root: "<< _root << "\n";
+	// 	if (!isPathValid(path, _root)) {
+	// 		buildResponse(403);
+	// 		return;
+	// 	}
+	// 	// _filePath = path;
+	// }
 	if (_filePath.empty()) {
 		buildResponse(404);
 		return;
