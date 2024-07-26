@@ -108,10 +108,10 @@ std::vector<std::string>	splitArgs(std::string val) {
 size_t	parseMaxBodySize(char &unit, std::string& bodySize, size_t sizeEnd) {
 	size_t size;
 	if (std::isdigit(unit)) {
-		size = std::strtoll(bodySize.c_str(), NULL, 10);
+		size = std::strtol(bodySize.c_str(), NULL, 10);
 		unit = ' ';
 	} else
-		size = std::strtoll(bodySize.substr(0, sizeEnd).c_str(), NULL, 10);
+		size = std::strtol(bodySize.substr(0, sizeEnd).c_str(), NULL, 10);
 
 	switch (unit) {
 		case 'k':
@@ -174,14 +174,8 @@ ConfigLocation	ConfigServer::parseLocation(std::vector<t_tokens> &tok, std::vect
 			loc.setRedirection(it->_value);
 			red++;
 		}
-		else if (it->_type == "fastcgi_pass") {
-			loc.setFastCgiPass(it->_value);
-		}
-		else if (it->_type == "include") {
-			loc.setInclude(it->_value);
-		}
-		else if (it->_type == "fastcgi_param") {
-			loc.setFastCgiParam(it->_value);
+		else if (it->_type == "interpreter") {
+			loc.setInterpreter(it->_value);
 		}
 		else if (it->_type.empty()){
 			it++;
@@ -203,12 +197,12 @@ ConfigLocation	ConfigServer::parseLocation(std::vector<t_tokens> &tok, std::vect
 		throw ConfigServerException("Error: Should have one autoindex parametre.");
 	else if (up > 1)
 		throw ConfigServerException("Error: Must have one uplod parametre.(Duplicate)");
-	else if (err > 1)
-		throw ConfigServerException("Error: Must set one error_page parametre.(Duplicate)");
 	else if (red > 1)
 		throw ConfigServerException("Error: Must have one return parametre.(Duplicate)");
 
 	if (it->_type != "}")
 		throw ConfigServerException("Error: expected '}' in the end of location directive.");
+	if (it->_value == "}")
+		throw ConfigServerException("Error: Unexpected token");
 	return (loc);
 }

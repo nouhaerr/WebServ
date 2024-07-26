@@ -9,7 +9,8 @@ HttpRequest::HttpRequest() :
 	request_status(HEADERS),
 	body_status(NONE),
 	_errorCode(0),
-	_bodySize(0) {}
+	_bodySize(0),
+	_cookie("") {}
 
 HttpRequest::HttpRequest(const HttpRequest &httprequest) :
 	_httpMethod(httprequest._httpMethod),
@@ -19,7 +20,8 @@ HttpRequest::HttpRequest(const HttpRequest &httprequest) :
 	bodyFileName(httprequest.bodyFileName),
 	queryString(httprequest.queryString),
 	_errorCode(httprequest._errorCode),
-	_bodySize(httprequest._bodySize) {}
+	_bodySize(httprequest._bodySize),
+	_cookie(httprequest._cookie) {}
 
 
 HttpRequest &HttpRequest::operator=(const HttpRequest &httprequest)
@@ -34,6 +36,7 @@ HttpRequest &HttpRequest::operator=(const HttpRequest &httprequest)
 		this->queryString = httprequest.queryString;
 		this->_errorCode = httprequest._errorCode;
 		this->_bodySize = httprequest._bodySize;
+		this->_cookie = httprequest._cookie;
 	}
 	return (*this);
 }
@@ -202,6 +205,9 @@ void HttpRequest::setHeaderField(std::string &headers)
 			key = header_line.substr(0, delim_pos);
 			value = header_line.substr(delim_pos + 1);
 			trim_front(value);
+			if (key == "Cookie") {
+				_cookie = value;
+			}
 			this->_headerFields.insert(std::pair<std::string, std::string>(key, value));
 		}
 	}
@@ -268,9 +274,6 @@ bool HttpRequest::setBody(std::string &body)
 		this->bodyFileName = "/tmp/" + Generate_Random_File_Name();
 	if (this->body_status == HttpRequest::CHUNKED)
 	{
-			//std::cout << body << std::endl;
-			//std::cout << "************************" << std::endl;
-
 		_getChunkedBody(body);
 		if (this->request_status == HttpRequest::REQUEST_READY)
 			return true;
@@ -279,22 +282,44 @@ bool HttpRequest::setBody(std::string &body)
 	{
 		std::map<std::string, std::string>::iterator it_chunk = this->_headerFields.find("Content-Length");
 		size_t content_length = atoi(it_chunk->second.c_str());
-		size_t bytes_left = content_length - (size_t)this->_bodySize;
+		if (content_length < body.size()) {
+			this->_errorCode = 400;
+			return true;
+		}
+		std::string end_marker("\r\n\r\n");
 		std::fstream bodyDataFile;
 		bodyDataFile.open(this->bodyFileName.c_str(), std::fstream::app | std::fstream::out | std::fstream::in);
 		if (!bodyDataFile.is_open()) {
-			this->_errorCode = 500; //internalSeral error
+			this->_errorCode = 500; //internal Server error
 			return true;
 		}
+		std::cout << "bodySize: " << this->_bodySize << "\n";
+		size_t bytes_left = content_length - body.size();
+		std::cout << "==> " << body.size() << "\n";
+		// contentlength = 1000;
+		// _bodySize = 99;
+    	// size_t write_size = std::min(body.size(), content_length); // Determine how much to write
 		if (bytes_left > 0 && body.size() <= bytes_left)
 		{
 			bodyDataFile << body;
+			// this->_bodySize = 0;
 			this->_bodySize += body.size();
 			body = "";
 		}
-		bodyDataFile.close();
+	
+    	bodyDataFile.close();
+		std::cout << "qraya salat\n";
+		std::cout << "bodySize: " << _bodySize << "\n";
 		if (this->_bodySize == content_length)
 			return true;
+		// bodyDataFile.close();  || this->_bodySize == write_size
+    	// std::cout << "Content-Length: " << content_length << "\n";
+    	// std::cout << "Bytes left: " << bytes_left << "\n";
+	
+    	// std::cout << "Write: " << write_size << "\n";
+	
+    	// bodyDataFile.write(body.c_str(), write_size); // Write up to write_size bytes
+    	// this->_bodySize += write_size;
 	}
 	return false;
 }
@@ -409,6 +434,11 @@ std::string &HttpRequest::get_queryString() {
 std::string &HttpRequest::getRequestData()
 {
 	return (this->requestData);
+}
+
+std::string &HttpRequest::getCookie()
+{
+	return (this->_cookie);
 }
 
 int HttpRequest::get_bodyStatus()

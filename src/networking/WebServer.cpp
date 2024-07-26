@@ -14,8 +14,9 @@ std::string trimm(const std::string& str)
 NetworkClient& WebServer::GetRightClient(int fd) 
 {
     std::map<int, NetworkClient>::iterator it = this->clients.find(fd);
-    if (it != this->clients.end())
+    if (it != this->clients.end()) {
         return it->second;
+    }
     else
         throw std::runtime_error("BUG: Potential Server error");
 }
@@ -62,9 +63,15 @@ void setSocketNonBlocking(int socket_fd)
     // std::cout << "Socket " << socket_fd << " set to non-blocking mode." << std::endl;
 }
 
+void WebServer::addSocketFd(int fd)
+{
+	this->serverSockets.push_back(fd);
+	FD_SET(fd, &(this->readSet));
+}
+
 void WebServer::setupServerSockets() 
 {
-    for (size_t i = 0; i < serverConfigs->size(); ++i) 
+     for (size_t i = 0; i < serverConfigs->size(); ++i) 
     {
         int sockfd = socket(AF_INET, SOCK_STREAM, 0);
         if (sockfd < 0) 
@@ -72,7 +79,6 @@ void WebServer::setupServerSockets()
             std::cerr << "Error opening socket for server " << (*serverConfigs)[i].getServerName() << ": " << strerror(errno) << std::endl;
             continue;
         }
-
         int optval = 1;
         if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) < 0) 
         {
@@ -93,22 +99,19 @@ void WebServer::setupServerSockets()
             close(sockfd);
             continue;
         }
-
-        if (listen(sockfd, 10) < 0) 
+        setSocketNonBlocking(sockfd);
+        if (listen(sockfd, SOMAXCONN) < 0) 
         {
             std::cerr << "Error listening on socket for server " << (*serverConfigs)[i].getServerName() << ": " << strerror(errno) << std::endl;
             close(sockfd);
             continue;
         }
-
-        setSocketNonBlocking(sockfd);
-
-        FD_SET(sockfd, &this->readSet);
-        //you should add the one of write
+        addSocketFd(sockfd);
         FD_SET(sockfd, &this->masterSet);
+        //you should add the one of write
         if (sockfd > highestFd) 
-            highestFd = sockfd;
-        serverSockets.push_back(sockfd);
+            this->highestFd = sockfd;
+       
         (*serverConfigs)[i].setSocket(sockfd);
         
        std::cout << "Server " << (*serverConfigs)[i].getServerName() 
@@ -160,9 +163,12 @@ void WebServer::processClientRequests(int fd) {
         }
     }
 	client.saveRequestData(bytes_received);
-	//std::cout<< client.getRequest().getRequestData() << std::endl;
+	std::cout<< client.getRequest().getRequestData() << std::endl;
     CheckRequestStatus(client);
     if (client.getRequest().get_requestStatus() == HttpRequest::REQUEST_READY) {
+    //     std::cout << "Meth: " << client.getRequest().getMethod() <<  "\n";
+    // client.getRequest().printHeaders();
+    // std::cout << "\n";
         // std::cout << "size of body " << client.getRequest().getBodysize();
     //     std::string hostHeader = client.getRequest().getHeader("Host");
     //     hostHeader = trimm(hostHeader);
@@ -191,29 +197,26 @@ void WebServer::run() {
     while (true) {
         readcpy = this->readSet;
         writecpy = this->writeSet;
+        this->highestFd = *std::max_element(this->serverSockets.begin(), this->serverSockets.end());
+        // std::cout << "this->highestFd " << this->highestFd << std::endl;
+        int maxFd = this->highestFd;
+        // std::cout << "this->highestFd2 " << maxFd<< std::endl;
         signal(SIGPIPE, SIG_IGN);
-        if (select(this->highestFd + 1, &readcpy, &writecpy, NULL, NULL) < 0) {
+        if (select(maxFd + 1, &readcpy, &writecpy, NULL, NULL) < 0) {
             std::cerr << "Error in select()." << std::endl;
         }
-        for (int i = 3; i <= this->highestFd; i++) { 
-            // try {
+        for (int i = 3; i <= maxFd; i++) {
                 if (FD_ISSET(i, &writecpy)) {
                     NetworkClient &client = GetRightClient(i);
                     sendDataToClient(client);
                 }
                 else if (FD_ISSET(i, &readcpy)) {
-                    if (std::find(serverSockets.begin(), serverSockets.end(), i) != serverSockets.end()) {
+                    if (FD_ISSET(i , &(this->masterSet))) {
                         acceptNewClient(i);                                               
                     } else {
                         processClientRequests(i);
                     }
                 }
-            // } catch (const RequestError &error)
-		    // {
-			//     FD_CLR(i, &this->readSet);
-			//     FD_SET(i, &this->writeSet);
-			//     close(i);
-		    // }
         }   
     }
 }
@@ -245,9 +248,10 @@ void WebServer::acceptNewClient(int serverSocket) {
     NetworkClient newClient(clientSocket, serverSocket);
     newClient.setServer(associatedServer);
     clients[clientSocket] = newClient;
-    FD_SET(clientSocket, &this->readSet);
-    if (clientSocket > highestFd)
-        highestFd = clientSocket;
+    addSocketFd(clientSocket);
+    // FD_SET(clientSocket, &this->readSet);
+    // if (clientSocket > highestFd)
+    //     highestFd = clientSocket;
 }
 
 

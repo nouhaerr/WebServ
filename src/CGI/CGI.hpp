@@ -6,36 +6,35 @@
 #include <cstring>
 #include <sys/wait.h>
 #include "../networking/NetworkClient.hpp"
+#include "../response/HttpResponse.hpp"
 #include <signal.h>
 #include <unistd.h>
 
 class NetworkClient;
 class HttpRequest;
+class HttpResponse;
+
 
 class CGI
 {
-	char** envData;
+	char** env;
 	NetworkClient &client;
+	std::string _filePath;
 
 	public:
-	int responseStatus;
-	CGI(NetworkClient&);
+	int status_code;
+	CGI(NetworkClient&, std::string& );
 	CGI(const CGI&);
 	CGI& operator=(const CGI&);
 	~CGI();
 
 	/*setters*/
-	void configureEnvironment(std::string& script_name);
-	void initializeEnvData(const std::vector<std::string>& envs);
+	void set_environmentVariables(std::string&);
 
 	/*getters*/
 	char** get_CGIenvironmentVariables();
 
-	void executeScript();
-	bool initializePipes(int pipeIn[2], int pipeOut[2]);
-	void executeChildProcess(const char* scriptPath, char* args[], int pipeIn[2], int pipeOut[2]);
-	void handleParentProcess(pid_t processId, int pipeIn[2], int pipeOut[2], const std::string& scriptArgument);
+	void RUN();
 };
 
 #endif
-

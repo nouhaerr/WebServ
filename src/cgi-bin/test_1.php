@@ -1,4 +1,4 @@
-#!/Users/user/Desktop/php-cgi
+#!/usr/bin/php-cgi
 <?php $a = "alo"; ?>
 <!DOCTYPE html>
 <html lang="en">

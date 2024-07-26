@@ -166,6 +166,11 @@ ConfigServer& NetworkClient::getServer()
     return this->server;
 }
 
+void    NetworkClient::saveRequestData(size_t nb_bytes) {
+	std::string str_bytes(this->_buffer, nb_bytes);
+	this->_req.setRequestData(str_bytes);
+}
+
 void    NetworkClient::setRequest(HttpRequest req) {
     this->_req = req;
 }
@@ -203,6 +208,12 @@ std::string NetworkClient::getResponse() {
 
 void NetworkClient::setResponse(std::string response) {
     this->_response = response;
+    this->_respSize = response.size();
+}
+
+void NetworkClient::set_Response(std::string response, size_t RespSize) {
+    this->_response = response;
+    this->_respSize = RespSize;
 }
 
 void    NetworkClient::setOpenFile(bool value) {
@@ -212,7 +223,6 @@ void    NetworkClient::setOpenFile(bool value) {
 bool    NetworkClient::getOpenFile() {
     return this->_openFile;
 }
-
 
 void NetworkClient::openFileForReading() {
     _file.open(getResponseBody().c_str(), std::ios::in | std::ios::binary);
@@ -238,12 +248,4 @@ void NetworkClient::setBytesSent(std::size_t bytes) {
 
 std::size_t NetworkClient::getBytesSent() const {
     return this->bytesSent;
-}
-
-bool    NetworkClient::getRespReady(){
-    return this->_respReady;
-}
-
-void    NetworkClient::setRespReady(bool value) {
-    _respReady = value;
 }

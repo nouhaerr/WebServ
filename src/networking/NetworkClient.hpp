@@ -40,23 +40,19 @@ class NetworkClient {
 		void setServer(const ConfigServer& server);
 		friend bool operator==(const NetworkClient& lhs, const NetworkClient& rhs);
 		const ConfigServer& getConfigServer() const;
-		void saveRequestData(size_t nb_bytes) {
-			std::string str_bytes(this->_buffer, nb_bytes);
-			this->_req.setRequestData(str_bytes);
-		};
+		void saveRequestData(size_t nb_bytes);
 
 		ConfigServer& getServer();
 
 		void setRequest(HttpRequest req);
-		void setRespReady(bool value);
 		void setResponseHeader(std::string respHeader);
 		void setResponseBody(std::string body);
 		void setHeaderSent(bool value);
 		void setResponse(std::string response);
 		void setOpenFile(bool value);
+		void set_Response(std::string response, size_t RespSize);
 
 		HttpRequest& getRequest();
-		bool getRespReady();
 		std::string getResponseHeader();
 		std::string getResponseBody();
 		bool getHeaderSent();
@@ -89,8 +85,8 @@ class NetworkClient {
 		bool _headersSent;
 		bool _openFile;
 		std::string _response;
-
 		std::size_t bytesSent;
+		size_t		_respSize;
 };
 
 #endif // NETWORK_CLIENT_HPP

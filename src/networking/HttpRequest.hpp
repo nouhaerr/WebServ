@@ -33,14 +33,12 @@ class HttpRequest
 		std::string requestData;
 		int _errorCode;
 		size_t _bodySize;
-		std::vector<ConfigServer>	_confServ;
-		ConfigServer	_serv;
+		std::string	_cookie;
 
 		void	_parseURI();
 
 	public:
 		HttpRequest();
-		HttpRequest(ConfigServer serverConfig);
 		HttpRequest(const HttpRequest&);
 		HttpRequest& operator=(const HttpRequest&);
 		~HttpRequest();
@@ -64,10 +62,10 @@ class HttpRequest
 		std::string	&getUri() ;
 		std::string	getHttpVersion() const;
 		std::string	getHeader(const std::string& headerName) const;
-		 std::map<std::string, std::string>& getHeaderFields();
-		std::string	getBody() const;
+		std::map<std::string, std::string>& getHeaderFields();
 		size_t&		getBodysize();
 		int			getErrorCode() const;
+		std::string &getCookie();
 		
 		std::string& get_queryString();
 		std::string& get_bodyFileName();

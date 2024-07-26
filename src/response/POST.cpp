@@ -3,7 +3,7 @@
 bool	HttpResponse::_isSupportedUploadPath() {
     // Find upload path logic
 	if (_uploadPath.empty()) {
-		buildResponse(405);
+		// buildResponse(404);
 		return 0;
 	}
     return 1;
@@ -17,7 +17,7 @@ void	HttpResponse::_createFile(std::string &filename) {
         file.close();
 		this->_errCode = 201;
 		std::string hostt = _serv.getHost() + ":" + toString(_serv.getPort());
-		std::string dirdir = findDirname(_uploadPath, _root) + "/";
+		std::string dirdir = findDirectoryName(_uploadPath, _root) + "/";
 		// std::cout << "dir " << dirdir << "\n";
 		_headers["Location"] = "http://" + hostt + dirdir + filename;
 		buildResponse(201);
@@ -55,73 +55,122 @@ void	HttpResponse::processPostMethod() {
 	_createFile(filename);
 }
 
-void	HttpResponse::handlePostMethod(){
-	if (!_isSupportedMethod("POST")) {
-		buildResponse(405);
-		return ;
-	}
-	if (_isSupportedUploadPath() && _filePath.find(".py") == std::string::npos && _filePath.find(".php") == std::string::npos) {
-		std::ifstream bodyfile(_bodyFileName.c_str());
-		std::ostringstream filecontent;
-		filecontent << bodyfile.rdbuf();
-		_postBody += filecontent.str();
-		bodyfile.close();
-		processPostMethod();
-		return ;
-	}
-	else {
-		int type = _checkRequestedType();
-		if (type == FILE_TYPE) {
-			_postRequestFile();
-			return;
-		}
-		else if (type == FOLDER_TYPE) {
-			// std::cout << "is folder\n";
-			_postRequestFolder();
-			return ;
-		}
-		else if (type == ERROR){
-			buildResponse(404);
-			return ;
-		}
-	}
+std::string extractHeadersPOST(std::string httpResponse)
+{
+    size_t end_headers = httpResponse.find("\r\n\r\n");
+    if (end_headers == std::string::npos)
+        return "";
+    else
+        return httpResponse.substr(0, end_headers + 4);
+}
+
+std::string extractBodyPOST(std::string httpResponse)
+{
+    size_t bodyStart = httpResponse.find("\r\n\r\n");
+    if (bodyStart == std::string::npos)
+    {
+        return "";
+    }
+    return httpResponse.substr(bodyStart + 4); // Skip the double newline
+}
+
+std::string findContentTypePOST(std::string response)
+{
+    std::istringstream responseStream(response);
+    std::string line;
+    std::string contentType;
+
+    while (std::getline(responseStream, line))
+    {
+        if (strncasecmp(line.c_str(), "Content-Type:", 12) == 0)
+        {
+            size_t pos = line.find(':');
+            if (pos != std::string::npos)
+            {
+                contentType = line.substr(pos + 1);
+                size_t firstNonSpace = contentType.find_first_not_of(" \t");
+                size_t lastNonSpace = contentType.find_last_not_of(" \t");
+                if (firstNonSpace != std::string::npos && lastNonSpace != std::string::npos)
+                {
+                    contentType = contentType.substr(firstNonSpace, lastNonSpace - firstNonSpace + 1);
+                    size_t semicolonPos = contentType.find(';');
+                    if (semicolonPos != std::string::npos)
+                    {
+                        contentType = contentType.substr(0, semicolonPos);
+                    }
+                }
+                break;
+            }
+        }
+    }
+    return contentType;
+}
+
+void HttpResponse::handlePostMethod() {
+    if (!_isSupportedMethod("POST")) {
+        buildResponse(405);
+        return;
+    }
+
+    if (_isSupportedUploadPath() && _filePath.find(".py") == std::string::npos && _filePath.find(".php") == std::string::npos) {
+        std::ifstream bodyfile(_bodyFileName.c_str());
+        std::ostringstream filecontent;
+        filecontent << bodyfile.rdbuf();
+        _postBody += filecontent.str();
+        bodyfile.close();
+        processPostMethod();
+        return;
+    } else {
+        int type = _checkRequestedType();
+        if (type == FILE_TYPE) {
+            _postRequestFile();
+            return;
+        } else if (type == FOLDER_TYPE) {
+            _postRequestFolder();
+            return;
+        } else if (type == ERROR) {
+            buildResponse(404);
+            return;
+        }
+    }
+
 }
 
 void	HttpResponse::_postRequestFile() {
-	// 	if (extension == ".php" || extension == ".py")
-			// {
-			// //	std::cout<< "CGI FOUND !" << std::endl;
-			// 	size_t pos;
-			// 	CGI cgi(_client);
-			// 		cgi.set_environmentVariables(file_name);
-			// 		cgi.run();
-			// 		if (cgi.status_code != 200)
-			// 		{  
-			// 			std::cout << "ERROCODE CGI " << std::endl;
-			// 			buildResponse(cgi.status_code);
-			// 			return;
-			// 		}
-			// 	std::string cgi_headers = extractHeaders(_client.getResponse());
-			// 	pos = cgi_headers.find("Set-Cookie");
-			// 	if (pos != std::string::npos)
-			// 	{
-			// 		cgi_headers = cgi_headers.substr(pos);
-			// 		pos = cgi_headers.find("\r\n");
-			// 		this->cookies = cgi_headers.substr(0, pos); 
-			// 	}
-			// 	std::string response_cgi = _client.getResponse();
-			// 					//std::cout << _client.getResponse() << std::endl;
+    if (_filePath.find(".py") != std::string::npos || _filePath.find(".php") != std::string::npos) {
 
-			// 	std::string c_t = findContentType(response_cgi);
-			// 	_client.setResponseBody(extractBody(_client.getResponse()));
-			// 	//std::cout << _client.getResponseBody() << std::endl;
-			// 	std::stringstream ss;
-			// 	ss << _client.getResponseBody().length();
-			// 	std::string body_length = ss.str();
-			// 	_client.setResponseHeader(createResponseHeader(200, c_t));
-			// 	_isText = true;
-			// 	return;
-			// }
+        CGI cgi(_client, _filePath);
+        std::string script_name = Get_File_Name_From_URI();
+        cgi.set_environmentVariables(script_name);
+        cgi.RUN();
+
+        if (cgi.status_code != 200) {
+            // std::cout << "ERROCODE CGI " << cgi.status_code << std::endl;
+            buildResponse(cgi.status_code);
+            return;
+        }
+        
+        std::string cgi_headers = extractHeadersPOST(_client.getResponse());
+        size_t pos = cgi_headers.find("Set-Cookie");
+        if (pos != std::string::npos) {
+            cgi_headers = cgi_headers.substr(pos);
+            pos = cgi_headers.find("\r\n");
+            this->_respCookie = cgi_headers.substr(0, pos);
+        }
+		this->_respCookie = this->_respCookie.substr(12);
+        std::string response_cgi = _client.getResponse();
+        _contentType = findContentTypePOST(response_cgi);
+        _client.setResponseBody(extractBodyPOST(_client.getResponse()));
+        std::stringstream ss;
+        ss << _client.getResponseBody().length();
+        std::string body_length = ss.str();
+        _headers["Content-Length"] = body_length;
+        _client.setResponseHeader(createResponseHeader(200, "Nothing"));
+        _isText = true;
+    }
+    else {
+		buildResponse(403);
+	}
 }
 
 void	HttpResponse::isUrihasSlashInTHeEnd() {
@@ -129,7 +178,7 @@ void	HttpResponse::isUrihasSlashInTHeEnd() {
 	if ((_root[_root.size() - 1]) != '/' && _client.getRequest().getUri()[urisize - 1] != '/')
 	{
 		std::string hostt = _serv.getHost() + ":" + toString(_serv.getPort());
-        std::string dirdir = _location.getLocationName().empty() ? findDirname(_filePath, _root) + "/" : _location.getLocationName() + findDirname(_filePath, _root) + "/";
+        std::string dirdir = _location.getLocationName().empty() ? findDirectoryName(_filePath, _root) + "/" : _location.getLocationName() + findDirectoryName(_filePath, _root) + "/";
         // std::cout << _filePath << " lastdir: " << dirdir<< "\n";
        _redirection = "http://" + hostt + dirdir;
 	   std::string header = createResponseHeader(301, "Default");
@@ -138,14 +187,6 @@ void	HttpResponse::isUrihasSlashInTHeEnd() {
 		_slashSetted = true;
 		return ;
 	}
-
-	// if (_filePath[_filePath.size() - 1] != '/')
-    // {
-	// 	std::cout << "kidkhol l hadi?\n";
-    //    _filePath += "/";
-    //     buildResponse(301);
-	// 	_slashSetted = true;
-    // }
 }
 
 void	HttpResponse::_postRequestFolder() {

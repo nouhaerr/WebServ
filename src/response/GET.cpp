@@ -3,18 +3,23 @@
 std::string HttpResponse::_constructPath(const std::string& requestPath, const std::string &root, const std::string &index) {
 	std::string path = requestPath;
 
+	// std::cout << path << "\n";
     if (path.empty() || path[0] != '/') {
         path = "/" + path;
     }
 	if (!path.empty() && path[path.length() - 1] == '/') {
         path += index;
     }
-    // Check if there is no extension by finding the last dot in the string
-    else if (path.find_last_of('.') == std::string::npos) {
+	// Check if there is no extension by finding the last dot in the string
+    else if (path.find_last_of('.') == std::string::npos && isDirectory((root + path).c_str())) {
+		std::cout << "makaynach noqta\n";
         path += "/" + index;
     }
     std::string filePath = root + path;
-		// std::cout << root << " + " << path << " =>  " << filePath << "\n";
+	// std::cout << "Construct: " << filePath << "\n";
+    // if (isDirectory(filePath.c_str())) {
+    //     path += "/" + index;
+    // }
     return filePath;
 }
 
@@ -80,7 +85,7 @@ bool HttpResponse::isDirHasIndexFiles() {
 //     return lastDirName;
 // }
 
-std::string findDirname(const std::string& path, const std::string& root)
+std::string findDirectoryName(const std::string& path, const std::string& root)
 {
 	// Ensure root ends with '/'
     std::string adjustedRoot = root;
@@ -115,8 +120,7 @@ void	HttpResponse::_getAutoIndex() {
     	if (dir == NULL) {
         	return;
     	}
-		std::string directory = _location.getLocationName().empty() ? findDirname(_filePath, _root) + "/" : _location.getLocationName() + findDirname(_filePath, _root) + "/";
-		// _findDirectoryName();
+		std::string directory = _location.getLocationName().empty() ? findDirectoryName(_filePath, _root) + "/" : _location.getLocationName() + findDirectoryName(_filePath, _root) + "/";
 		// std::cout << directory << "\n";
 
 		std::ostringstream listeningfile;
@@ -174,6 +178,7 @@ void	HttpResponse::_getAutoIndex() {
 			buildResponse(_errCode);
 			return;
 		}
+		_contentType = getContentType(_filePath);
 		_client.setResponseHeader(createResponseHeader(200, "Nothing"));
 	}
 	else
@@ -202,14 +207,15 @@ std::string extractHeaders(std::string httpResponse)
 
 std::string HttpResponse::Get_File_Name_From_URI()
 {
-    size_t lastSlashPos = _client.getRequest().getUri().find_last_of('/');
+    size_t lastSlashPos = _filePath.find_last_of('/');
 
     if (lastSlashPos != std::string::npos)
     {
-        return _client.getRequest().getUri().substr(lastSlashPos + 1);
+		
+        return _filePath.substr(lastSlashPos + 1);
     }
 
-    const char *cstr = _client.getRequest().getUri().c_str();
+    const char *cstr = _filePath.c_str();
     const char *fileName = std::strrchr(cstr, '/');
 
     if (fileName)
@@ -217,7 +223,7 @@ std::string HttpResponse::Get_File_Name_From_URI()
         return fileName + 1;
     }
 
-    return _client.getRequest().getUri();
+    return _filePath;
 }
 
 std::string findContentType(std::string response)
@@ -258,54 +264,54 @@ std::string findContentType(std::string response)
     return contentType;
 }
 
-void	HttpResponse::_isFile() {
+void	HttpResponse::_isFile() 
+{
     // Handle file
 	std::string script_name = Get_File_Name_From_URI();
+	std::string filePath = _client.getRequest().getUri();
     std::ifstream file(_filePath.c_str(), std::ios::in | std::ios::binary);
-	if (file) {
+	if (file) 
+	{
 		std::string extension = _filePath.substr(_filePath.find_last_of('.'));
-						//std::cout << extension << "FILE EXT" << std::endl;
 
-			if (extension == ".php" || extension == ".py")
-			{
-			//	std::cout<< "CGI FOUND !" << std::endl;
-				size_t pos;
-				CGI cgi(_client);
-					cgi.configureEnvironment(script_name);
-					cgi.executeScript();
-					if (cgi.responseStatus != 200)
-					{  
-						std::cout << "ERROCODE CGI " << std::endl;
-						buildResponse(cgi.responseStatus);
-						return;
-					}
-				std::string cgi_headers = extractHeaders(_client.getResponse());
-				pos = cgi_headers.find("Set-Cookie");
-				if (pos != std::string::npos)
-				{
-					cgi_headers = cgi_headers.substr(pos);
-					pos = cgi_headers.find("\r\n");
-					this->cookies = cgi_headers.substr(0, pos); 
-				}
-				std::string response_cgi = _client.getResponse();
-								//std::cout << _client.getResponse() << std::endl;
-
-				std::string c_t = findContentType(response_cgi);
-				_client.setResponseBody(extractBody(_client.getResponse()));
-				std::cout << _client.getResponseBody() << std::endl;
-				std::stringstream ss;
-				ss << _client.getResponseBody().length();
-				std::string body_length = ss.str();
-				_client.setResponseHeader(createResponseHeader(200, c_t));
-				_isText = true;
+		if (extension == ".php" || extension == ".py")
+		{
+			size_t pos;
+			CGI cgi(_client, _filePath);
+			cgi.set_environmentVariables(script_name);
+			cgi.RUN();
+			if (cgi.status_code != 200)
+			{  
+				// std::cout << "ERROCODE CGI " << cgi.status_code << std::endl;
+				buildResponse(cgi.status_code);
 				return;
 			}
+			std::string cgi_headers = extractHeaders(_client.getResponse());
+			//std::cout << "Headers CGI: " << cgi_headers << "\n";
+			pos = cgi_headers.find("Set-Cookie");
+            if (pos != std::string::npos) {
+                cgi_headers = cgi_headers.substr(pos);
+                pos = cgi_headers.find("\r\n");
+                this->_respCookie = cgi_headers.substr(0, pos);
+            }
+			this->_respCookie = this->_respCookie.substr(12);
+			std::string response_cgi = _client.getResponse();
+			_contentType = findContentType(response_cgi);
+			_client.setResponseBody(extractBody(_client.getResponse()));
+			std::stringstream ss;
+			ss << _client.getResponseBody().length();
+			std::string body_length = ss.str();
+			_headers["Content-Length"] = body_length;
+			_client.setResponseHeader(createResponseHeader(200, "Nothing"));
+			_isText = true;
+			return;
+		}
 		// std::cout << "the file exist: " << _filePath<< "\n";
 		_contentType = getContentType(_filePath);
 		std::string header = createResponseHeader(200, "Nothing");
 		_client.setResponseHeader(header);
 		_client.setResponseBody(_filePath);
-						// std::cout << _client.getResponseBody() << std::endl;
+		// std::cout << _client.getResponseBody() << std::endl;
 
 		return ;
 	}
