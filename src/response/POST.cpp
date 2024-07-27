@@ -156,7 +156,7 @@ void	HttpResponse::_postRequestFile() {
             cgi_headers = cgi_headers.substr(pos);
             pos = cgi_headers.find("\r\n");
             this->_respCookie = cgi_headers.substr(0, pos);
-		this->_respCookie = this->_respCookie.substr(12);
+		    this->_respCookie = this->_respCookie.substr(12);
         }
         std::string response_cgi = _client.getResponse();
         _contentType = findContentTypePOST(response_cgi);
