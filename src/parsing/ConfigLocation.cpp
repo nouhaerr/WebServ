@@ -5,7 +5,7 @@ ConfigLocation::ConfigLocation() :
 	_root(""),
 	_index(),
 	_methods(),
-	_maxBodySize(1000000),
+	_maxBodySize(),
 	_autoindex(false),
 	_upload(""),
 	_errorPage(),
@@ -51,7 +51,11 @@ std::string& ConfigLocation::getLocationName() {
 }
 
 void	ConfigLocation::setRoot(std::string& root) {
-	if (root.empty() || root.find_first_of(" \t") != std::string::npos)
+	if (isAllSpacesOrTabs(root)) {
+		this->_root= "";
+		return ;
+	}
+	if (root.find_first_of(" \t") != std::string::npos)
 		throw ConfigLocationException("Error: Wrong root!");
 	this->_root = root;
 }

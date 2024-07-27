@@ -187,7 +187,7 @@ ConfigLocation	ConfigServer::parseLocation(std::vector<t_tokens> &tok, std::vect
 		}
 		it++;
     }
-	if (rt != 1 || ind > 1)
+	if (rt > 1 || ind > 1)
 		throw ConfigServerException("Error: Should have one root/index parametre.");
 	else if (met != 1)
 		throw ConfigServerException("Error: Should have one allowed_methods parametre.");

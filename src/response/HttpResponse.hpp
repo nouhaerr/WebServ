@@ -32,6 +32,7 @@ class HttpResponse {
 		bool	isText() const;
 		void	handleGetMethod();
 		void	isUrihasSlashInTHeEnd();
+		void	hasSlahInTheEnd();
 		bool	isDirHasIndexFiles();
 		
 		off_t	getFileSize();

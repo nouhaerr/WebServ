@@ -88,7 +88,7 @@ ConfigServer Config::parseServerConfig(std::vector<t_tokens>::iterator& it) {
 		throw ParseServerException("Error: Should have one listen parametre.");
 	else if (serv > 1)
 		throw ParseServerException("Error: Must have one server_name parametre.(Duplicate)");
-	else if (rt > 1)
+	else if (rt != 1)
 		throw ParseServerException("Error: Must have one root parametre.(Duplicate)");
 	else if (loc < 1)
 		throw ParseServerException("Error: Should have at least one block of location.");

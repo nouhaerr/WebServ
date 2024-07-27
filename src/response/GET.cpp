@@ -53,12 +53,13 @@ bool HttpResponse::isDirHasIndexFiles() {
 				_isFile();
                 return true;
             }
-			else {
-				buildResponse(404);
-				return true;
-			}
+			// else {
+				
+			// 	return true;
+			// }
 		}
-		//hna fin khass yreturner error
+		// std::cout << "hna fin khass yreturner error\n";
+		buildResponse(404); //or 500 ???
 		return true;
 	}
 	return false;
@@ -294,7 +295,7 @@ void	HttpResponse::_isFile()
                 cgi_headers = cgi_headers.substr(pos);
                 pos = cgi_headers.find("\r\n");
                 this->_respCookie = cgi_headers.substr(0, pos);
-			this->_respCookie = this->_respCookie.substr(12);
+				this->_respCookie = this->_respCookie.substr(12);
             }
 			std::string response_cgi = _client.getResponse();
 			_contentType = findContentType(response_cgi);
@@ -307,11 +308,11 @@ void	HttpResponse::_isFile()
 			_isText = true;
 			return;
 		}
-		// std::cout << "the file exist: " << _filePath<< "\n";
 		_contentType = getContentType(_filePath);
 		std::string header = createResponseHeader(200, "Nothing");
 		_client.setResponseHeader(header);
 		_client.setResponseBody(_filePath);
+		// std::cout << "the file exist: " << "'" << _filePath << "'\n";
 		// std::cout << _client.getResponseBody() << std::endl;
 
 		return ;
@@ -335,9 +336,18 @@ int	HttpResponse::_checkRequestedType() {
 	return 3;
 }
 
+void	HttpResponse::hasSlahInTheEnd() {
+	if (_filePath[_filePath.size() - 1] != '/')
+    {
+       _filePath += "/";
+	//    std::cout << "adding slash: "<< _filePath << "\n";
+        buildResponse(301);
+    }
+}
+
 void	HttpResponse::_isFolder() {
 	// std::cout << "foldeeer\n";
-	// isUrihasSlashInTHeEnd();
+	hasSlahInTheEnd();
 	if (isDirHasIndexFiles())
 		return;
 	else {

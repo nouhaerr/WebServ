@@ -294,7 +294,7 @@ bool HttpRequest::setBody(std::string &body)
 			return true;
 		}
 		std::cout << "bodySize: " << this->_bodySize << "\n";
-		size_t bytes_left = content_length - body.size();
+		size_t bytes_left = content_length - (size_t)this->_bodySize;
 		std::cout << "==> " << body.size() << "\n";
 		// contentlength = 1000;
 		// _bodySize = 99;
@@ -302,24 +302,12 @@ bool HttpRequest::setBody(std::string &body)
 		if (bytes_left > 0 && body.size() <= bytes_left)
 		{
 			bodyDataFile << body;
-			// this->_bodySize = 0;
 			this->_bodySize += body.size();
 			body = "";
 		}
-	
-    	bodyDataFile.close();
-		std::cout << "qraya salat\n";
-		std::cout << "bodySize: " << _bodySize << "\n";
+		bodyDataFile.close();
 		if (this->_bodySize == content_length)
 			return true;
-		// bodyDataFile.close();  || this->_bodySize == write_size
-    	// std::cout << "Content-Length: " << content_length << "\n";
-    	// std::cout << "Bytes left: " << bytes_left << "\n";
-	
-    	// std::cout << "Write: " << write_size << "\n";
-	
-    	// bodyDataFile.write(body.c_str(), write_size); // Write up to write_size bytes
-    	// this->_bodySize += write_size;
 	}
 	return false;
 }

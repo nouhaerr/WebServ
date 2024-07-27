@@ -93,17 +93,17 @@ void	HttpResponse::generateResponse(HttpRequest &req) {
 	// std::cout << "errcode result from req:" << _errCode << "\n";
 	_uri = getRequestedResource(req);
 	_filePath = deleteRedundantSlash(_uri);
-	std::cout << "filePath: "<< _filePath << "\n";
-	// std::string path = resolvePath(_filePath);
-	// if (!path.empty())
-	// {
-	// 	std::cout << "root: "<< _root << "\n";
-	// 	if (!isPathValid(path, _root)) {
-	// 		buildResponse(403);
-	// 		return;
-	// 	}
-	// 	// _filePath = path;
-	// }
+	// std::cout << "filePath: "<< _filePath << "\n";
+	std::string path = resolvePath(_filePath);
+	if (!path.empty())
+	{
+		std::cout << "root: "<< _root << "\n";
+		if (!isPathValid(path, _root)) {
+			buildResponse(403);
+			return;
+		}
+		// _filePath = path;
+	}
 	if (_filePath.empty()) {
 		buildResponse(404);
 		return;
@@ -350,6 +350,7 @@ bool isDirectory(const char* path) {
 
 std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
 	_locations = _serv.getLocation();
+    bool    exist = false;
 	std::string location;
     for (std::vector<ConfigLocation>::iterator it = _locations.begin(); it != _locations.end(); ++it)
     {
@@ -364,16 +365,32 @@ std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
 				&& req.getUri()[it->getLocationName().size()] != '/');
 			else if (it->getLocationName().size() > location.size())
 			{
+                // std::cout << "lqa loc\n";
             	_location = *it;
 				location = it->getLocationName();
+                exist = true;
 			}
 		}
 	}
-	if (req.getUri().find(_location.getRoot()) == std::string::npos)
+    if (exist == true && _location.getRoot().empty()) {
+        _root = _serv.getRoot();
+    }
+    else if (exist == true && !_location.getRoot().empty()) {
+        _root = _location.getRoot();
+    }
+    else {
+        _root = _serv.getRoot();
+    }
+	if (exist == true && req.getUri().find(_root) == std::string::npos)
 	{
-            _root = _location.getRoot();
-            _maxBodySize = _serv.getMaxBodySize();
-            std::cout << "maxBodySIze in location: " << _location.getMaxBodySize() << "\n";
+            std::cout << "kidkholdcdefcesfvf\n";
+            if (toString(_location.getMaxBodySize()).empty()) {
+                _maxBodySize = _serv.getMaxBodySize();
+            }
+            else {
+                _maxBodySize = _location.getMaxBodySize();
+            }
+            // std::cout << "maxBodySIze in location: " << _location.getMaxBodySize() << "\n";
             _idxFiles = _location.getIndex();
             _autoindex =_location.getAutoIndex();
             _errorPage =_location.getErrorPage();
@@ -391,7 +408,6 @@ std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
                                       req.getUri().substr(0, idx);
             _filePath = _constructPath(relativePath, _root, "");
 
-            // std::cout << "fff " << _filePath << "\n";
             if (isDirectory(_filePath.c_str()) && req.getMethod() == "GET" && _isSupportedMethod("GET") && _location.getRedirect() == false) {
                 size_t urisize = _client.getRequest().getUri().size();
                 if ((_root[_root.size() - 1]) != '/' && _client.getRequest().getUri()[urisize - 1] != '/')
@@ -407,12 +423,13 @@ std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
             if (_filePath[_filePath.length() - 1] == '/')
                 {_filePath = _filePath.substr(0, _filePath.length() - 1);}
 
-            if (_autoindex)
+            if (_autoindex || _idxFiles.size() != 0)
             {
                 // std::cout << "root " << _root << "\n";
                 _filePath = _constructPath(relativePath, _root, "");
                 return _filePath;
             }
+            // std::cout << "fff " << _filePath << "\n";
         return _filePath;
 	}
 	_root = _serv.getRoot();
@@ -431,12 +448,11 @@ std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
             // std::cout << "ma fhamtch2\n";
             std::string hostt = _serv.getHost() + ":" + toString(_serv.getPort());
             std::string dirdir = _location.getLocationName().empty() ? findDirectoryName(_filePath, _root) + "/" : _location.getLocationName() + findDirectoryName(_filePath, _root) + "/";
-            // std::cout << _filePath << " lastdir: " << dirdir<< "\n";
             _redirection = "http://" + hostt + dirdir;
             return _filePath;
         }
     }
- 	if (_autoindex)
+ 	if ((_autoindex || _idxFiles.size() != 0))
     {
 		if (req.getUri().find(_root) == std::string::npos)
 		{
