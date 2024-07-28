@@ -9,6 +9,7 @@
 # include <string>
 # include <limits>
 # include <cstdio>
+# include <cstring>
 
 // CPP Containers
 # include <map>

@@ -41,6 +41,10 @@ void	HttpResponse::processPostMethod() {
     std::map<std::string, std::string>::iterator it = _reqHeader.find("Content-Type");
 	if(it != _reqHeader.end())
     {
+        if (it->first != "Content-Type") {
+            buildResponse(400);
+			return ;
+        }
 		std::string value = trimHeader((*it).second);
         std::string contentType = getMimeTypes("second", value);
 		if (contentType.empty()) {

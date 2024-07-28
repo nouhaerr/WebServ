@@ -66,7 +66,7 @@ std::string	resolvePath(std::string& uri) {
 
     // realpath resolves the absolute path and canonicalizes it
     if (realpath(uri.c_str(), resolved_path) == NULL) {
-         std::cerr << "Error resolving path: " << uri << " - " << strerror(errno) << std::endl;
+        //  std::cerr << "Error resolving path: " << uri << " - " << strerror(errno) << std::endl;
         return "";
     }
 	std::cout << "resolvedPath: " << resolved_path << "\n";
@@ -77,7 +77,7 @@ bool isPathValid(const std::string &resolvedPath, std::string &rootDirectory) {
    std::string resolvedRoot = resolvePath(rootDirectory);
 
     if (resolvedRoot.empty()) {
-        std::cerr << "Error resolving root directory: " << rootDirectory << std::endl;
+        // std::cerr << "Error resolving root directory: " << rootDirectory << std::endl;
         return false;
     }
 
@@ -134,7 +134,6 @@ void	HttpResponse::generateResponse(HttpRequest &req) {
 		return ;
 	}
 	if (req.getMethod() == "DELETE") {
-        std::cout << "PROCESS DELETE \n";
 		handleDeleteMethod(); //where u put the Delete method
 		return ;
 	}

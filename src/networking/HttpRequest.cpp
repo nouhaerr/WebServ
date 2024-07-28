@@ -104,7 +104,6 @@ bool isHexadecimal(std::string &str)
 
 bool isNumber(std::string &str)
 {
-
 	if (str.empty())
 		return false;
 	for (size_t i = 0; i < str.size(); i++)
@@ -285,7 +284,11 @@ bool HttpRequest::setBody(std::string &body)
 	else
 	{
 		std::map<std::string, std::string>::iterator it_chunk = this->_headerFields.find("Content-Length");
-		size_t content_length = atoi(it_chunk->second.c_str());
+		if (!isNumber(it_chunk->second)) {
+			this->_errorCode = 400;
+			return true;
+		}
+		size_t content_length = atol(it_chunk->second.c_str());
 		if (content_length < body.size()) {
 			this->_errorCode = 400;
 			return true;

@@ -6,7 +6,7 @@ bool HttpResponse::checkFilePermission(const std::string& filePath)
     if (stat(filePath.c_str(), &fileStat) != 0)
         return false;
 
-    if (!S_ISREG(fileStat.st_mode))
+    if (!S_ISREG(fileStat.st_mode) && !S_ISDIR(fileStat.st_mode))
         return false;
 
     if ((fileStat.st_mode & S_IWUSR) == 0)
