@@ -15,6 +15,45 @@ bool HttpResponse::checkFilePermission(const std::string& filePath)
     return true;
 }
 
+bool deleteDirectory(const std::string& dirPath) 
+{
+    DIR* dir = opendir(dirPath.c_str());
+    if (dir == NULL)
+        return false;
+
+    struct dirent* entry;
+    while ((entry = readdir(dir)) != NULL) 
+    {
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+            continue;
+
+        std::string entryPath = dirPath + "/" + entry->d_name;
+        struct stat entryStat;
+        if (stat(entryPath.c_str(), &entryStat) == 0) 
+        {
+            if (S_ISDIR(entryStat.st_mode)) 
+            {
+                if (!deleteDirectory(entryPath)) 
+                {
+                    closedir(dir);
+                    return false;
+                }
+            } 
+            else 
+            {
+                if (unlink(entryPath.c_str()) != 0) 
+                {
+                    closedir(dir);
+                    return false;
+                }
+            }
+        }
+    }
+
+    closedir(dir);
+    return rmdir(dirPath.c_str()) == 0;
+}
+
 void HttpResponse::handleDeleteMethod() 
 {
     std::string root = _serv.getRoot();
@@ -26,23 +65,30 @@ void HttpResponse::handleDeleteMethod()
         buildResponse(404);
         return;
     }
-
-    if (S_ISDIR(fileStat.st_mode)) 
+    if (!checkFilePermission(filePath))
     {
         buildResponse(403);
         return;
     }
 
-    if (checkFilePermission(filePath)) 
+     if (S_ISDIR(fileStat.st_mode))
     {
-        if (unlink(filePath.c_str()) == 0) {
+        if (deleteDirectory(filePath))
+        {
             _errCode = 204;
             buildResponse(204);
-            return ;
         }
-        else 
+        else
             buildResponse(403);
     }
     else
-        buildResponse(403);
+    {
+        if (unlink(filePath.c_str()) == 0)
+        {
+            _errCode = 204;
+            buildResponse(204);
+        }
+        else
+            buildResponse(403);
+    }
 }

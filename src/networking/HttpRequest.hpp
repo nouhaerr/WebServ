@@ -55,6 +55,7 @@ class HttpRequest
 		void set_bodyStatus(BODY_STATE);
 		void set_requestStatus(REQUEST_STATE);
 		void setRequestData(std::string&);
+		void setErrorCode(int code);
 
 		/*getters*/
 		std::string	getRequest() const;

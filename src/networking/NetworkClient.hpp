@@ -69,24 +69,28 @@ class NetworkClient {
 		void setBytesSent(std::size_t bytes);
     	std::size_t getBytesSent() const;
 
+		bool isTimedOut() const;
+		void updateLastActivityTime();
+
 	private:
-		bool	_respReady;
-		HttpRequest _req;
-		int serverSocketId;
-		int connectionSocketId;
-		ConfigServer server;
-		socklen_t clientAddressSize;
-		sockaddr_in clientDetails;
-		std::string responseHeader;
-		std::string responseBody;
-		std::string fullResponse;
-		bool headerDispatched;
-		bool fileAccessed;
-		bool _headersSent;
-		bool _openFile;
-		std::string _response;
-		std::size_t bytesSent;
-		size_t		_respSize;
+		bool			_respReady;
+		HttpRequest 	_req;
+		int				serverSocketId;
+		int				connectionSocketId;
+		ConfigServer	server;
+		socklen_t		clientAddressSize;
+		sockaddr_in		clientDetails;
+		std::string		responseHeader;
+		std::string		responseBody;
+		std::string		fullResponse;
+		bool			headerDispatched;
+		bool			fileAccessed;
+		bool			_headersSent;
+		bool			_openFile;
+		std::string		_response;
+		std::size_t		bytesSent;
+		size_t			_respSize;
+		time_t			lastActivityTime;
 };
 
 #endif // NETWORK_CLIENT_HPP

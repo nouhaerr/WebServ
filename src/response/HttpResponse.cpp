@@ -55,7 +55,7 @@ void	HttpResponse::_handleDefaultErrors() {
 		buildResponse(501);
 		return ;
 	}
-	if (_errCode == 400 || _errCode == 414) {
+	if (_errCode == 400 || _errCode == 414 || _errCode == 408) {
 		buildResponse(_errCode);
 		return ;
 	}
@@ -155,6 +155,9 @@ void	HttpResponse::findStatusCode(int code) {
             break;
         case 400:
             _statusCode = "400 Bad Request";
+            break;
+        case 408:
+            _statusCode = "408 Request Timeout";
             break;
         case 301:
             _statusCode = "301 Moved Permanently";
@@ -383,8 +386,8 @@ std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
     }
 	if (exist == true && req.getUri().find(_root) == std::string::npos)
 	{
-            std::cout << "kidkholdcdefcesfvf\n";
-            if (toString(_location.getMaxBodySize()).empty()) {
+            std::cout << "kidkholdcdefcesfvf " << "\n";
+            if (_location.getBodySet() == false) {
                 _maxBodySize = _serv.getMaxBodySize();
             }
             else {

@@ -36,6 +36,7 @@ class ConfigLocation {
 		std::vector<std::string>&				getIndex();
 		std::vector<std::string>&				getMethods();
 		size_t&									getMaxBodySize();
+		bool&									getBodySet();
 		bool&									getAutoIndex();
 		std::string&							getUpload();
 		std::map<int, std::string>&				getErrorPage();
@@ -62,6 +63,7 @@ class ConfigLocation {
 		std::vector<std::string>			_index;
 		std::vector<std::string>			_methods;
 		size_t								_maxBodySize;
+		bool								_bodySizeSet;
 		bool								_autoindex;
 		std::string							_upload;
 		std::map<int, std::string>			_errorPage;

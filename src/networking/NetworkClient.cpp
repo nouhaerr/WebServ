@@ -10,7 +10,8 @@ NetworkClient::NetworkClient() :
     _openFile(false),
     _response(""),
     bytesSent(0) {
-    std::memset(&clientDetails, 0, sizeof(clientDetails));
+        updateLastActivityTime();
+        std::memset(&clientDetails, 0, sizeof(clientDetails));
 }
 
 NetworkClient::NetworkClient(int socketDescriptor, int serverSocket) :
@@ -248,4 +249,14 @@ void NetworkClient::setBytesSent(std::size_t bytes) {
 
 std::size_t NetworkClient::getBytesSent() const {
     return this->bytesSent;
+}
+
+bool NetworkClient::isTimedOut() const {
+    time_t now = time(0);
+    double secondsSinceLastActivity = difftime(now, lastActivityTime);
+    return secondsSinceLastActivity > 10;
+}
+
+void NetworkClient::updateLastActivityTime() {
+    lastActivityTime = time(0);
 }

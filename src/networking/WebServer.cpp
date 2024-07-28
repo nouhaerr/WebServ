@@ -108,7 +108,6 @@ void WebServer::setupServerSockets()
         }
         addSocketFd(sockfd);
         FD_SET(sockfd, &this->masterSet);
-        //you should add the one of write
         if (sockfd > highestFd) 
             this->highestFd = sockfd;
        
@@ -163,7 +162,17 @@ void WebServer::processClientRequests(int fd) {
         }
     }
 	client.saveRequestData(bytes_received);
+    client.updateLastActivityTime();
 	std::cout<< client.getRequest().getRequestData() << std::endl;
+
+    if (client.getRequest().getRequestData().empty()) 
+    {
+        client.getRequest().setErrorCode(408);
+        client.getRequest().set_requestStatus(HttpRequest::REQUEST_READY);
+        FD_SET(fd, &this->writeSet);
+        return;
+    }
+
     CheckRequestStatus(client);
     if (client.getRequest().get_requestStatus() == HttpRequest::REQUEST_READY) {
     //     std::cout << "Meth: " << client.getRequest().getMethod() <<  "\n";
@@ -194,30 +203,40 @@ void WebServer::processClientRequests(int fd) {
 void WebServer::run() {
     fd_set readcpy;
     fd_set writecpy;
+    struct timeval timeout;
+
     while (true) {
         readcpy = this->readSet;
         writecpy = this->writeSet;
         this->highestFd = *std::max_element(this->serverSockets.begin(), this->serverSockets.end());
-        // std::cout << "this->highestFd " << this->highestFd << std::endl;
         int maxFd = this->highestFd;
-        // std::cout << "this->highestFd2 " << maxFd<< std::endl;
+
+        timeout.tv_sec = 10;
+        timeout.tv_usec = 0;
+    
         signal(SIGPIPE, SIG_IGN);
-        if (select(maxFd + 1, &readcpy, &writecpy, NULL, NULL) < 0) {
+        int activity = select(maxFd + 1, &readcpy, &writecpy, NULL, &timeout);
+        if (activity < 0)
             std::cerr << "Error in select()." << std::endl;
-        }
-        for (int i = 3; i <= maxFd; i++) {
-                if (FD_ISSET(i, &writecpy)) {
+        else if (activity == 0)
+            handleTimeouts();
+        else
+        {
+            for (int i = 3; i <= maxFd; i++)
+
+                if (FD_ISSET(i, &writecpy))
+                {
                     NetworkClient &client = GetRightClient(i);
                     sendDataToClient(client);
                 }
-                else if (FD_ISSET(i, &readcpy)) {
-                    if (FD_ISSET(i , &(this->masterSet))) {
-                        acceptNewClient(i);                                               
-                    } else {
+                else if (FD_ISSET(i, &readcpy))
+                {
+                    if (FD_ISSET(i, &(this->masterSet)))
+                        acceptNewClient(i);
+                    else
                         processClientRequests(i);
-                    }
                 }
-        }   
+        }
     }
 }
 
@@ -228,7 +247,6 @@ const ConfigServer& WebServer::matchServerByFd(int fd)
         if ((*serverConfigs)[i].getSocket() == fd) 
             return (*serverConfigs)[i];
     }
-   // std::cerr << "No matching server found for socket fd: " << fd << std::endl;
     return (*serverConfigs)[0];
 }
 
@@ -241,9 +259,6 @@ void WebServer::acceptNewClient(int serverSocket) {
         return;
     }
     fcntl(clientSocket, F_SETFL, O_NONBLOCK);
-    // long option_len = 1;
-    // setsockopt(clientSocket, SOL_SOCKET, SO_NOSIGPIPE , &option_len, sizeof(option_len));
-    // setSocketNonBlocking(clientSocket);
     const ConfigServer& associatedServer = matchServerByFd(serverSocket);
     NetworkClient newClient(clientSocket, serverSocket);
     newClient.setServer(associatedServer);
@@ -317,4 +332,28 @@ const ConfigServer& WebServer::matchServerByName(const std::string& host, int po
 void WebServer::sendDataToClient(NetworkClient& client) 
 {
     sendResponse(client.getRequest(), client);
+}
+
+void WebServer::handleTimeouts()
+{
+    std::map<int, NetworkClient>::iterator it = clients.begin();
+    while (it != clients.end())
+    {
+        NetworkClient &client = it->second;
+        if (client.isTimedOut())
+        {
+            int fd = client.fetchConnectionSocket();
+            close(fd);
+            FD_CLR(fd, &masterSet);
+            FD_CLR(fd, &readSet);
+            FD_CLR(fd, &writeSet);
+            std::map<int, NetworkClient>::iterator it_to_erase = it;
+            ++it;
+            clients.erase(it_to_erase);
+            std::cout << "Client with socket " << fd << " has been closed due to timeout." << std::endl;
+            std::cout << "408 Request Timeout" << std::endl;
+        }
+        else
+            ++it;
+    }
 }

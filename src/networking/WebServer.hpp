@@ -12,17 +12,17 @@
 #include "../response/HttpResponse.hpp"
 
 
-class RequestError {
-	private:
-		int _error_number;
+// class RequestError {
+// 	private:
+// 		int _error_number;
 
-	public:
-		RequestError(int error_number) : _error_number(error_number) {
-		}
-		int getErrorNumber() const  {
-			return (this->_error_number);
-		}
-};
+// 	public:
+// 		RequestError(int error_number) : _error_number(error_number) {
+// 		}
+// 		int getErrorNumber() const  {
+// 			return (this->_error_number);
+// 		}
+// };
 
 class WebServer {
 	public:
@@ -32,6 +32,7 @@ class WebServer {
 	    void			run();
 	    NetworkClient&	GetRightClient(int fd);
 	    void			CheckRequestStatus(NetworkClient &client);
+		void			handleTimeouts();
 
 	private:
 		void setupServerSockets();

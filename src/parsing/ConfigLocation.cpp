@@ -6,6 +6,7 @@ ConfigLocation::ConfigLocation() :
 	_index(),
 	_methods(),
 	_maxBodySize(),
+	_bodySizeSet(false),
 	_autoindex(false),
 	_upload(""),
 	_errorPage(),
@@ -27,6 +28,7 @@ ConfigLocation& ConfigLocation::operator=(const ConfigLocation &src) {
 		this->_index = src._index;
 		this->_methods = src._methods;
 		this->_maxBodySize = src._maxBodySize;
+		this->_bodySizeSet = src._bodySizeSet;
 		this->_autoindex = src._autoindex;
 		this->_upload = src._upload;
 		this->_errorPage = src._errorPage;
@@ -101,10 +103,15 @@ void	ConfigLocation::setBodySize(std::string& bodySize) {
     if (unit != 'm' && unit != 'g' && unit != 't' && unit != 'k' && !std::isdigit(unit)) {
         throw ConfigLocationException("Invalid max_body_size.");}
 	this->_maxBodySize = parseMaxBodySize(unit, bodySize, sizeEnd);
+	this->_bodySizeSet = true;
 }
 
 size_t&	ConfigLocation::getMaxBodySize() {
 	return this->_maxBodySize;
+}
+
+bool&	ConfigLocation::getBodySet() {
+	return this->_bodySizeSet;
 }
 
 void	ConfigLocation::setAutoIndex(std::string& autoindex) {	

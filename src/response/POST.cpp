@@ -50,6 +50,10 @@ void	HttpResponse::processPostMethod() {
 		filename += contentType;
 		_contentType = value;
     }
+    else {
+        buildResponse(400);
+        return ;
+    }
 	// std::cout << "dyal resp: " << _uploadPath << "\n";
     _uploadPath += filename;
 	_createFile(filename);
@@ -211,17 +215,18 @@ bool HttpResponse::isPostDirHasIndexFiles() {
 
             if (file.is_open())
             {
-                 _errCode = 200;
+                _errCode = 200;
                 _filePath = path;
                 file.close();
 				_postRequestFile();
                 return true;
             }
-			else {
-				buildResponse(404);
-				return true;
-			}
+			// else {
+			// 	buildResponse(404);
+			// 	return true;
+			// }
 		}
+        buildResponse(404);
 		return true;
 	}
 	return false;

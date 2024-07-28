@@ -1,0 +1,7 @@
+handle content-type doesn't exist
+handle contentlength : cdsf or 54vfd or -54254
+handle transfer encoding and content length the privilege is for transfer encoding
+handle content type = chi haja that doesn't exist in mimeTypes
+handle content length > body size should give timeout
+handle cgi timeouthandle cgi post duplicate
+check again for parsing of config file to handle allow meth and upload
