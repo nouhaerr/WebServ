@@ -294,8 +294,8 @@ void	HttpResponse::_isFile()
             if (pos != std::string::npos) {
                 cgi_headers = cgi_headers.substr(pos);
                 pos = cgi_headers.find("\r\n");
-                this->_respCookie = cgi_headers.substr(0, pos);
-				this->_respCookie = this->_respCookie.substr(12);
+                this->_cookie = cgi_headers.substr(0, pos);
+				this->_cookie = this->_cookie.substr(12);
             }
 			std::string response_cgi = _client.getResponse();
 			_contentType = findContentType(response_cgi);

@@ -97,7 +97,7 @@ void	HttpResponse::generateResponse(HttpRequest &req) {
 	std::string path = resolvePath(_filePath);
 	if (!path.empty())
 	{
-		std::cout << "root: "<< _root << "\n";
+		// std::cout << "root: "<< _root << "\n";
 		if (!isPathValid(path, _root)) {
 			buildResponse(403);
 			return;
@@ -113,7 +113,7 @@ void	HttpResponse::generateResponse(HttpRequest &req) {
 		_handleDefaultErrors();
 		return ;
 	}
-    if (_serv.getMaxBodySize() < req.getBodysize()) {
+    if ( _maxBodySize < req.getBodysize()) {
         buildResponse(413);
 		return ; /*Content Too Large response status code indicates that
 			// the request entity is larger than limits defined by server*/
@@ -280,7 +280,7 @@ std::string	HttpResponse::createResponseHeader(int errCode, std::string flag) {
         _headers["Content-Type"] = _contentType;
 	}
     if (!_cookie.empty()) {
-        _headers["Set-Cookie"] = _respCookie;
+        _headers["Set-Cookie"] = _cookie;
     }
 	_headers["Date"] = generateDate();
 	std::stringstream ss;
@@ -390,7 +390,6 @@ std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
             else {
                 _maxBodySize = _location.getMaxBodySize();
             }
-            // std::cout << "maxBodySIze in location: " << _location.getMaxBodySize() << "\n";
             _idxFiles = _location.getIndex();
             _autoindex =_location.getAutoIndex();
             _errorPage =_location.getErrorPage();
