@@ -140,7 +140,7 @@ void WebServer::CheckRequestStatus(NetworkClient &client)
             if (request.setBody(request_data))
                 request.set_requestStatus(HttpRequest::REQUEST_READY);
         }
-        else if (request.getErrorCode() == 400 || request.getErrorCode() == 501)
+        else if (request.getErrorCode() == 400 || request.getErrorCode() == 408 || request.getErrorCode() == 501)
             request.set_requestStatus(HttpRequest::REQUEST_READY);
     }
 }
@@ -149,22 +149,26 @@ void WebServer::processClientRequests(int fd) {
     NetworkClient &client = GetRightClient(fd);
     char *buffer = client._buffer;
     size_t client_buffer_size = sizeof(client._buffer);
-    size_t bytes_received;
+    int bytes_received;
 
     bzero(buffer, client_buffer_size);
     bytes_received = read(client.fetchConnectionSocket(), buffer, client_buffer_size - 1);
     if (bytes_received <= 0) {
         if (bytes_received == 0) {
+		    std::cout << "Client disconnected" << std::endl;
             close(fd);
             closeClient(fd);
             FD_CLR(fd, &(this->readSet));
             return;
         }
+        else if (bytes_received == -1) {
+		    std::cerr << "Error: read() failed" << std::endl;
+		    return ;
+	    }
     }
 	client.saveRequestData(bytes_received);
     client.updateLastActivityTime();
-	std::cout<< client.getRequest().getRequestData() << std::endl;
-
+	std::cout << client.getRequest().getRequestData() << std::endl;
     if (client.getRequest().getRequestData().empty()) 
     {
         client.getRequest().setErrorCode(408);
@@ -218,12 +222,13 @@ void WebServer::run() {
         int activity = select(maxFd + 1, &readcpy, &writecpy, NULL, &timeout);
         if (activity < 0)
             std::cerr << "Error in select()." << std::endl;
-        else if (activity == 0)
+        else if (activity == 0) {
             handleTimeouts();
+        }
         else
         {
             for (int i = 3; i <= maxFd; i++)
-
+            {
                 if (FD_ISSET(i, &writecpy))
                 {
                     NetworkClient &client = GetRightClient(i);
@@ -231,11 +236,14 @@ void WebServer::run() {
                 }
                 else if (FD_ISSET(i, &readcpy))
                 {
-                    if (FD_ISSET(i, &(this->masterSet)))
+                    if (FD_ISSET(i, &(this->masterSet))) {
                         acceptNewClient(i);
-                    else
+                    }
+                    else {
                         processClientRequests(i);
+                    }
                 }
+            }
         }
     }
 }
@@ -342,7 +350,28 @@ void WebServer::handleTimeouts()
         NetworkClient &client = it->second;
         if (client.isTimedOut())
         {
+            std::stringstream ss;
             int fd = client.fetchConnectionSocket();
+            std::stringstream sse;
+            sse << "<!DOCTYPE html>";
+            sse << "<html>";
+            sse << "<head><title> 408 </title></head>";
+            sse << "<body>";
+            sse << "<center><h1> 408 Request Timeout </h1></center>";
+            sse << "<hr><center>Welcome to our Webserv</center>";
+            sse << "</body>" << "</html>";
+            std::string _body = sse.str();
+    		off_t _bdSize = _body.size();
+            ss << "HTTP/1.1 " << "408 Request Timeout" << "\r\n";
+            ss << "Server: Webserv/1.1" << "\r\n";
+            ss << "Content-Length: " << toString(_bdSize) << "\r\n";
+            ss << "Content-Type: " << "text/html" << "\r\n";
+            ss << "Date: " << HttpResponse::generateDate() << "\r\n";
+            ss << "\r\n";
+            std::string _buffer = ss.str();
+            send(fd, _buffer.c_str(), _buffer.length(), 0);
+            send(fd, _body.c_str(), _body.length(), 0);
+            std::cout << _buffer << _body << "\n";
             close(fd);
             FD_CLR(fd, &masterSet);
             FD_CLR(fd, &readSet);

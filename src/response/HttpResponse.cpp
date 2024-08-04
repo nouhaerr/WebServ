@@ -69,7 +69,7 @@ std::string	resolvePath(std::string& uri) {
         //  std::cerr << "Error resolving path: " << uri << " - " << strerror(errno) << std::endl;
         return "";
     }
-	std::cout << "resolvedPath: " << resolved_path << "\n";
+	// std::cout << "resolvedPath: " << resolved_path << "\n";
     return std::string(resolved_path);
 }
 
@@ -232,7 +232,7 @@ std::string HttpResponse::generateDate()
 std::string	HttpResponse::createResponseHeader(int errCode, std::string flag) {
 	std::string	respHeader;
 
-	_headers["Server"] = "Webserv/1.0";
+	_headers["Server"] = "Webserv/1.1";
 	if (!_redirection.empty()) {
 		_headers["Location"] = _redirection;
 		_errCode = 301;
@@ -284,7 +284,7 @@ std::string	HttpResponse::createResponseHeader(int errCode, std::string flag) {
     if (!_cookie.empty()) {
         _headers["Set-Cookie"] = _cookie;
     }
-	_headers["Date"] = generateDate();
+	_headers["Date"] = HttpResponse::generateDate();
 	std::stringstream ss;
 
 	findStatusCode(errCode);
@@ -385,7 +385,7 @@ std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
     }
 	if (exist == true && req.getUri().find(_root) == std::string::npos)
 	{
-            std::cout << "kidkholdcdefcesfvf " << "\n";
+            // std::cout << "kidkholdcdefcesfvf " << "\n";
             if (_location.getBodySet() == false) {
                 _maxBodySize = _serv.getMaxBodySize();
             }

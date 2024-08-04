@@ -258,5 +258,5 @@ bool NetworkClient::isTimedOut() const {
 }
 
 void NetworkClient::updateLastActivityTime() {
-    lastActivityTime = time(0);
+    lastActivityTime = time(NULL);
 }

@@ -27,7 +27,7 @@ class HttpResponse {
 		std::string	createResponseHeader(int errCode, std::string flag);
 		void	findStatusCode(int code);
 		std::string	getRequestedResource(HttpRequest &req);
-		std::string generateDate();
+		static std::string generateDate();
 		std::string deleteRedundantSlash(std::string uri);
 		bool	isText() const;
 		void	handleGetMethod();

@@ -23,6 +23,7 @@ class CGI
 
 	public:
 	int status_code;
+	bool _cgiDone;
 	CGI(NetworkClient&, std::string& );
 	CGI(const CGI&);
 	CGI& operator=(const CGI&);
@@ -33,6 +34,7 @@ class CGI
 
 	/*getters*/
 	char** get_CGIenvironmentVariables();
+	bool getIsCgiDone() const {return _cgiDone;}
 
 	void RUN();
 };

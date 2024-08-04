@@ -69,11 +69,11 @@ void WebServer::sendResponse(HttpRequest &req, NetworkClient &client)
 		{
             char buffer[1024];
             if (resp.isText() == true) {
-                std::cout << "ewew "<< client.getResponseBody() << std::endl;
+                // std::cout << "ewew "<< client.getResponseBody() << std::endl;
                 ssize_t bytesSent = send(client.fetchConnectionSocket(), client.getResponseBody().c_str(), client.getResponseBody().length(), 0);
-				std::cout << bytesSent << "\n";
+				// std::cout << bytesSent << "\n";
                 if (bytesSent < 0 || bytesSent == (int)client.getResponseBody().length()) {
-                    std::cout << "salina\n";
+                    // std::cout << "salina\n";
                     std::remove(req.get_bodyFileName().c_str());
 					closeClient(client.fetchConnectionSocket());
 				}

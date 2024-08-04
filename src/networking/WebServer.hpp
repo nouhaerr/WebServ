@@ -11,7 +11,6 @@
 #include "HttpRequest.hpp"
 #include "../response/HttpResponse.hpp"
 
-
 // class RequestError {
 // 	private:
 // 		int _error_number;
