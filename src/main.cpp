@@ -6,7 +6,7 @@
 int main(int argc, char* argv[]) 
 {
 	const char*	conFile;
-	 if (argc > 2) {
+	if (argc > 2) {
         std::cerr << "Error: Shouldn't have more than one args!" << std::endl;
         return EXIT_FAILURE;
     }

@@ -11,6 +11,7 @@ CGI::~CGI() {}
 CGI::CGI(const CGI& cgi) : client(cgi.client), status_code(200)
 {
 	this->env = cgi.env;
+    this->_cgiDone = cgi._cgiDone;
 }
 
 CGI& CGI::operator=(const CGI& cgi)
@@ -20,6 +21,7 @@ CGI& CGI::operator=(const CGI& cgi)
 		this->env = cgi.env;
 		this->client = cgi.client;
 		this->status_code = cgi.status_code;
+        this->_cgiDone = cgi._cgiDone;
 	}
 	return (*this);
 }
@@ -119,8 +121,8 @@ void CGI::RUN() {
     if (pid == -1) {
        
         std::string errorContent = "Content-Type: text/html\r\n\r\n<html><body style='text-align:center;'><h1>500 Internal Server Error</h1></body></html>";
-        write(STDOUT_FILENO, errorContent.c_str(), errorContent.size());
         this->status_code = 500;
+        write(STDOUT_FILENO, errorContent.c_str(), errorContent.size());
         std::exit(EXIT_FAILURE);
     } else if (pid == 0) {
         if (dup2(fdIn, 0) == -1 || dup2(fdOut, 1) == -1) {
@@ -143,6 +145,7 @@ void CGI::RUN() {
         this->status_code = 500;
         std::exit(EXIT_FAILURE);
     } else if (pid > 0) {
+        std::cout <<this->status_code << "\n";
         int change_status = 200;
         time_t start_time = time(NULL);
         while (time(NULL) - start_time < 5) {
@@ -155,7 +158,9 @@ void CGI::RUN() {
             this->status_code = 504;
             kill(pid, SIGKILL);
         }
-
+        if (this->status_code == 500) {
+            change_status = 500;
+        }
         delete[] interp_arg;
         delete[] script_arg;
 

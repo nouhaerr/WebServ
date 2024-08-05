@@ -71,7 +71,7 @@ void WebServer::addSocketFd(int fd)
 
 void WebServer::setupServerSockets() 
 {
-     for (size_t i = 0; i < serverConfigs->size(); ++i) 
+    for (size_t i = 0; i < serverConfigs->size(); ++i) 
     {
         int sockfd = socket(AF_INET, SOCK_STREAM, 0);
         if (sockfd < 0) 
@@ -222,9 +222,9 @@ void WebServer::run() {
         int activity = select(maxFd + 1, &readcpy, &writecpy, NULL, &timeout);
         if (activity < 0)
             std::cerr << "Error in select()." << std::endl;
-        else if (activity == 0) {
-            handleTimeouts();
-        }
+        // else if (activity == 0) {
+        //     handleTimeouts();
+        // }
         else
         {
             for (int i = 3; i <= maxFd; i++)
