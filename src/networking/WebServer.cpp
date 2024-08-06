@@ -209,6 +209,8 @@ void WebServer::run() {
     fd_set writecpy;
     struct timeval timeout;
 
+    if (serverSockets.empty()) 
+        exit(EXIT_FAILURE);
     while (true) {
         readcpy = this->readSet;
         writecpy = this->writeSet;

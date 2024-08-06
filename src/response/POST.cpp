@@ -169,6 +169,7 @@ void	HttpResponse::_postRequestFile() {
         std::string response_cgi = _client.getResponse();
         _contentType = findContentTypePOST(response_cgi);
         _client.setResponseBody(extractBodyPOST(_client.getResponse()));
+        std::cout << "response body post: " << _client.getResponseBody() << "\n";
         std::stringstream ss;
         ss << _client.getResponseBody().length();
         std::string body_length = ss.str();
