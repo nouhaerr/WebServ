@@ -78,8 +78,9 @@ void CGI::RUN() {
     pid_t pid;
     int fdIn = 0;
     int fdOut = 1;
-    FILE* tmp = std::tmpfile();
-
+    int fdErr = 2;
+    FILE* tmpOut = std::tmpfile();
+    FILE* tmpErr = std::tmpfile();
 
     std::string path(this->_filePath);
     std::string interpreter;
@@ -91,12 +92,10 @@ void CGI::RUN() {
     else {
         std::cout << "Error: Unknown file extension." << std::endl;
         this->status_code = 500;
-        fclose(tmp);
+        fclose(tmpOut);
+        fclose(tmpErr);
         return;
     }
-
-    // echec exevve
-    // interpreter = "/invalid/path/to/interpreter";
 
     char* interp_arg = new char[interpreter.size() + 1];
     strcpy(interp_arg, interpreter.c_str());
@@ -108,71 +107,48 @@ void CGI::RUN() {
 
     if (this->client.getRequest().getMethod() == "POST") {
         fdIn = open(this->client.getRequest().get_bodyFileName().c_str(), O_RDONLY);
-        if (!fdIn) {
+        if (fdIn == -1) {
             this->status_code = 500;
-            std::exit(EXIT_FAILURE);
+            fclose(tmpOut);
+            fclose(tmpErr);
+            return;
         }
     }
 
-    tmp = std::tmpfile();
-    fdOut = fileno(tmp);
+    fdOut = fileno(tmpOut);
+    fdErr = fileno(tmpErr);
     pid = fork();
+
     if (pid == -1) {
-       
         std::string errorContent = "Content-Type: text/html\r\n\r\n<html><body style='text-align:center;'><h1>500 Internal Server Error</h1></body></html>";
         this->status_code = 500;
         write(STDOUT_FILENO, errorContent.c_str(), errorContent.size());
-        std::exit(EXIT_FAILURE);
+        fclose(tmpOut);
+        fclose(tmpErr);
+        return;
     } else if (pid == 0) {
-        if (dup2(fdIn, 0) == -1 || dup2(fdOut, 1) == -1) {
-           
+        if (dup2(fdIn, 0) == -1 || dup2(fdOut, 1) == -1 || dup2(fdErr, 2) == -1) {
             std::string errorContent = "Content-Type: text/html\r\n\r\n<html><body style='text-align:center;'><h1>500 Internal Server Error</h1></body></html>";
             write(STDOUT_FILENO, errorContent.c_str(), errorContent.size());
             this->status_code = 500;
+            fclose(tmpOut);
+            fclose(tmpErr);
             std::exit(EXIT_FAILURE);
         }
 
         if (this->client.getRequest().getMethod() == "POST")
             close(fdIn);
-        close(fdOut);
-        fclose(tmp);
+        fclose(tmpOut);
+        fclose(tmpErr);
 
         execve(args[0], args, this->env);
-       
+
         std::string errorContent = "Content-Type: text/html\r\n\r\n<html><body style='text-align:center;'><h1>500 Internal Server Error</h1></body></html>";
         write(STDOUT_FILENO, errorContent.c_str(), errorContent.size());
         this->status_code = 500;
         std::exit(EXIT_FAILURE);
-    } 
-    else if (pid > 0) {
+    } else if (pid > 0) {
         int change_status = 200;
-        // time_t start_time = time(NULL);
-        // int status = 0;
-        // int result;
-        // result = waitpid(pid, &status, WNOHANG);
-        // std::cout << "waitpid res: " << result <<"\n";
-        // if (result > 0) {
-        //     if (WIFEXITED(status))
-        //         status_code = 200;
-        //     else
-        //         status_code = 502; //bad gateway
-        // }
-        // else if (result == 0) {
-        //     std::cout << "start time:  " << start_time << "\n";
-        //     std::cout << time(NULL) - start_time << "\n";
-        //     if (time(NULL) - start_time < 5) {
-        //         status_code = 200;
-        //     }
-        //     else {
-        //         if (kill(pid, SIGTERM) == -1)
-        //             kill(pid, SIGKILL);
-        //         status_code = 504; //Gateway timeout
-        //     }
-        // }
-        // else if(result == -1) {
-        //     status_code = 500;
-        // }
-
         time_t start_time = time(NULL);
         while (time(NULL) - start_time < 5) {
             if (waitpid(pid, NULL, WNOHANG) == pid) {
@@ -184,17 +160,18 @@ void CGI::RUN() {
             this->status_code = 504;
             kill(pid, SIGKILL);
         }
+        if (this->status_code == 500) {
+            change_status = 500;
+        }
         delete[] interp_arg;
         delete[] script_arg;
 
-     
         int i = 0;
         while(this->env[i]) {
             delete[] this->env[i];
             i++;
         }
         delete[] this->env;
-
 
         char buffer[1024];
         ssize_t bytes;
@@ -205,16 +182,175 @@ void CGI::RUN() {
             buffer[bytes] = '\0';
             response += buffer;
         }
+
+        std::string errorResponse;
+        lseek(fdErr, 0, SEEK_SET);
+        while ((bytes = read(fdErr, buffer, 1023)) > 0) {
+            buffer[bytes] = '\0';
+            errorResponse += buffer;
+        }
+
+        if (!errorResponse.empty()) 
+        {
+            this->status_code = 500;
+            response = "Content-Type: text/html\r\n\r\n<html><body style='text-align:center;'><h1>500 Internal Server Error</h1><pre>" + errorResponse + "</pre></body></html>";
+        }
+
         char *tmp_str = new char[response.size() + 1];
         strcpy(tmp_str, response.c_str());
         this->client.set_Response(tmp_str, response.size());
         delete[] tmp_str;
+
         if (this->client.getRequest().getMethod() == "POST")
             close(fdIn);
         close(fdOut);
-        fclose(tmp);
+        close(fdErr);
+        fclose(tmpOut);
+        fclose(tmpErr);
     }
 }
+
+// void CGI::RUN() {
+//     pid_t pid;
+//     int fdIn = 0;
+//     int fdOut = 1;
+//     FILE* tmp = std::tmpfile();
+
+
+//     std::string path(this->_filePath);
+//     std::string interpreter;
+
+//     if (path.size() >= 4 && path.compare(path.size() - 4, 4, ".php") == 0)
+//         interpreter = "/usr/bin/php-cgi";
+//     else if (path.size() >= 3 && path.compare(path.size() - 3, 3, ".py") == 0)
+//         interpreter = "/usr/bin/python3";
+//     else {
+//         std::cout << "Error: Unknown file extension." << std::endl;
+//         this->status_code = 500;
+//         fclose(tmp);
+//         return;
+//     }
+
+//     // echec exevve
+//     // interpreter = "/invalid/path/to/interpreter";
+
+//     char* interp_arg = new char[interpreter.size() + 1];
+//     strcpy(interp_arg, interpreter.c_str());
+
+//     char* script_arg = new char[path.size() + 1];
+//     strcpy(script_arg, path.c_str());
+
+//     char *args[] = {interp_arg, script_arg, NULL};
+
+//     if (this->client.getRequest().getMethod() == "POST") {
+//         fdIn = open(this->client.getRequest().get_bodyFileName().c_str(), O_RDONLY);
+//         if (!fdIn) {
+//             this->status_code = 500;
+//             std::exit(EXIT_FAILURE);
+//         }
+//     }
+
+//     tmp = std::tmpfile();
+//     fdOut = fileno(tmp);
+//     pid = fork();
+//     if (pid == -1) {
+       
+//         std::string errorContent = "Content-Type: text/html\r\n\r\n<html><body style='text-align:center;'><h1>500 Internal Server Error</h1></body></html>";
+//         this->status_code = 500;
+//         write(STDOUT_FILENO, errorContent.c_str(), errorContent.size());
+//         std::exit(EXIT_FAILURE);
+//     } else if (pid == 0) {
+//         if (dup2(fdIn, 0) == -1 || dup2(fdOut, 1) == -1) {
+           
+//             std::string errorContent = "Content-Type: text/html\r\n\r\n<html><body style='text-align:center;'><h1>500 Internal Server Error</h1></body></html>";
+//             write(STDOUT_FILENO, errorContent.c_str(), errorContent.size());
+//             this->status_code = 500;
+//             std::exit(EXIT_FAILURE);
+//         }
+
+//         if (this->client.getRequest().getMethod() == "POST")
+//             close(fdIn);
+//         close(fdOut);
+//         fclose(tmp);
+
+//         execve(args[0], args, this->env);
+       
+//         std::string errorContent = "Content-Type: text/html\r\n\r\n<html><body style='text-align:center;'><h1>500 Internal Server Error</h1></body></html>";
+//         write(STDOUT_FILENO, errorContent.c_str(), errorContent.size());
+//         this->status_code = 500;
+//         std::exit(EXIT_FAILURE);
+//     } 
+//     else if (pid > 0) {
+//         int change_status = 200;
+//         // time_t start_time = time(NULL);
+//         // int status = 0;
+//         // int result;
+//         // result = waitpid(pid, &status, WNOHANG);
+//         // std::cout << "waitpid res: " << result <<"\n";
+//         // if (result > 0) {
+//         //     if (WIFEXITED(status))
+//         //         status_code = 200;
+//         //     else
+//         //         status_code = 502; //bad gateway
+//         // }
+//         // else if (result == 0) {
+//         //     std::cout << "start time:  " << start_time << "\n";
+//         //     std::cout << time(NULL) - start_time << "\n";
+//         //     if (time(NULL) - start_time < 5) {
+//         //         status_code = 200;
+//         //     }
+//         //     else {
+//         //         if (kill(pid, SIGTERM) == -1)
+//         //             kill(pid, SIGKILL);
+//         //         status_code = 504; //Gateway timeout
+//         //     }
+//         // }
+//         // else if(result == -1) {
+//         //     status_code = 500;
+//         // }
+
+//         time_t start_time = time(NULL);
+//         while (time(NULL) - start_time < 5) {
+//             if (waitpid(pid, NULL, WNOHANG) == pid) {
+//                 change_status = -2;
+//                 break;
+//             }
+//         }
+//         if (change_status != -2 && waitpid(pid, NULL, WNOHANG) != pid) {
+//             this->status_code = 504;
+//             kill(pid, SIGKILL);
+//         }
+//         delete[] interp_arg;
+//         delete[] script_arg;
+
+     
+//         int i = 0;
+//         while(this->env[i]) {
+//             delete[] this->env[i];
+//             i++;
+//         }
+//         delete[] this->env;
+
+
+//         char buffer[1024];
+//         ssize_t bytes;
+//         std::string response;
+
+//         lseek(fdOut, 0, SEEK_SET);
+//         while ((bytes = read(fdOut, buffer, 1023)) > 0) {
+//             buffer[bytes] = '\0';
+//             response += buffer;
+//         }
+//         char *tmp_str = new char[response.size() + 1];
+//         strcpy(tmp_str, response.c_str());
+//         this->client.set_Response(tmp_str, response.size());
+//         delete[] tmp_str;
+//         if (this->client.getRequest().getMethod() == "POST")
+//             close(fdIn);
+//         close(fdOut);
+//         fclose(tmp);
+//     }
+// }
 
 
 // void CGI::RUN() {
