@@ -193,6 +193,7 @@ void	HttpResponse::isUrihasSlashInTHeEnd() {
 	   std::string header = createResponseHeader(301, "Default");
     	_client.setResponseHeader(header);
         _client.setResponseBody(_errorPath);
+        _redir = true;
 		_slashSetted = true;
 		return ;
 	}

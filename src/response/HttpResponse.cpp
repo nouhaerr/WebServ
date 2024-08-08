@@ -25,13 +25,18 @@ HttpResponse::HttpResponse(NetworkClient &client) :
     _isText(false),
     _slashSetted(false),
     _cookie(""),
-	_respCookie("")
+	_respCookie(""),
+    _redir(false)
     {}
 
 HttpResponse::~HttpResponse(){}
 
 bool	HttpResponse::isText() const{
 	return this->_isText;
+}
+
+bool	HttpResponse::getRedir() const {
+    return this->_redir;
 }
 
 void	HttpResponse::locateErrorPage(int errCode) {
@@ -404,6 +409,7 @@ std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
                     std::string hostt = _serv.getHost() + ":" + toString(_serv.getPort());
                     std::string dirdir = _location.getLocationName().empty() ? findDirectoryName(_filePath, _root) + "/" : _location.getLocationName() + findDirectoryName(_filePath, _root) + "/";
                     _redirection = "http://" + hostt + dirdir;
+                    _redir = true;
                     return _filePath;
                 }
             }
@@ -434,6 +440,7 @@ std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
             std::string hostt = _serv.getHost() + ":" + toString(_serv.getPort());
             std::string dirdir = _location.getLocationName().empty() ? findDirectoryName(_filePath, _root) + "/" : _location.getLocationName() + findDirectoryName(_filePath, _root) + "/";
             _redirection = "http://" + hostt + dirdir;
+            _redir = true;
             return _filePath;
         }
     }

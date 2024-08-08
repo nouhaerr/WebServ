@@ -2,9 +2,8 @@
 
 void WebServer::sendResponse(HttpRequest &req, NetworkClient &client) 
 {
-    if (!client.getResponseDone()) {
-        HttpResponse resp(client);
-
+    HttpResponse resp(client);
+    if (!client.getResponseDone() || resp.getRedir()) {
         resp.generateResponse(req);
         client.setResponseDone(true);
         client.isText = resp.isText();
@@ -21,7 +20,7 @@ void WebServer::sendResponse(HttpRequest &req, NetworkClient &client)
         if (!client.getResponseBody().empty())
 		{
             char buffer[1024];
-            if (client.isText == true) {
+            if (client.isText  == true) {
                 // std::cout << "ewew "<< client.getResponseBody() << std::endl;
                 ssize_t bytesSent = send(client.fetchConnectionSocket(), client.getResponseBody().c_str(), client.getResponseBody().length(), 0);
 				// std::cout << bytesSent << "\n";

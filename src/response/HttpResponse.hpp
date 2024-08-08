@@ -44,7 +44,8 @@ class HttpResponse {
 		void	_postRequestFile();
 
 		void	handleDeleteMethod();
-		bool checkFilePermission(const std::string& filePath);
+		bool	checkFilePermission(const std::string& filePath);
+		bool	getRedir() const;
 
 	private:
 		NetworkClient&	_client;
@@ -80,6 +81,7 @@ class HttpResponse {
 		std::map<std::string, std::string>	_interpreter;
 		std::string	_cookie;
 		std::string _respCookie;
+		bool 		_redir;
 
 		void	_handleDefaultErrors();
 		bool	_isSupportedMethod(std::string meth);
