@@ -117,7 +117,6 @@ void CGI::RUN() {
     tmp = std::tmpfile();
     fdOut = fileno(tmp);
     pid = fork();
-
     if (pid == -1) {
        
         std::string errorContent = "Content-Type: text/html\r\n\r\n<html><body style='text-align:center;'><h1>500 Internal Server Error</h1></body></html>";
@@ -144,9 +143,36 @@ void CGI::RUN() {
         write(STDOUT_FILENO, errorContent.c_str(), errorContent.size());
         this->status_code = 500;
         std::exit(EXIT_FAILURE);
-    } else if (pid > 0) {
-        std::cout <<this->status_code << "\n";
+    } 
+    else if (pid > 0) {
         int change_status = 200;
+        // time_t start_time = time(NULL);
+        // int status = 0;
+        // int result;
+        // result = waitpid(pid, &status, WNOHANG);
+        // std::cout << "waitpid res: " << result <<"\n";
+        // if (result > 0) {
+        //     if (WIFEXITED(status))
+        //         status_code = 200;
+        //     else
+        //         status_code = 502; //bad gateway
+        // }
+        // else if (result == 0) {
+        //     std::cout << "start time:  " << start_time << "\n";
+        //     std::cout << time(NULL) - start_time << "\n";
+        //     if (time(NULL) - start_time < 5) {
+        //         status_code = 200;
+        //     }
+        //     else {
+        //         if (kill(pid, SIGTERM) == -1)
+        //             kill(pid, SIGKILL);
+        //         status_code = 504; //Gateway timeout
+        //     }
+        // }
+        // else if(result == -1) {
+        //     status_code = 500;
+        // }
+
         time_t start_time = time(NULL);
         while (time(NULL) - start_time < 5) {
             if (waitpid(pid, NULL, WNOHANG) == pid) {
@@ -157,9 +183,6 @@ void CGI::RUN() {
         if (change_status != -2 && waitpid(pid, NULL, WNOHANG) != pid) {
             this->status_code = 504;
             kill(pid, SIGKILL);
-        }
-        if (this->status_code == 500) {
-            change_status = 500;
         }
         delete[] interp_arg;
         delete[] script_arg;

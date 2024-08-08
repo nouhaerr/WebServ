@@ -1,61 +1,14 @@
-// #include "WebServer.hpp"
-
-// void WebServer::sendResponse(HttpRequest &req, NetworkClient &client) 
-// { 
-//     HttpResponse resp(client);
-//     resp.generateResponse(req);
-
-//     if (!client.getHeaderSent()) 
-// 	{
-//         client.setResponse(client.getResponseHeader());
-//         client.setHeaderSent(true);
-//         std::cout << client.getResponse();
-//     }
-// 	else 
-// 	{
-//         if (!client.getResponseBody().empty()) 
-// 		{
-//             char buffer[1024] = {0};
-//             if (!client.getOpenFile()) 
-// 			{
-//                 client._file.open(client.getResponseBody().c_str(), std::ios::in | std::ios::binary);
-//                 if (!client._file.is_open()) 
-// 				{
-//                     std::cerr << "Failed to open file: " << client.getResponseBody() << std::endl;
-//                     closeClient(client.fetchConnectionSocket());
-//                     return;
-//                 }
-//                 client.setOpenFile(true);
-//             }
-//             if (client._file.good()) 
-// 			{
-//                 client._file.read(buffer, sizeof(buffer));
-//                 std::size_t bytesRead = static_cast<std::size_t>(client._file.gcount());
-//                 std::cout << "BytesRead: " << bytesRead << "\n";
-//                 client.setResponse(std::string(buffer, bytesRead));
-//             } 
-// 			else 
-// 			{
-//                 std::cerr << "error read: " << client.getResponseBody() << std::endl;
-//                 closeClient(client.fetchConnectionSocket());
-//                 return;
-//             }
-//         }
-//     }
-
-//     std::cout << "Outside SockCl: " << client.fetchConnectionSocket() << "\n";
-//     ssize_t bytesSent = send(client.fetchConnectionSocket(), client.getResponse().c_str(), client.getResponse().length(), 0);
-//     std::cout << "BytesSent: " << bytesSent << "\n";
-//     if (bytesSent <= 0)
-//         closeClient(client.fetchConnectionSocket());
-// }
-
 #include "WebServer.hpp"
 
 void WebServer::sendResponse(HttpRequest &req, NetworkClient &client) 
-{ 
-    HttpResponse resp(client);
-    resp.generateResponse(req);
+{
+    if (!client.getResponseDone()) {
+        HttpResponse resp(client);
+
+        resp.generateResponse(req);
+        client.setResponseDone(true);
+        client.isText = resp.isText();
+    }
 
     if (!client.getHeaderSent())
 	{
@@ -68,7 +21,7 @@ void WebServer::sendResponse(HttpRequest &req, NetworkClient &client)
         if (!client.getResponseBody().empty())
 		{
             char buffer[1024];
-            if (resp.isText() == true) {
+            if (client.isText == true) {
                 // std::cout << "ewew "<< client.getResponseBody() << std::endl;
                 ssize_t bytesSent = send(client.fetchConnectionSocket(), client.getResponseBody().c_str(), client.getResponseBody().length(), 0);
 				// std::cout << bytesSent << "\n";

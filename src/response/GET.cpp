@@ -281,9 +281,10 @@ void	HttpResponse::_isFile()
 			CGI cgi(_client, _filePath);
 			cgi.set_environmentVariables(script_name);
 			cgi.RUN();
+			// std::cout << "status: " << cgi.status_code << std::endl;
+			// exit(2);
 			if (cgi.status_code != 200)
 			{
-				// std::cout << "ERROR CODE CGI " << cgi.status_code << std::endl;
 				buildResponse(cgi.status_code);
 				return;
 			}

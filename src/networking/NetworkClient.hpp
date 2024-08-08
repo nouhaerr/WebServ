@@ -43,14 +43,16 @@ class NetworkClient {
 		void saveRequestData(size_t nb_bytes);
 
 		ConfigServer& getServer();
+		bool	getResponseDone() const;
 
-		void setRequest(HttpRequest req);
-		void setResponseHeader(std::string respHeader);
-		void setResponseBody(std::string body);
-		void setHeaderSent(bool value);
-		void setResponse(std::string response);
-		void setOpenFile(bool value);
-		void set_Response(std::string response, size_t RespSize);
+		void	setRequest(HttpRequest req);
+		void	setResponseHeader(std::string respHeader);
+		void	setResponseBody(std::string body);
+		void	setHeaderSent(bool value);
+		void	setResponse(std::string response);
+		void	setOpenFile(bool value);
+		void	set_Response(std::string response, size_t RespSize);
+		void	setResponseDone(bool resp);
 
 		HttpRequest& getRequest();
 		std::string getResponseHeader();
@@ -71,6 +73,7 @@ class NetworkClient {
 
 		bool isTimedOut() const;
 		void updateLastActivityTime();
+		bool isText;
 
 	private:
 		bool			_respReady;
@@ -91,6 +94,7 @@ class NetworkClient {
 		std::size_t		bytesSent;
 		size_t			_respSize;
 		time_t			lastActivityTime;
+		bool			_resp;
 };
 
 #endif // NETWORK_CLIENT_HPP

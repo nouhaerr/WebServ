@@ -9,7 +9,8 @@ NetworkClient::NetworkClient() :
     _headersSent(false),
     _openFile(false),
     _response(""),
-    bytesSent(0) {
+    bytesSent(0),
+    _resp(false) {
         updateLastActivityTime();
         std::memset(&clientDetails, 0, sizeof(clientDetails));
 }
@@ -25,7 +26,8 @@ NetworkClient::NetworkClient(int socketDescriptor, int serverSocket) :
     _headersSent(false),
     _openFile(false),
     _response(""),
-    bytesSent(0) {
+    bytesSent(0),
+    _resp(false) {
     std::memset(&clientDetails, 0, sizeof(clientDetails));
 }
 
@@ -40,7 +42,8 @@ NetworkClient::NetworkClient(const NetworkClient& source)
     _headersSent(source._headersSent),
     _openFile(source._openFile),
     _response(source._response),
-    bytesSent(source.bytesSent) {}
+    bytesSent(source.bytesSent),
+    _resp(source._resp) {}
 
 bool operator==(const NetworkClient& lhs, const NetworkClient& rhs) 
 {
@@ -69,6 +72,7 @@ NetworkClient& NetworkClient::operator=(const NetworkClient& source)
         _openFile = source._openFile;
         _response = source._response;
         bytesSent = source.bytes_read;
+        _resp = source._resp;
     }
     return *this;
 }
@@ -259,4 +263,12 @@ bool NetworkClient::isTimedOut() const {
 
 void NetworkClient::updateLastActivityTime() {
     lastActivityTime = time(NULL);
+}
+
+void	NetworkClient::setResponseDone(bool resp) {
+    this->_resp = resp;
+}
+
+bool	NetworkClient::getResponseDone() const {
+    return this->_resp;
 }
