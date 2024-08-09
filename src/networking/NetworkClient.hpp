@@ -73,6 +73,7 @@ class NetworkClient {
 
 		bool isTimedOut() const;
 		void updateLastActivityTime();
+		void extendTimeout();
 		bool isText;
 
 	private:

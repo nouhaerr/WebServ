@@ -455,3 +455,17 @@ std::string trimHeader(const std::string& str)
 
     return str.substr(first, (last - first + 1));
 }
+
+bool HttpRequest::isVideoRequest() 
+{
+    std::string url = this->getUri();
+	std::cout << "*********" << getUri() << std::endl;
+    std::string::size_type dotPos = url.find_last_of('.');
+    if (dotPos != std::string::npos) 
+	{
+        std::string extension = url.substr(dotPos + 1);
+        if (extension == "mp4" || extension == "mpeg" || extension == "mpg" || extension == "avi" || extension == "mkv" || extension == "mov" || extension == "flv")
+            return true;
+    }
+    return false;
+}

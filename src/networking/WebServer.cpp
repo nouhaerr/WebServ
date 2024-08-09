@@ -179,21 +179,21 @@ void WebServer::processClientRequests(int fd) {
 
     CheckRequestStatus(client);
     if (client.getRequest().get_requestStatus() == HttpRequest::REQUEST_READY) {
-        // std::string hostHeader = client.getRequest().getHeader("Host");
-        // hostHeader = trimm(hostHeader);
+        std::string hostHeader = client.getRequest().getHeader("Host");
+        hostHeader = trimm(hostHeader);
 
-        // size_t portPos = hostHeader.find(":");
-        // int port = 80; // Default to 80 if no port is specified
-        // if (portPos != std::string::npos) {
-        //     port = std::atoi(hostHeader.substr(portPos + 1).c_str());
-        //     hostHeader = hostHeader.substr(0, portPos);
-        // } else {
-        //     port = client.getServer().getPort();
-        // }
+        size_t portPos = hostHeader.find(":");
+        int port = 80; // Default to 80 if no port is specified
+        if (portPos != std::string::npos) {
+            port = std::atoi(hostHeader.substr(portPos + 1).c_str());
+            hostHeader = hostHeader.substr(0, portPos);
+        } else {
+            port = client.getServer().getPort();
+        }
 
-        // const ConfigServer &clientServer = matchServerByName(client.getRequest().getHeader("Host"), port);
+        const ConfigServer &clientServer = matchServerByName(client.getRequest().getHeader("Host"), port);
     //    // std::cout << "Port in processClientRequests: " << clientServer.getPort() << std::endl; // Debugging output
-    //     client.setServer(clientServer);
+        client.setServer(clientServer);
         FD_SET(fd, &this->writeSet);
     }
 }
@@ -219,9 +219,9 @@ void WebServer::run() {
         int activity = select(maxFd + 1, &readcpy, &writecpy, NULL, &timeout);
         if (activity < 0)
             std::cerr << "Error in select()." << std::endl;
-        // else if (activity == 0) {
-        //     handleTimeouts();
-        // }
+        else if (activity == 0) {
+            handleTimeouts();
+        }
         else
         {
             for (int i = 3; i <= maxFd; i++)
@@ -313,9 +313,9 @@ const ConfigServer& WebServer::matchServerByName(const std::string& host, int po
 
     for (std::vector<ConfigServer>::const_iterator it = serverConfigs->begin(); it != serverConfigs->end(); ++it) 
     {
-        std::ostringstream portStr;
-        portStr << it->getPort();
-        if ((it->getHost() == "localhost" || it->getHost() == "127.0.0.1") && isLocalhost)
+        // std::ostringstream portStr;
+        // portStr << it->getPort();
+        if (it->getHost() == "127.0.0.1" && isLocalhost)
         {
             if (static_cast<size_t>(port) == it->getPort())
             {
@@ -347,6 +347,13 @@ void WebServer::handleTimeouts()
         NetworkClient &client = it->second;
         if (client.isTimedOut())
         {
+            HttpRequest &request = client.getRequest();
+            if (request.getMethod() == "GET" && request.isVideoRequest()) 
+            {
+                client.extendTimeout();
+                ++it;
+                continue;
+            }
             std::stringstream ss;
             int fd = client.fetchConnectionSocket();
             std::stringstream sse;
@@ -358,7 +365,7 @@ void WebServer::handleTimeouts()
             sse << "<hr><center>Welcome to our Webserv</center>";
             sse << "</body>" << "</html>";
             std::string _body = sse.str();
-    		off_t _bdSize = _body.size();
+            off_t _bdSize = _body.size();
             ss << "HTTP/1.1 " << "408 Request Timeout" << "\r\n";
             ss << "Server: Webserv/1.1" << "\r\n";
             ss << "Content-Length: " << toString(_bdSize) << "\r\n";
@@ -378,8 +385,8 @@ void WebServer::handleTimeouts()
             clients.erase(it_to_erase);
             std::cout << "Client with socket " << fd << " has been closed due to timeout." << std::endl;
             std::cout << "408 Request Timeout" << std::endl;
-        }
-        else
+        } else {
             ++it;
+        }
     }
 }

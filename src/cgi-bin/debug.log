@@ -1,11 +1,11 @@
-Script run at: 2024-08-09 00:36:51
-Script run at: 2024-08-09 00:37:17
-Content-Type: multipart/form-data; boundary=----WebKitFormBoundarylR1e1GZBoEJ0AeMQ
-Content-Length: 471921
-Cookie: PHPSESSID=2tjrd6ai4n596qqrq3284mu2mo; color=green; PHPSESSID=2tjrd6ai4n596qqrq3284mu2mo; name=edf
-User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36
-POST name: nouha
-POST email: fer
-File uploaded: sara.png
-POST request received with file: sara.png
-File uploaded to: ./66b5489d8c30e1.26378149.png
+Script run at: 2024-08-09 20:49:50
+Script run at: 2024-08-09 20:49:57
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary9Xa8PNb42wVFamM4
+Content-Length: 8481
+Cookie: PHPSESSID=2tjrd6ai4n596qqrq3284mu2mo; color=green; name=nouha; PHPSESSID=2tjrd6ai4n596qqrq3284mu2mo; name=edf
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36
+POST name: lola
+POST email: fef
+File uploaded: tulipes.jpeg
+POST request received with file: tulipes.jpeg
+File uploaded to: ./66b664d53ae981.70872247.jpeg

@@ -78,6 +78,7 @@ class HttpRequest
 		std::string& getRequestData();
 
 		bool is_body();
+		bool isVideoRequest();
 };
 
 int	hexToInt(const std::string& str);

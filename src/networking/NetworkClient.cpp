@@ -272,3 +272,10 @@ void	NetworkClient::setResponseDone(bool resp) {
 bool	NetworkClient::getResponseDone() const {
     return this->_resp;
 }
+
+void NetworkClient::extendTimeout() 
+{
+    this->updateLastActivityTime();
+    std::cout << "Timeout extended for client with socket " << this->fetchConnectionSocket() << std::endl;
+}
+

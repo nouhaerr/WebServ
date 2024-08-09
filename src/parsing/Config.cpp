@@ -126,7 +126,7 @@ void	Config::parse()
 		this->_serverCount = this->_servers.size();
 		if (this->_serverCount == 0)
 			throw ParseServerException("Error: Must have at least one server.");
-		while (this->_serverCount > 1) 
+		while (this->_serverCount > 1)
 		{
 			for (size_t i = 0; i < this->_serverCount - 1; i++) 
 			{

@@ -25,7 +25,7 @@ void WebServer::sendResponse(HttpRequest &req, NetworkClient &client)
                 ssize_t bytesSent = send(client.fetchConnectionSocket(), client.getResponseBody().c_str(), client.getResponseBody().length(), 0);
 				// std::cout << bytesSent << "\n";
                 if (bytesSent < 0 || bytesSent == (int)client.getResponseBody().length()) {
-                    // std::cout << "salina\n";
+                    std::cout << "salina\n";
                     std::remove(req.get_bodyFileName().c_str());
 					closeClient(client.fetchConnectionSocket());
 				}
@@ -52,8 +52,6 @@ void WebServer::sendResponse(HttpRequest &req, NetworkClient &client)
             }
 			else 
 			{
-                // std::cout << "IN ELSE, SockCli: " << client.fetchConnectionSocket() << "\n";
-				// std::cerr << "Nothing left to read " << client.getResponseBody() << std::endl;
                 closeClient(client.fetchConnectionSocket());
                 return;
             }
