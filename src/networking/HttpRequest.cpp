@@ -300,12 +300,7 @@ bool HttpRequest::setBody(std::string &body)
 			this->_errorCode = 500; //internal Server error
 			return true;
 		}
-		// std::cout << "bodySize: " << this->_bodySize << "\n";
 		size_t bytes_left = content_length - (size_t)this->_bodySize;
-		// std::cout << "==> " << body.size() << "\n";
-		// contentlength = 1000;
-		// _bodySize = 99;
-    	// size_t write_size = std::min(body.size(), content_length); // Determine how much to write
 		if (bytes_left > 0 && body.size() <= bytes_left)
 		{
 			bodyDataFile << body;

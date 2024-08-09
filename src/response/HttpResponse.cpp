@@ -55,10 +55,6 @@ void	HttpResponse::_handleDefaultErrors() {
 		buildResponse(505);
 		return ;
 	}
-	if (_errCode == 501) {
-		buildResponse(501);
-		return ;
-	}
 	if (_errCode == 400 || _errCode == 414 || _errCode == 408) {
 		buildResponse(_errCode);
 		return ;
@@ -107,6 +103,10 @@ void	HttpResponse::generateResponse(HttpRequest &req) {
 	if (_filePath.empty()) {
 		buildResponse(404);
 		return;
+	}
+	if (_errCode == 501) {
+		buildResponse(501);
+		return ;
 	}
 	checkHttpVersion(req);
 	if (_errCode != 0) {
@@ -418,7 +418,6 @@ std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
 
             if (_autoindex || _idxFiles.size() != 0)
             {
-                // std::cout << "root " << _root << "\n";
                 _filePath = _constructPath(relativePath, _root, "");
                 return _filePath;
             }

@@ -215,7 +215,6 @@ bool HttpResponse::isPostDirHasIndexFiles() {
 	if (_idxFiles.size() != 0) {
 		for (size_t i = 0; i <_idxFiles.size(); i++) {
 			std::string path = _filePath + _idxFiles[i];
-			// std::cout << "haas index\n" << path << "\n";
 			path = deleteRedundantSlash(path);
 			std::ifstream file(path.c_str(), std::ios::in | std::ios::binary);
 
