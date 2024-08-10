@@ -1,14 +1,15 @@
 #include "ConfigServer.hpp"
 
 ConfigServer::ConfigServer() : 
-_host("127.0.0.1"),
-_port(8080),
-_serverName(""),
-_maxBodySize(100000),
-_autoindex(false),
-_root("/var/www"),
-_index(std::vector<std::string>()),
-_errorPage(std::map<int , std::string>())
+	_host("127.0.0.1"),
+	_port(8080),
+	_serverName(""),
+	_maxBodySize(100000),
+	_autoindex(false),
+	_root("/var/www"),
+	_index(std::vector<std::string>()),
+	_errorPage(std::map<int , std::string>()),
+	_methods()
 {}
 
 ConfigServer::ConfigServer(const ConfigServer &src) {
@@ -27,6 +28,7 @@ ConfigServer&	ConfigServer::operator=(const ConfigServer &src) {
 		this->_root = src._root;
 		this->_index = src._index;
 		this->_errorPage = src._errorPage;
+		this->_methods = src._methods;
 	}
 	return *this;
 }
@@ -164,4 +166,24 @@ void	ConfigServer::setErrorPage(std::string& errorPage) {
 
 std::map<int, std::string>	&ConfigServer::getErrorPage() {
 	return this->_errorPage;
+}
+
+void	ConfigServer::setMethods(std::string& methods) {
+	if (methods.empty()) {
+		this->_methods.push_back("GET");
+		this->_methods.push_back("POST");
+		this->_methods.push_back("DELETE");
+		return ;
+	}
+	this->_methods = splitVal(methods);
+	std::vector<std::string>::iterator it = _methods.begin();
+	for (; it != _methods.end(); ++it) {
+		if (*it != "POST" && *it != "GET" && *it != "DELETE"
+			&& *it != "HEAD" && *it != "PUT")
+			throw ConfigServerException("Error: Unexpected value for methods!");
+	}
+}
+
+std::vector<std::string>& ConfigServer::getMethods() {
+	return this->_methods;
 }

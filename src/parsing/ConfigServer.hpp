@@ -30,6 +30,7 @@ class	ConfigServer {
 		std::string					&getRoot();
 		std::vector<std::string>	&getIndex();
 		std::map<int, std::string>	&getErrorPage();
+		std::vector<std::string>	&getMethods();
 
 		// Setters
 		void	setListen(std::string& listen);
@@ -40,6 +41,7 @@ class	ConfigServer {
 		void	setRoot(std::string& root);
 		void	setIndex(std::string &index);
 		void	setErrorPage(std::string& errorPage);
+		void	setMethods(std::string& methods);
 
 		int		getSocket() const;
 		void	setSocket(int sock);
@@ -65,6 +67,7 @@ class	ConfigServer {
 		std::string					_root;
 		std::vector<std::string>	_index;
 		std::map<int, std::string>	_errorPage;
+		std::vector<std::string>	_methods;
 		int _socket;
 		int socketFD;
 };

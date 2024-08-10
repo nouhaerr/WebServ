@@ -36,7 +36,7 @@ ConfigServer Config::parseServerConfig(std::vector<t_tokens>::iterator& it) {
 
 	++it;
 	int lis = 0, serv = 0, rt = 0, bd = 0;
-	int	loc = 0, aut = 0, ind = 0, err = 0;
+	int	loc = 0, aut = 0, ind = 0, err = 0, met = 0;
 	ConfigServer	server;
     // Parse server configuration settings
 	while (it != this->_tokens.end() && it->_type != "}" && it->_value != "}") {
@@ -74,6 +74,10 @@ ConfigServer Config::parseServerConfig(std::vector<t_tokens>::iterator& it) {
 			server.setErrorPage(it->_value);
 			err++;
 		}
+		else if (it->_type == "allowed_methods") {
+			server.setMethods(it->_value);
+			met++;
+		}
 		else if (it->_type.empty()) {
 			it++;
 			continue;
@@ -98,7 +102,8 @@ ConfigServer Config::parseServerConfig(std::vector<t_tokens>::iterator& it) {
 		throw ParseServerException("Error: Must set one autoindex parametre.(Duplicate)");
 	else if (ind > 1)
 		throw ParseServerException("Error: Should have one index parametre.(Duplicate)...");
-
+	else if (met > 1)
+		throw ParseServerException("Error: Should have one allowed_methods directive.(Duplicate)");
 	// std::cout << "end of server\n";
 	if (it->_type != "}")
 		throw ParseServerException("Error: expected '}' in the end of server directive.");

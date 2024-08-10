@@ -39,7 +39,6 @@ bool HttpResponse::isDirHasIndexFiles() {
 	if (_idxFiles.size() != 0) {
 		for (size_t i = 0; i <_idxFiles.size(); i++) {
 			std::string path = _filePath + _idxFiles[i];
-			// std::cout << "haas index\n" << path << "\n";
 			path = deleteRedundantSlash(path);
 			std::ifstream file(path.c_str(), std::ios::in | std::ios::binary);
 
@@ -333,16 +332,15 @@ void	HttpResponse::hasSlahInTheEnd() {
 	if (_filePath[_filePath.size() - 1] != '/')
     {
        _filePath += "/";
-	//    std::cout << "adding slash: "<< _filePath << "\n";
         buildResponse(301);
     }
 }
 
 void	HttpResponse::_isFolder() {
-	// std::cout << "foldeeer\n";
 	hasSlahInTheEnd();
-	if (isDirHasIndexFiles())
+	if (isDirHasIndexFiles()) {
 		return;
+	}
 	else {
 		_getAutoIndex();
 		return ;

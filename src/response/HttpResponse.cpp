@@ -100,6 +100,7 @@ void	HttpResponse::generateResponse(HttpRequest &req) {
 			return;
 		}
 	}
+    std::cout << _filePath << "\n";
 	if (_filePath.empty()) {
 		buildResponse(404);
 		return;
@@ -340,7 +341,6 @@ bool isDirectory(const char* path) {
     if (stat(path, &fileInfo) != 0) {
         return false;
     }
-    
     return S_ISDIR(fileInfo.st_mode);
 }
 
@@ -426,9 +426,13 @@ std::string	HttpResponse::getRequestedResource(HttpRequest &req) {
     _autoindex = _serv.getAutoIndex();
     _errorPage = _serv.getErrorPage();
     _maxBodySize = _serv.getMaxBodySize();
-    _methods.push_back("POST");
-    _methods.push_back("GET");
-    _methods.push_back("DELETE");
+    if (_serv.getMethods().empty()) {
+        _methods.push_back("POST");
+        _methods.push_back("GET");
+        _methods.push_back("DELETE");
+    }
+    else
+        _methods = _serv.getMethods();
     _filePath = _constructPath(req.getUri(), _root, "");
     if (isDirectory(_filePath.c_str()) && req.getMethod() == "GET" && _isSupportedMethod("GET")) {
         size_t urisize = _client.getRequest().getUri().size();
