@@ -1,6 +1,6 @@
 CPP = c++
 
-FLAGS = -Wall -Wextra -Werror -std=c++98 -fsanitize=address -g3 $(shell pkill webserv)
+FLAGS = -Wall -Wextra -Werror -std=c++98 $(shell pkill webserv) #-fsanitize=address -g3
 
 SRC = src/main.cpp\
 	src/parsing/Config.cpp src/parsing/ParseFile.cpp\

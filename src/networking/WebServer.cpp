@@ -183,7 +183,7 @@ void WebServer::processClientRequests(int fd) {
         hostHeader = trimm(hostHeader);
 
         size_t portPos = hostHeader.find(":");
-        int port = 80; // Default to 80 if no port is specified
+        int port = 80;
         if (portPos != std::string::npos) {
             port = std::atoi(hostHeader.substr(portPos + 1).c_str());
             hostHeader = hostHeader.substr(0, portPos);
@@ -269,9 +269,6 @@ void WebServer::acceptNewClient(int serverSocket) {
     newClient.setServer(associatedServer);
     clients[clientSocket] = newClient;
     addSocketFd(clientSocket);
-    // FD_SET(clientSocket, &this->readSet);
-    // if (clientSocket > highestFd)
-    //     highestFd = clientSocket;
 }
 
 
@@ -313,8 +310,6 @@ const ConfigServer& WebServer::matchServerByName(const std::string& host, int po
 
     for (std::vector<ConfigServer>::const_iterator it = serverConfigs->begin(); it != serverConfigs->end(); ++it) 
     {
-        // std::ostringstream portStr;
-        // portStr << it->getPort();
         if (it->getHost() == "127.0.0.1" && isLocalhost)
         {
             if (static_cast<size_t>(port) == it->getPort())
@@ -384,7 +379,6 @@ void WebServer::handleTimeouts()
             ++it;
             clients.erase(it_to_erase);
             std::cout << "Client with socket " << fd << " has been closed due to timeout." << std::endl;
-            std::cout << "408 Request Timeout" << std::endl;
         } else {
             ++it;
         }

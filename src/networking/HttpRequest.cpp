@@ -459,7 +459,6 @@ std::string trimHeader(const std::string& str)
 bool HttpRequest::isVideoRequest() 
 {
     std::string url = this->getUri();
-	std::cout << "*********" << getUri() << std::endl;
     std::string::size_type dotPos = url.find_last_of('.');
     if (dotPos != std::string::npos) 
 	{

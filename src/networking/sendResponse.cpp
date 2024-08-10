@@ -32,7 +32,6 @@ void WebServer::sendResponse(HttpRequest &req, NetworkClient &client)
             }
             else if (!client.getOpenFile())
 			{
-                // client._file.open(client.getResponseBody().c_str(), std::ios::in | std::ios::binary);
 				client.openFileForReading();
                 if (!client.getOpenFile())
 				{
@@ -40,7 +39,6 @@ void WebServer::sendResponse(HttpRequest &req, NetworkClient &client)
                     closeClient(client.fetchConnectionSocket());
                     return;
                 }
-                // client.setOpenFile(true);
             }
             if (client._file.good())
 			{
