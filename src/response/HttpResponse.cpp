@@ -100,7 +100,7 @@ void	HttpResponse::generateResponse(HttpRequest &req) {
 			return;
 		}
 	}
-    std::cout << _filePath << "\n";
+    // std::cout << _filePath << "\n";
 	if (_filePath.empty()) {
 		buildResponse(404);
 		return;

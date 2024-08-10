@@ -21,7 +21,6 @@ void	HttpResponse::_createFile(std::string &filename) {
 		// std::cout << "dir " << dirdir << "\n";
 		_headers["Location"] = "http://" + hostt + dirdir + filename;
 		buildResponse(201);
-		// std::cout << _uploadPath << "\n";
 		 /*201 Created success status response code indicates
 		that the request has succeeded and has led to the creation of a resource*/
     } 
@@ -168,7 +167,7 @@ void	HttpResponse::_postRequestFile() {
         std::string response_cgi = _client.getResponse();
         _contentType = findContentTypePOST(response_cgi);
         _client.setResponseBody(extractBodyPOST(_client.getResponse()));
-        std::cout << "response body post: " << _client.getResponseBody() << "\n";
+        // std::cout << "response body post: " << _client.getResponseBody() << "\n";
         std::stringstream ss;
         ss << _client.getResponseBody().length();
         std::string body_length = ss.str();
