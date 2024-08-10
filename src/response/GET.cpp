@@ -51,13 +51,9 @@ bool HttpResponse::isDirHasIndexFiles() {
 				_isFile();
                 return true;
             }
-			// else {
-				
-			// 	return true;
-			// }
 		}
 		// std::cout << "hna fin khass yreturner error\n";
-		buildResponse(404); //or 500 ???
+		buildResponse(404);
 		return true;
 	}
 	return false;

@@ -120,7 +120,8 @@ void	HttpResponse::generateResponse(HttpRequest &req) {
 	if (!_redirection.empty()) {
 		std::string header = createResponseHeader(301, "Default");
     	_client.setResponseHeader(header);
-        _client.setResponseBody(_errorPath);
+        if (!_redir)
+            _client.setResponseBody(_errorPath);
 		return;
 	}
 	if (req.getMethod() == "GET") {
@@ -162,6 +163,9 @@ void	HttpResponse::findStatusCode(int code) {
             break;
         case 302:
             _statusCode = "302 Moved Temporarily";
+            break;
+        case 308:
+            _statusCode = "308 Permanent Redirect";
             break;
         case 403:
             _statusCode = "403 Forbidden";
@@ -270,12 +274,6 @@ std::string	HttpResponse::createResponseHeader(int errCode, std::string flag) {
         if (_headers.find("Content-Length") == _headers.end()) {
 		    _headers["Content-Length"] = getContentLength(_filePath);
         }
-        // if (_headers.find("Content-Type") == _headers.end())
-        // {
-        //     std::cout << "kidkhol hna\n";
-        //     _headers["Content-Type"] = getContentType(_filePath);
-        // }
-		// else
         _headers["Content-Type"] = _contentType;
 	}
     if (!_cookie.empty()) {

@@ -58,7 +58,6 @@ void	HttpResponse::processPostMethod() {
         buildResponse(400);
         return ;
     }
-	// std::cout << "dyal resp: " << _uploadPath << "\n";
     _uploadPath += filename;
 	_createFile(filename);
 }
@@ -190,9 +189,9 @@ void	HttpResponse::isUrihasSlashInTHeEnd() {
         std::string dirdir = _location.getLocationName().empty() ? findDirectoryName(_filePath, _root) + "/" : _location.getLocationName() + findDirectoryName(_filePath, _root) + "/";
         // std::cout << _filePath << " lastdir: " << dirdir<< "\n";
        _redirection = "http://" + hostt + dirdir;
-	   std::string header = createResponseHeader(301, "Default");
+	   std::string header = createResponseHeader(308, "Default");
     	_client.setResponseHeader(header);
-        _client.setResponseBody(_errorPath);
+        // _client.setResponseBody(_errorPath);
         _redir = true;
 		_slashSetted = true;
 		return ;

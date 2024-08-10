@@ -9,3 +9,13 @@ POST email: fef
 File uploaded: tulipes.jpeg
 POST request received with file: tulipes.jpeg
 File uploaded to: ./66b664d53ae981.70872247.jpeg
+Script run at: 2024-08-10 01:39:28
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary9Xa8PNb42wVFamM4
+Content-Length: 8481
+Cookie: PHPSESSID=2tjrd6ai4n596qqrq3284mu2mo; color=green; name=lola; PHPSESSID=2tjrd6ai4n596qqrq3284mu2mo; name=edf
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36
+POST name: lola
+POST email: fef
+File uploaded: tulipes.jpeg
+POST request received with file: tulipes.jpeg
+File uploaded to: ./66b6a8b0d161f0.96449024.jpeg

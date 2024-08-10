@@ -11,18 +11,6 @@
 #include "HttpRequest.hpp"
 #include "../response/HttpResponse.hpp"
 
-// class RequestError {
-// 	private:
-// 		int _error_number;
-
-// 	public:
-// 		RequestError(int error_number) : _error_number(error_number) {
-// 		}
-// 		int getErrorNumber() const  {
-// 			return (this->_error_number);
-// 		}
-// };
-
 class WebServer {
 	public:
 	    WebServer(const Config& config);
@@ -54,5 +42,5 @@ class WebServer {
 		std::map<int, std::string>		clientRequests; // Stockage des requêtes par client
 		int currentClientIndex;
 };
-#endif
 
+#endif
