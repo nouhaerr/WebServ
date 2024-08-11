@@ -58,28 +58,6 @@ bool HttpResponse::isDirHasIndexFiles() {
 	return false;
 }
 
-// std::string	HttpResponse::_findDirectoryName() {
-// 	size_t rootPos = _filePath.find(_root);
-//     if (rootPos == std::string::npos)
-//         return "";
-
-//     // Remove root from the path
-//     std::string dirname = _filePath.substr(rootPos + _root.length());
-
-// 	//Create a string stream from the path
-//     std::istringstream iss(dirname);
-
-//     // Tokenize the path by '/'
-//     std::string token;
-//     std::string lastDirName;
-//     while (std::getline(iss, token, '/')) {
-//         if (!token.empty()) {
-//             lastDirName = token;
-//         }
-//     }
-//     return lastDirName;
-// }
-
 std::string findDirectoryName(const std::string& path, const std::string& root)
 {
 	// Ensure root ends with '/'
@@ -113,10 +91,10 @@ void	HttpResponse::_getAutoIndex() {
     	DIR *dir = opendir(path.c_str());
 
     	if (dir == NULL) {
+			buildResponse(500);
         	return;
     	}
 		std::string directory = _location.getLocationName().empty() ? findDirectoryName(_filePath, _root) + "/" : _location.getLocationName() + findDirectoryName(_filePath, _root) + "/";
-		// std::cout << directory << "\n";
 
 		std::ostringstream listeningfile;
 		listeningfile << "<!DOCTYPE html>\n" << "<html lang=\"en\">\n" << "\t<head>\n" << "\t\t<meta charset=\"UTF-8\">\n";
@@ -274,15 +252,12 @@ void	HttpResponse::_isFile()
 			CGI cgi(_client, _filePath);
 			cgi.set_environmentVariables(script_name);
 			cgi.RUN();
-			// std::cout << "status: " << cgi.status_code << std::endl;
-			// exit(2);
 			if (cgi.status_code != 200)
 			{
 				buildResponse(cgi.status_code);
 				return;
 			}
 			std::string cgi_headers = extractHeaders(_client.getResponse());
-			//std::cout << "Headers CGI: " << cgi_headers << "\n";
 			pos = cgi_headers.find("Set-Cookie");
             if (pos != std::string::npos) {
                 cgi_headers = cgi_headers.substr(pos);
@@ -305,7 +280,6 @@ void	HttpResponse::_isFile()
 		std::string header = createResponseHeader(200, "Nothing");
 		_client.setResponseHeader(header);
 		_client.setResponseBody(_filePath);
-		// std::cout << _client.getResponseBody() << std::endl;
 		return ;
 	}
 	else {

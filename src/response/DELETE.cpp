@@ -18,8 +18,9 @@ bool HttpResponse::checkFilePermission(const std::string& filePath)
 bool deleteDirectory(const std::string& dirPath) 
 {
     DIR* dir = opendir(dirPath.c_str());
-    if (dir == NULL)
+    if (dir == NULL) {
         return false;
+    }
 
     struct dirent* entry;
     while ((entry = readdir(dir)) != NULL) 
@@ -33,7 +34,7 @@ bool deleteDirectory(const std::string& dirPath)
         {
             if (S_ISDIR(entryStat.st_mode)) 
             {
-                if (!deleteDirectory(entryPath)) 
+                if (!deleteDirectory(entryPath))
                 {
                     closedir(dir);
                     return false;
@@ -60,6 +61,7 @@ void HttpResponse::handleDeleteMethod()
     std::string filePath = _filePath;
     
     struct stat fileStat;
+    // if (filePath == root)
     if (stat(filePath.c_str(), &fileStat) != 0) 
     {
         buildResponse(404);

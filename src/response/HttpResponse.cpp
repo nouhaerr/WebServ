@@ -69,7 +69,7 @@ std::string	resolvePath(std::string& uri) {
         //  std::cerr << "Error resolving path: " << uri << " - " << strerror(errno) << std::endl;
         return "";
     }
-	// std::cout << "resolvedPath: " << resolved_path << "\n";
+	std::cout << "resolvedPath: " << resolved_path << "\n";
     return std::string(resolved_path);
 }
 
@@ -99,6 +99,10 @@ void	HttpResponse::generateResponse(HttpRequest &req) {
 			buildResponse(403);
 			return;
 		}
+        if (req.getMethod() == "DELETE" && path == resolvePath(_root)) {
+            buildResponse(403);
+            return;
+        }
 	}
     // std::cout << _filePath << "\n";
 	if (_filePath.empty()) {

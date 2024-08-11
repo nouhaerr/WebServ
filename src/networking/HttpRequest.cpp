@@ -61,7 +61,6 @@ void trim_back(std::string &str)
 		pos--;
 	if (pos == 0)
 		return;
-	// sus error
 	str = str.substr(0, pos);
 }
 
@@ -297,7 +296,7 @@ bool HttpRequest::setBody(std::string &body)
 		std::fstream bodyDataFile;
 		bodyDataFile.open(this->bodyFileName.c_str(), std::fstream::app | std::fstream::out | std::fstream::in);
 		if (!bodyDataFile.is_open()) {
-			this->_errorCode = 500; //internal Server error
+			this->_errorCode = 500;
 			return true;
 		}
 		size_t bytes_left = content_length - (size_t)this->_bodySize;
@@ -354,7 +353,6 @@ void HttpRequest::parseHttpRequest(std::string &read_request)
 			setHttpVersion(request[2]);
 			_parseURI();
 			if (this->_errorCode != 400 && this->_errorCode != 414) {
-				// setRequest(request_line);
 				setHeaderField(headers_lines);
 				read_request = headers_lines;
 				if (this->_httpMethod == "POST")
