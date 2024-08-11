@@ -5,3 +5,13 @@ handle content type = chi haja that doesn't exist in mimeTypes
 handle content length > body size should give timeout
 handle cgi timeouthandle cgi post duplicate
 check again for parsing of config file to handle allow meth and upload
+
+
+sudo apt-get update
+sudo apt-get install siege
+siege -b -t 1h -c 50 http://yourserver/empty-page
+
+top -p $(pgrep -d ',' webserv)
+
+netstat -anp | grep webserv
+

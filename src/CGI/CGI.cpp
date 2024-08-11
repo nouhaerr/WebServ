@@ -150,8 +150,10 @@ void CGI::RUN() {
     } else if (pid > 0) {
         int change_status = 200;
         time_t start_time = time(NULL);
-        while (time(NULL) - start_time < 5) {
-            if (waitpid(pid, NULL, WNOHANG) == pid) {
+        while (time(NULL) - start_time < 10) {
+            int wait = waitpid(pid, NULL, WNOHANG);
+            std::cout << "wait = "<< wait << std::endl;
+            if (wait == pid) {
                 change_status = -2;
                 break;
             }
