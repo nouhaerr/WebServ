@@ -18,22 +18,22 @@ class HttpResponse {
 		HttpResponse(NetworkClient &client);
 		~HttpResponse();
 
-		void	generateResponse(HttpRequest &req);
+		void		generateResponse(HttpRequest &req);
 		std::string Get_File_Name_From_URI();
-		void	buildResponse(int errCode);
-		void	locateErrorPage(int errCode);
-		void	checkHttpVersion(HttpRequest &req);
+		void		buildResponse(int errCode);
+		void		locateErrorPage(int errCode);
+		void		checkHttpVersion(HttpRequest &req);
 		std::string	getContentLength(std::string path);
 		std::string	createResponseHeader(int errCode, std::string flag);
-		void	findStatusCode(int code);
+		void		findStatusCode(int code);
 		std::string	getRequestedResource(HttpRequest &req);
 		static std::string generateDate();
 		std::string deleteRedundantSlash(std::string uri);
-		bool	isText() const;
-		void	handleGetMethod();
-		void	isUrihasSlashInTHeEnd();
-		void	hasSlahInTheEnd();
-		bool	isDirHasIndexFiles();
+		bool		isText() const;
+		void		handleGetMethod();
+		void		isUrihasSlashInTHeEnd();
+		void		hasSlahInTheEnd();
+		bool		isDirHasIndexFiles();
 		
 		off_t	getFileSize();
 		
@@ -44,7 +44,6 @@ class HttpResponse {
 		void	_postRequestFile();
 
 		void	handleDeleteMethod();
-		// bool	checkFilePermission(const std::string& filePath);
 		bool	checkFilePermission(const std::string& filePath);
 		bool	deleteDirectory(const std::string& dirPath);
 		bool	getRedir() const;
@@ -85,17 +84,16 @@ class HttpResponse {
 		std::string _respCookie;
 		bool 		_redir;
 
-		void	_handleDefaultErrors();
-		bool	_isSupportedMethod(std::string meth);
-		bool	_isSupportedUploadPath();
+		void		_handleDefaultErrors();
+		bool		_isSupportedMethod(std::string meth);
+		bool		_isSupportedUploadPath();
 		std::string	_constructPath(const std::string& requestPath, const std::string &root, const std::string &index);
-		int		_checkRequestedType();
-		void	_isFile();
-		void	_isFolder();
-		void	_getAutoIndex();
-		// std::string	_findDirectoryName();
+		int			_checkRequestedType();
+		void		_isFile();
+		void		_isFolder();
+		void		_getAutoIndex();
 		std::string	_generateTempFileName();
-		void	_createFile(std::string &filename);
+		void		_createFile(std::string &filename);
 };
 
 std::string getContentType(std::string filename);

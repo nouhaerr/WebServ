@@ -269,7 +269,6 @@ std::string	HttpResponse::createResponseHeader(int errCode, std::string flag) {
             _headers["Content-Type"] = _contentType;
             _errorPath = "";
 			_headers["Content-Length"] = "0";
-            // _isText = false;
         } else if (_errCode == 204) {
             _errorPath = "";
 			_headers["Content-Length"] = "0";

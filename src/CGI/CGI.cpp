@@ -152,7 +152,6 @@ void CGI::RUN() {
         time_t start_time = time(NULL);
         while (time(NULL) - start_time < 10) {
             int wait = waitpid(pid, NULL, WNOHANG);
-            std::cout << "wait = "<< wait << std::endl;
             if (wait == pid) {
                 change_status = -2;
                 break;

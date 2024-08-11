@@ -181,8 +181,6 @@ void	ConfigLocation::setRedirection(std::string& redirection) {
 		this->_redirectCode = isNum(args[0]);
 		this->_redirection = args[1];
 	}
-	// else
-	// 	throw ConfigLocationException("Error: Invalid redirection URL!");
 }
 
 std::string&	ConfigLocation::getRedirection() {

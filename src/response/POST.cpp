@@ -3,7 +3,6 @@
 bool	HttpResponse::_isSupportedUploadPath() {
     // Find upload path logic
 	if (_uploadPath.empty()) {
-		// buildResponse(404);
 		return 0;
 	}
     return 1;
@@ -18,7 +17,6 @@ void	HttpResponse::_createFile(std::string &filename) {
 		this->_errCode = 201;
 		std::string hostt = _serv.getHost() + ":" + toString(_serv.getPort());
 		std::string dirdir = findDirectoryName(_uploadPath, _root) + "/";
-		// std::cout << "dir " << dirdir << "\n";
 		_headers["Location"] = "http://" + hostt + dirdir + filename;
 		buildResponse(201);
 		 /*201 Created success status response code indicates
@@ -167,7 +165,6 @@ void	HttpResponse::_postRequestFile() {
         std::string response_cgi = _client.getResponse();
         _contentType = findContentTypePOST(response_cgi);
         _client.setResponseBody(extractBodyPOST(_client.getResponse()));
-        // std::cout << "response body post: " << _client.getResponseBody() << "\n";
         std::stringstream ss;
         ss << _client.getResponseBody().length();
         std::string body_length = ss.str();
@@ -186,11 +183,9 @@ void	HttpResponse::isUrihasSlashInTHeEnd() {
 	{
 		std::string hostt = _serv.getHost() + ":" + toString(_serv.getPort());
         std::string dirdir = _location.getLocationName().empty() ? findDirectoryName(_filePath, _root) + "/" : _location.getLocationName() + findDirectoryName(_filePath, _root) + "/";
-        // std::cout << _filePath << " lastdir: " << dirdir<< "\n";
        _redirection = "http://" + hostt + dirdir;
 	   std::string header = createResponseHeader(308, "Default");
     	_client.setResponseHeader(header);
-        // _client.setResponseBody(_errorPath);
         _redir = true;
 		_slashSetted = true;
 		return ;
@@ -224,10 +219,6 @@ bool HttpResponse::isPostDirHasIndexFiles() {
 				_postRequestFile();
                 return true;
             }
-			// else {
-			// 	buildResponse(404);
-			// 	return true;
-			// }
 		}
         buildResponse(404);
 		return true;
