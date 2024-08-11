@@ -99,12 +99,11 @@ void	HttpResponse::generateResponse(HttpRequest &req) {
 			buildResponse(403);
 			return;
 		}
-        if (req.getMethod() == "DELETE" && path == resolvePath(_root)) {
+        if (req.getMethod() == "DELETE" && _isSupportedMethod("DELETE") && path == resolvePath(_root)) {
             buildResponse(403);
             return;
         }
 	}
-    // std::cout << _filePath << "\n";
 	if (_filePath.empty()) {
 		buildResponse(404);
 		return;
