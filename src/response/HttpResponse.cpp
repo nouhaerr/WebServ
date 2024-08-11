@@ -69,7 +69,7 @@ std::string	resolvePath(std::string& uri) {
         //  std::cerr << "Error resolving path: " << uri << " - " << strerror(errno) << std::endl;
         return "";
     }
-	std::cout << "resolvedPath: " << resolved_path << "\n";
+	// std::cout << "resolvedPath: " << resolved_path << "\n";
     return std::string(resolved_path);
 }
 

@@ -9,20 +9,22 @@ bool HttpResponse::checkFilePermission(const std::string& filePath)
     if (!S_ISREG(fileStat.st_mode) && !S_ISDIR(fileStat.st_mode))
         return false;
 
-    if ((fileStat.st_mode & S_IWUSR) == 0)
+    if ((fileStat.st_mode & S_IWUSR) == 0)  // Check if write permission is missing
         return false;
 
     return true;
 }
 
-bool deleteDirectory(const std::string& dirPath) 
+bool HttpResponse::deleteDirectory(const std::string& dirPath)
 {
     DIR* dir = opendir(dirPath.c_str());
     if (dir == NULL) {
         return false;
     }
 
+    bool success = true;
     struct dirent* entry;
+
     while ((entry = readdir(dir)) != NULL) 
     {
         if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
@@ -30,29 +32,41 @@ bool deleteDirectory(const std::string& dirPath)
 
         std::string entryPath = dirPath + "/" + entry->d_name;
         struct stat entryStat;
+        
         if (stat(entryPath.c_str(), &entryStat) == 0) 
         {
+            // Check permissions before attempting deletion
+            if (!checkFilePermission(entryPath)) 
+            {
+                success = false;  // Fail if any file or directory lacks permissions
+                continue;  // Skip to the next entry
+            }
+
             if (S_ISDIR(entryStat.st_mode)) 
             {
                 if (!deleteDirectory(entryPath))
                 {
-                    closedir(dir);
-                    return false;
+                    success = false;
                 }
             } 
             else 
             {
                 if (unlink(entryPath.c_str()) != 0) 
                 {
-                    closedir(dir);
-                    return false;
+                    success = false;
                 }
             }
         }
     }
 
     closedir(dir);
-    return rmdir(dirPath.c_str()) == 0;
+    // Attempt to remove the directory itself only if all internal operations succeeded
+    if (success && rmdir(dirPath.c_str()) != 0) 
+    {
+        success = false;
+    }
+
+    return success;
 }
 
 void HttpResponse::handleDeleteMethod() 
@@ -61,7 +75,6 @@ void HttpResponse::handleDeleteMethod()
     std::string filePath = _filePath;
     
     struct stat fileStat;
-    // if (filePath == root)
     if (stat(filePath.c_str(), &fileStat) != 0) 
     {
         buildResponse(404);

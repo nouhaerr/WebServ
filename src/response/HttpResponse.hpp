@@ -44,7 +44,9 @@ class HttpResponse {
 		void	_postRequestFile();
 
 		void	handleDeleteMethod();
+		// bool	checkFilePermission(const std::string& filePath);
 		bool	checkFilePermission(const std::string& filePath);
+		bool	deleteDirectory(const std::string& dirPath);
 		bool	getRedir() const;
 
 	private:
