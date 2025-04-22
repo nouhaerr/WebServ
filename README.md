@@ -75,8 +75,14 @@ Below are screenshots of the different pages handled by the server:
 ### Error Page
 ![Error Page](Screens/errorpage.png)
 
+### Html/JS/CSS Page
+![Space Page](Screens/space.png)
+
 ### CGI Execution Page with cookie
 ![CGI Page](Screens/python-ccokie.png)
+
+### CGI Timeout Error
+![Terminal](Screens/cgi-timeout.png)
 
 ### Terminal Outputs Page
 ![Terminal](Screens/Terminal.png)
