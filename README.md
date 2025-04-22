@@ -5,7 +5,8 @@ A lightweight HTTP server built from scratch in C++. This project was developed 
 ## 🚀 Features
 
 - 📡 Handles HTTP/1.1 requests  
-- 🗂️ Serves static files and directories  
+- 🗂️ Serves static files and directories
+- 📺 Can serve video files like .mp4, .webm, etc.
 - 🧠 Custom configuration parsing  
 - 🗑️ Supports file and directory deletion (DELETE method)  
 - ⚙️ CGI support for Python and PHP scripts  
@@ -49,13 +50,14 @@ make re
 ```
 ## 🧪 Testing
 
+During development, we relied on tools like **Postman** to test various HTTP requests and ensure consistent server behavior. It helped us validate headers, payloads, response codes, and more.
 You can test the server with tools like:
 
-- Browser – Navigate to http://localhost:<port>/src
+- Browser – Navigate to http://<ipaddr>:<port>/src
 
-- curl – Example: curl -X GET http://localhost:<port>/index.html
+- curl – Example: curl -X GET http://<ipaddr>:<port>/index.html
 
-- siege – For stress testing: siege http://localhost:<port>
+- siege – For stress testing: siege http://<ipaddr>:<port>
 
 Make sure the port you use is open and not already taken.
 
