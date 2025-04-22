@@ -1,6 +1,8 @@
 # 🌐 Webserv
 
-A lightweight HTTP server built from scratch in C++. This project was developed to deepen our understanding of networking, the HTTP protocol, and server architecture.
+Webserv is a lightweight yet fully functional HTTP/1.1 server implemented from scratch in C++. Designed to deepen understanding of networking and server architecture, this project serves static files, handles dynamic requests with CGI (Python and PHP), and supports essential HTTP methods such as GET, POST, and DELETE.
+In addition to its core features, Webserv is capable of serving video files like .mp4 and .webm, making it versatile for various types of content. The server's behavior can be finely tuned through a customizable configuration file that supports location blocks, error handling, and CGI settings.
+Extensive testing was carried out using Postman for HTTP requests and Siege for stress testing. To ensure reliability, the server has been memory-leak tested with Valgrind, and it intelligently avoids hanging connections.
 
 ## 🚀 Features
 
