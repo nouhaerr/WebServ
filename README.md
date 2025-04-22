@@ -31,3 +31,51 @@ This file defines things like:
 - Location blocks (root, methods, error pages)
 - Index files
 - CGI support for specific paths and extensions
+
+### 🛠️ Building
+
+To build the server:
+```bash
+make
+```
+To clean build files:
+```bash
+make fclean
+```
+To rebuild from scratch:
+```bash
+make re
+```
+## 🧪 Testing
+
+You can test the server with tools like:
+
+- Browser – Navigate to http://localhost:<port>/src
+
+- curl – Example: curl -X GET http://localhost:<port>/index.html
+
+- siege – For stress testing: siege http://localhost:<port>
+
+Make sure the port you use is open and not already taken.
+
+## 🖼️ Screenshots
+
+Below are screenshots of the different pages handled by the server:
+
+### Index Page
+![Index Page](Screens/src.png)
+
+### Display Page
+![Display Page](Screens/display.png)
+
+### Cgi Directory Page
+![CGIDir Page](Screens/Index.png)
+
+### Error Page
+![Error Page](Screens/errorpage.png)
+
+### CGI Execution Page
+![CGI Page](screenshots/cgi_page.png)
+
+### Terminal Outputs Page
+![Terminal](Screens/Terminal.png)
