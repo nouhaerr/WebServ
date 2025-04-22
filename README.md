@@ -26,6 +26,7 @@ The server behavior is customizable via a configuration file:
 ```bash
 ./webserv config/default.conf
 ```
+Make sure to update the configuration file to match your system's file paths, ports, and CGI interpreter locations.
 This file defines things like:
 - Server blocks (IP, port)
 - Location blocks (root, methods, error pages)
@@ -74,8 +75,19 @@ Below are screenshots of the different pages handled by the server:
 ### Error Page
 ![Error Page](Screens/errorpage.png)
 
-### CGI Execution Page
-![CGI Page](screenshots/cgi_page.png)
+### CGI Execution Page with cookie
+![CGI Page](Screens/python-ccokie.png)
 
 ### Terminal Outputs Page
 ![Terminal](Screens/Terminal.png)
+
+## 👨‍💻 Authors
+
+This project was a team collaboration as part of our systems programming curriculum. Built with 💙 and C++.
+
+- **[@Nouhaila](https://github.com/nouhaerr)** – Configuration parsing, Errors handling, POST/GET methods, Response handling, File I/O, and Testing.
+- **[@Badr](https://github.com/SAINT-CLAIRE-MERODE)** – Multiplexing, CGI integration, Request parsing, and DELETE method.
+
+## 📜 License
+
+This project is for educational purposes and not intended for production use. License info can be added here if applicable.
