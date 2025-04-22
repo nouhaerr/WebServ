@@ -51,6 +51,7 @@ make re
 ## 🧪 Testing
 
 During development, we relied on tools like **Postman** to test various HTTP requests and ensure consistent server behavior. It helped us validate headers, payloads, response codes, and more.
+
 You can test the server with tools like:
 
 - Browser – Navigate to http://ipaddr<ipaddr>:port<port>/src
